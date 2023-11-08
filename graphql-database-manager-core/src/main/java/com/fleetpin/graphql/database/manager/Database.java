@@ -15,6 +15,7 @@ package com.fleetpin.graphql.database.manager;
 import com.fleetpin.graphql.database.manager.access.ForbiddenWriteException;
 import com.fleetpin.graphql.database.manager.access.ModificationPermission;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -119,8 +120,16 @@ public class Database {
 		return driver.takeBackup(organisationId);
 	}
 
+	public CompletableFuture<List<HistoryBackupItem>> takeHistoryBackup(String organisationId) {
+		return driver.takeHistoryBackup(organisationId);
+	}
+
 	public CompletableFuture<Void> restoreBackup(List<BackupItem> entities) {
 		return driver.restoreBackup(entities);
+	}
+
+	public CompletableFuture<Void> restoreHistoryBackup(List<HistoryBackupItem> entities) {
+		return driver.restoreHistoryBackup(entities);
 	}
 
 	public <T extends Table> CompletableFuture<List<T>> delete(String organisationId, Class<T> clazz) {

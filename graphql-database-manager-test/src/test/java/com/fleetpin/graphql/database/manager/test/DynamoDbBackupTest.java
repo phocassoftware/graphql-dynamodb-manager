@@ -12,25 +12,27 @@
 
 package com.fleetpin.graphql.database.manager.test;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.Database;
+import com.fleetpin.graphql.database.manager.QueryHistoryBuilder;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.GlobalIndex;
+import com.fleetpin.graphql.database.manager.annotations.History;
 import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoBackupItem;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
+import com.fleetpin.graphql.database.manager.dynamo.DynamoHistoryBackupItem;
 import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 final class DynamoDbBackupTest {
@@ -62,6 +64,29 @@ final class DynamoDbBackupTest {
 		final var orgQuery2 = db1.takeBackup("organisation-1").get();
 		Assertions.assertNotNull(putTomato);
 		checkResponseNameField(orgQuery2, 0, List.of(putTomato.getName()));
+	}
+
+	@TestDatabase(classPath = "com.fleetpin.graphql.database.manager.test")
+	void testTakeHistoryBackup(final DynamoDbManager dynamoDbManager, final HistoryProcessor historyProcessor) throws ExecutionException, InterruptedException {
+		final var db0 = dynamoDbManager.getDatabase("organisation");
+		db0.start(new CompletableFuture<>());
+
+		final var putAvocado = db0.put(new SimpleHistoryTable("avocado", "fruit")).get();
+		final var putBanana = db0.put(new SimpleHistoryTable("banana", "fruit")).get();
+		final var putBeer = db0.put(new HistoryDrink("Beer", true)).get();
+
+		Assertions.assertNotNull(putAvocado);
+		Assertions.assertNotNull(putBanana);
+		Assertions.assertNotNull(putBeer);
+
+		historyProcessor.process();
+
+		final var orgQuery = db0.takeHistoryBackup("organisation").get();
+		Assertions.assertEquals(3, orgQuery.size());
+		List<String> tablesName = List.of(putBanana.getName(), putAvocado.getName(), putBeer.getName());
+		checkResponseNameField(orgQuery, 0, tablesName);
+		checkResponseNameField(orgQuery, 1, tablesName);
+		checkResponseNameField(orgQuery, 2, tablesName);
 	}
 
 	@TestDatabase
@@ -111,6 +136,69 @@ final class DynamoDbBackupTest {
 
 		Assertions.assertEquals("avocado", simpleTableExists.getName());
 		Assertions.assertEquals("fruit", simpleTableExists.getGlobalLookup());
+	}
+
+	@TestDatabase(classPath = "com.fleetpin.graphql.database.manager.test")
+	void testRestoreHistoryBackup(final DynamoDbManager dynamoDbManager, HistoryProcessor historyProcessor) throws ExecutionException, InterruptedException {
+		final String DRINK_ID = "1234";
+		final String SIMPLE_ID = "6789";
+
+		final var db = dynamoDbManager.getDatabase("organisation");
+		db.start(new CompletableFuture<>());
+
+		Map<String, AttributeValue> drinkAttributes = new HashMap<>();
+		drinkAttributes.put("organisationId", AttributeValue.builder().s("organisation").build());
+		drinkAttributes.put("organisationIdType", AttributeValue.builder().s("organisation:historydrinks").build());
+		drinkAttributes.put("idRevision", AttributeValue.builder().b(SdkBytes.fromUtf8String(DRINK_ID + ":")).build());
+		drinkAttributes.put("id", AttributeValue.builder().s("historydrinks:" + DRINK_ID).build());
+		final var dateString = "2023-11-08 12:00:00";
+		final var updatedAt = Long.toString(Timestamp.valueOf(dateString).toInstant().getEpochSecond());
+		final var dateBinaryAttribute = AttributeValue.builder().b(SdkBytes.fromUtf8String("08/11/2023")).build();
+		drinkAttributes.put("idDate", dateBinaryAttribute);
+		drinkAttributes.put("startsWithUpdatedAt", dateBinaryAttribute);
+		drinkAttributes.put("updatedAt", AttributeValue.builder().n(updatedAt).build());
+		Map<String, AttributeValue> items = new HashMap<>();
+		items.put("revision", AttributeValue.builder().s("1").build());
+		items.put("name", AttributeValue.builder().s("Beer").build());
+		items.put("alcoholic", AttributeValue.builder().bool(true).build());
+		items.put("id", AttributeValue.builder().s("historydrinks:" + DRINK_ID).build());
+		drinkAttributes.put("item", AttributeValue.builder().m(items).build());
+
+		Map<String, AttributeValue> simpleTableAttributes = new HashMap<>();
+		simpleTableAttributes.put("organisationId", AttributeValue.builder().s("organisation").build());
+		simpleTableAttributes.put("organisationIdType", AttributeValue.builder().s("organisation:simplehistorytables").build());
+		simpleTableAttributes.put("idRevision", AttributeValue.builder().b(SdkBytes.fromUtf8String(SIMPLE_ID + ":")).build());
+		simpleTableAttributes.put("id", AttributeValue.builder().s("simplehistorytables:" + SIMPLE_ID).build());
+		simpleTableAttributes.put("idDate", dateBinaryAttribute);
+		simpleTableAttributes.put("startsWithUpdatedAt", dateBinaryAttribute);
+		simpleTableAttributes.put("updatedAt", AttributeValue.builder().n(updatedAt).build());
+		items.clear();
+		items.put("revision", AttributeValue.builder().s("1").build());
+		items.put("name", AttributeValue.builder().s("avocado").build());
+		items.put("globalLookup", AttributeValue.builder().s("fruit").build());
+		items.put("id", AttributeValue.builder().s("simplehistorytables:" + SIMPLE_ID).build());
+		simpleTableAttributes.put("item", AttributeValue.builder().m(items).build());
+
+		HistoryBackupItem drinkItem = new DynamoHistoryBackupItem("table_history", drinkAttributes, mapper);
+		HistoryBackupItem simpleTableItem = new DynamoHistoryBackupItem("table_history", simpleTableAttributes, mapper);
+
+		db.restoreHistoryBackup(List.of(drinkItem, simpleTableItem)).get();
+
+		final var drinkExists = db.queryHistory(QueryHistoryBuilder.create(HistoryDrink.class).id(DRINK_ID).build()).get();
+		Assertions.assertNotNull(drinkExists);
+		Assertions.assertEquals(1, drinkExists.size());
+		final var beer = drinkExists.get(0);
+		Assertions.assertEquals("Beer", beer.getName());
+		Assertions.assertEquals(true, beer.getAlcoholic());
+
+		final var simpleTableExistsPromise = db.queryHistory(QueryHistoryBuilder.create(SimpleHistoryTable.class).id(SIMPLE_ID).build());
+		db.start(simpleTableExistsPromise);
+		final var simpleTableExists = simpleTableExistsPromise.join();
+		Assertions.assertNotNull(simpleTableExists);
+		Assertions.assertEquals(1, simpleTableExists.size());
+		final var avocado = simpleTableExists.get(0);
+		Assertions.assertEquals("avocado", avocado.getName());
+		Assertions.assertEquals("fruit", avocado.getGlobalLookup());
 	}
 
 	@TestDatabase
@@ -191,7 +279,7 @@ final class DynamoDbBackupTest {
 		Assertions.assertEquals(1, response1.size());
 	}
 
-	private void checkResponseNameField(List<BackupItem> queryResult, Integer rank, List<String> names) {
+	private <T extends BackupItem> void checkResponseNameField(List<T> queryResult, Integer rank, List<String> names) {
 		var jsonMap = queryResult.get(rank).getItem();
 		ObjectMapper om = new ObjectMapper();
 		var itemMap = om.convertValue(jsonMap, new TypeReference<Map<String, Object>>() {});
@@ -219,6 +307,14 @@ final class DynamoDbBackupTest {
 		}
 	}
 
+	@History
+	public static class HistoryDrink extends Drink {
+
+		public HistoryDrink(String name, Boolean alcoholic) {
+			super(name, alcoholic);
+		}
+	}
+
 	public static class SimpleTable extends Table {
 
 		private String name;
@@ -239,6 +335,14 @@ final class DynamoDbBackupTest {
 		@GlobalIndex
 		public String getGlobalLookup() {
 			return globalLookup;
+		}
+	}
+
+	@History
+	public static class SimpleHistoryTable extends SimpleTable {
+
+		public SimpleHistoryTable(String name, String globalLookup) {
+			super(name, globalLookup);
 		}
 	}
 }

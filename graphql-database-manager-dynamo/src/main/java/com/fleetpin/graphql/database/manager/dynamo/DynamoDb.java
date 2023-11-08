@@ -30,10 +30,7 @@ import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.annotations.Hash.HashExtractor;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator.HashQueryBuilder;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.fleetpin.graphql.database.manager.util.CompletableFutureUtil;
-import com.fleetpin.graphql.database.manager.util.HistoryCoreUtil;
-import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
+import com.fleetpin.graphql.database.manager.util.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
@@ -54,6 +51,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,7 +77,7 @@ public class DynamoDb extends DatabaseDriver {
 	private static final int BATCH_WRITE_SIZE = 25;
 	private static final int MAX_RETRY = 10;
 
-	private final List<String> entityTables; //is in reverse order so easy to over ride as we go through
+	private final List<String> entityTables; //is in reverse order so easy to override as we go through
 	private final String historyTable;
 	private final String entityTable;
 	private final DynamoDbAsyncClient client;
@@ -89,12 +87,18 @@ public class DynamoDb extends DatabaseDriver {
 	private final int maxRetry;
 	private final boolean globalEnabled;
 	private final boolean hash;
+	private final String classPath;
 
 	private final ConcurrentHashMap<Class<? extends Table>, Optional<Hash.HashExtractor>> extractorCache = new ConcurrentHashMap<>();
 
+	private enum BackupTableType {
+		Entity,
+		History,
+	}
+
 	private final Map<String, HashQueryBuilder> hashKeyExpander;
 
-	public DynamoDb(ObjectMapper mapper, List<String> entityTables, DynamoDbAsyncClient client, Supplier<String> idGenerator) {
+	public DynamoDb(ObjectMapper mapper, List<String> entityTables, List<String> historyTables, DynamoDbAsyncClient client, Supplier<String> idGenerator) {
 		this(mapper, entityTables, null, client, idGenerator, BATCH_WRITE_SIZE, MAX_RETRY, true, true, null);
 	}
 
@@ -120,6 +124,7 @@ public class DynamoDb extends DatabaseDriver {
 		this.maxRetry = maxRetry;
 		this.globalEnabled = globalEnabled;
 		this.hash = hash;
+		this.classPath = classPath;
 
 		if (classPath != null) {
 			var tableObjects = new Reflections(classPath).getSubTypesOf(Table.class);
@@ -231,7 +236,7 @@ public class DynamoDb extends DatabaseDriver {
 			.toArray(CompletableFuture[]::new);
 		return CompletableFuture.allOf(all);
 	}
-	
+
 	private CompletableFuture<?> nonConditionalBulkPutChunk(List<PutValue> items) {
 		var writeRequests = items.stream().map(i -> buildWriteRequest(i)).collect(Collectors.toList());
 		var data = Map.of(entityTable, writeRequests);
@@ -254,57 +259,55 @@ public class DynamoDb extends DatabaseDriver {
 	}
 
 	private CompletableFuture<?> nonConditionalBulkWrite(List<PutValue> items) {
-		
-		
-		if(items.isEmpty()) {
+		if (items.isEmpty()) {
 			return CompletableFuture.completedFuture(null);
 		}
-		if(items.size() > batchWriteSize) {
-		
+		if (items.size() > batchWriteSize) {
 			ArrayListMultimap<String, PutValue> byPartition = ArrayListMultimap.create();
-			items.stream().forEach(t -> {
-				var key = mapWithKeys(t.getOrganisationId(), t.getEntity());
-				byPartition.put(key.get("organisationId").s(), t);
-			});
-			
-			var futures = byPartition.keySet().stream().map(key -> {
-				var partition = byPartition.get(key);
-				
-				var toReturn = new CompletableFuture();
-				sendBackToBack(toReturn, Lists.partition(partition, batchWriteSize).iterator());
-				return toReturn;
-			}).toArray(CompletableFuture[]::new);
-			
+			items
+				.stream()
+				.forEach(t -> {
+					var key = mapWithKeys(t.getOrganisationId(), t.getEntity());
+					byPartition.put(key.get("organisationId").s(), t);
+				});
+
+			var futures = byPartition
+				.keySet()
+				.stream()
+				.map(key -> {
+					var partition = byPartition.get(key);
+
+					var toReturn = new CompletableFuture();
+					sendBackToBack(toReturn, Lists.partition(partition, batchWriteSize).iterator());
+					return toReturn;
+				})
+				.toArray(CompletableFuture[]::new);
+
 			return CompletableFuture.allOf(futures);
-		}else {
+		} else {
 			return nonConditionalBulkPutChunk(items);
 		}
 	}
 
 	private void sendBackToBack(CompletableFuture<?> atEnd, Iterator<List<PutValue>> it) {
-		
-		nonConditionalBulkPutChunk(it.next()).whenComplete((response, error) -> {
-			
-			if(error != null) {
-				while(it.hasNext()) {
-					var f = it.next();
-					for(var e: f) {
-						e.fail(error);
+		nonConditionalBulkPutChunk(it.next())
+			.whenComplete((response, error) -> {
+				if (error != null) {
+					while (it.hasNext()) {
+						var f = it.next();
+						for (var e : f) {
+							e.fail(error);
+						}
+					}
+					atEnd.completeExceptionally(error);
+				} else {
+					if (it.hasNext()) {
+						sendBackToBack(atEnd, it);
+					} else {
+						atEnd.complete(null);
 					}
 				}
-				atEnd.completeExceptionally(error);
-			}else {
-				if(it.hasNext()) {
-					sendBackToBack(atEnd, it);
-				}else {
-					atEnd.complete(null);
-				}
-				
-				
-			}
-			
-		});
-		
+			});
 	}
 
 	private CompletableFuture<?> putItems(int count, Map<String, List<WriteRequest>> data) {
@@ -337,9 +340,9 @@ public class DynamoDb extends DatabaseDriver {
 			var nonConditional = values.stream().filter(v -> !v.getCheck()).collect(Collectors.toList());
 
 			var conditionalFuture = CompletableFuture.allOf(conditional.stream().map(part -> conditionalBulkWrite(part)).toArray(CompletableFuture[]::new));
-			
+
 			var nonConditionalFuture = nonConditionalBulkWrite(nonConditional);
-			
+
 			return CompletableFuture.allOf(conditionalFuture, nonConditionalFuture);
 		} catch (Exception e) {
 			for (var v : values) {
@@ -569,13 +572,22 @@ public class DynamoDb extends DatabaseDriver {
 			builder = queryHistoryWithStarts(key, builder, organisationIdType);
 		}
 
-		var toReturn = new ArrayList<T>();
+		var targetException = new AtomicReference<Exception>();
+
+		List<T> toReturn = new ArrayList<T>();
 		return client
 			.queryPaginator(builder.build())
 			.subscribe(response -> {
-				response.items().forEach(item -> toReturn.add(new DynamoItem(historyTable, item).convertTo(mapper, queryHistory.getType())));
+				try {
+					response.items().forEach(item -> toReturn.add(new DynamoItem(historyTable, item).convertTo(mapper, queryHistory.getType())));
+				} catch (Exception e) {
+					targetException.set(e);
+				}
 			})
 			.thenApply(__ -> {
+				if (targetException.get() != null) {
+					throw new RuntimeException(targetException.get());
+				}
 				return toReturn;
 			});
 	}
@@ -835,6 +847,15 @@ public class DynamoDb extends DatabaseDriver {
 
 	@Override
 	public CompletableFuture<Void> restoreBackup(List<BackupItem> entities) {
+		return restoreBackup(entities, BackupTableType.Entity);
+	}
+
+	@Override
+	public CompletableFuture<Void> restoreHistoryBackup(List<HistoryBackupItem> entities) {
+		return restoreBackup(entities, BackupTableType.History);
+	}
+
+	private <T extends BackupItem> CompletableFuture<Void> restoreBackup(List<T> entities, BackupTableType backupTableType) {
 		List<CompletableFuture<BatchWriteItemResponse>> completableFutures = Lists
 			.partition(
 				entities
@@ -847,7 +868,10 @@ public class DynamoDb extends DatabaseDriver {
 			)
 			.stream()
 			.map(putRequestBatch -> {
-				final var batchPutRequest = BatchWriteItemRequest.builder().requestItems(Map.of(entityTable, putRequestBatch)).build();
+				final var batchPutRequest = BatchWriteItemRequest
+					.builder()
+					.requestItems(Map.of(backupTableType == BackupTableType.History ? historyTable : entityTable, putRequestBatch))
+					.build();
 
 				return client
 					.batchWriteItem(batchPutRequest)
@@ -888,6 +912,45 @@ public class DynamoDb extends DatabaseDriver {
 		return future.thenApply(results -> {
 			return results.stream().flatMap(List::stream).collect(Collectors.toList());
 		});
+	}
+
+	@Override
+	public CompletableFuture<List<HistoryBackupItem>> takeHistoryBackup(String organisationId) {
+		if (this.classPath == null) {
+			throw new RuntimeException("classPath is required to obtain the tables' name to query the history table");
+		}
+
+		// Using reflections to loop through tables and get the tables' name
+		Set<Class<? extends Table>> tableObjects = new Reflections(classPath).getSubTypesOf(Table.class);
+		List<HistoryBackupItem> toReturn = Collections.synchronizedList(new ArrayList<HistoryBackupItem>());
+
+		Set<String> orgIdTypes = new HashSet<>(tableObjects.stream().map(obj -> organisationId + ":" + TableCoreUtil.table(obj)).collect(Collectors.toList()));
+
+		var queries = orgIdTypes
+			.stream()
+			.map(orgIdType -> {
+				Map<String, AttributeValue> keyConditions = new HashMap<>();
+				AttributeValue orgIdTypeAttr = AttributeValue.builder().s(orgIdType).build();
+				keyConditions.put(":organisationIdType", orgIdTypeAttr);
+				return client
+					.queryPaginator(r ->
+						r
+							.tableName(historyTable)
+							.consistentRead(true)
+							.keyConditionExpression("organisationIdType = :organisationIdType")
+							.expressionAttributeValues(keyConditions)
+					)
+					.subscribe(response -> {
+						response
+							.items()
+							.forEach(item -> {
+								toReturn.add(new DynamoHistoryBackupItem(historyTable, item, mapper));
+							});
+					});
+			})
+			.toArray(CompletableFuture[]::new);
+
+		return CompletableFuture.allOf(queries).thenApply(__ -> toReturn);
 	}
 
 	private CompletableFuture<List<BackupItem>> takeBackup(String table, AttributeValue organisationId) {
