@@ -223,7 +223,7 @@ public class TableUtil {
 		}
 		if (value.n() != null) {
 			double v = Double.parseDouble(value.n());
-			if (Math.floor(v) == v && value.n().indexOf('.') == -1 && Long.MAX_VALUE < v && Long.MIN_VALUE > v) {
+			if (Math.floor(v) == v && value.n().indexOf('.') == -1 && Long.MAX_VALUE > v && Long.MIN_VALUE < v) {
 				return LongNode.valueOf(Long.parseLong(value.n()));
 			}
 			return DoubleNode.valueOf(v);
