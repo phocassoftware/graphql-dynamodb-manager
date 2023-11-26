@@ -924,7 +924,7 @@ public class DynamoDb extends DatabaseDriver {
 		Set<Class<? extends Table>> tableObjects = new Reflections(classPath).getSubTypesOf(Table.class);
 		List<HistoryBackupItem> toReturn = Collections.synchronizedList(new ArrayList<HistoryBackupItem>());
 
-		Set<String> orgIdTypes = new HashSet<>(tableObjects.stream().map(obj -> organisationId + ":" + TableCoreUtil.table(obj)).collect(Collectors.toList()));
+		Set<String> orgIdTypes = tableObjects.stream().map(obj -> organisationId + ":" + TableCoreUtil.table(obj)).collect(Collectors.toSet());
 
 		var queries = orgIdTypes
 			.stream()

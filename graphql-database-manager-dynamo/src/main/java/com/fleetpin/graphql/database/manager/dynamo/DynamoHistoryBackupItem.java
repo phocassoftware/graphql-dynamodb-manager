@@ -10,11 +10,11 @@ public class DynamoHistoryBackupItem extends DynamoBackupItem implements History
 
 	private String organisationIdType;
 
-	private ByteBuffer idRevision;
+	private byte[] idRevision;
 
-	private ByteBuffer idDate;
+	private byte[] idDate;
 
-	private ByteBuffer startsWithUpdatedAt;
+	private byte[] startsWithUpdatedAt;
 
 	private Long updatedAt;
 
@@ -24,11 +24,11 @@ public class DynamoHistoryBackupItem extends DynamoBackupItem implements History
 		super(table, item, objectMapper);
 		this.organisationIdType = item.get("organisationIdType").s();
 
-		this.idRevision = item.get("idRevision").b().asByteBuffer();
+		this.idRevision = item.get("idRevision").b().asByteArray();
 
-		this.idDate = item.get("idDate").b().asByteBuffer();
+		this.idDate = item.get("idDate").b().asByteArray();
 
-		this.startsWithUpdatedAt = item.get("startsWithUpdatedAt").b().asByteBuffer();
+		this.startsWithUpdatedAt = item.get("startsWithUpdatedAt").b().asByteArray();
 
 		this.updatedAt = Long.parseLong(item.get("updatedAt").n());
 	}
@@ -39,17 +39,17 @@ public class DynamoHistoryBackupItem extends DynamoBackupItem implements History
 	}
 
 	@Override
-	public ByteBuffer getIdRevision() {
+	public byte[] getIdRevision() {
 		return this.idRevision;
 	}
 
 	@Override
-	public ByteBuffer getIdDate() {
+	public byte[] getIdDate() {
 		return this.idDate;
 	}
 
 	@Override
-	public ByteBuffer getStartsWithUpdatedAt() {
+	public byte[] getStartsWithUpdatedAt() {
 		return this.startsWithUpdatedAt;
 	}
 

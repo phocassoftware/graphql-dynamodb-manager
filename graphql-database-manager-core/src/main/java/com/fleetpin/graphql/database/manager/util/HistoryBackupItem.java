@@ -5,11 +5,11 @@ import java.nio.ByteBuffer;
 public interface HistoryBackupItem extends BackupItem {
 	String getOrganisationIdType();
 
-	ByteBuffer getIdRevision();
+	byte[] getIdRevision();
 
-	ByteBuffer getIdDate();
+	byte[] getIdDate();
 
-	ByteBuffer getStartsWithUpdatedAt();
+	byte[] getStartsWithUpdatedAt();
 
 	Long getUpdatedAt();
 }
