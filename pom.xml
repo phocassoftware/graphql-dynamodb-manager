@@ -5,7 +5,7 @@
 	<version>0.2.30-SNAPSHOT</version>
 	<name>GraphQL Builder</name>
 	<description>library to make working with dynamodb and graphql easy</description>
-	<url>https://github.com/fleetpin/graphql-dynamodb-manager</url>
+	<url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -21,9 +21,9 @@
 	</modules>
 
 	<scm>
-		<url>https://github.com/fleetpin/graphql-dynamodb-manager</url>
-		<connection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</connection>
-		<developerConnection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</developerConnection>
+		<url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
+		<connection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</connection>
+		<developerConnection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
