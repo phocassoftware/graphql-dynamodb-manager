@@ -15,9 +15,10 @@ package com.fleetpin.graphql.database.manager.dynamo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.TableAccess;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 public class DynamoItem implements Comparable<DynamoItem> {
@@ -26,21 +27,21 @@ public class DynamoItem implements Comparable<DynamoItem> {
 	private final Map<String, AttributeValue> item;
 	private final String id;
 
-	private final HashMultimap<String, String> links;
+	private final Map<String, Set<String>> links;
 	private String organisationId;
 
-	DynamoItem(String table, Map<String, AttributeValue> item) {
+	public DynamoItem(String table, Map<String, AttributeValue> item) {
 		this.table = table;
 		this.item = item;
 
-		this.links = HashMultimap.create();
+		this.links = new HashMap<>();
 
 		var links = item.get("links");
 		if (links != null) {
 			links
 				.m()
 				.forEach((t, value) -> {
-					this.links.putAll(t, value.ss());
+					this.links.computeIfAbsent(t, __ -> new HashSet<>()).addAll(value.ss());
 				});
 		}
 		var id = item.get("id").s();
@@ -91,7 +92,7 @@ public class DynamoItem implements Comparable<DynamoItem> {
 		return item;
 	}
 
-	public Multimap<String, String> getLinks() {
+	public Map<String, Set<String>> getLinks() {
 		return links;
 	}
 

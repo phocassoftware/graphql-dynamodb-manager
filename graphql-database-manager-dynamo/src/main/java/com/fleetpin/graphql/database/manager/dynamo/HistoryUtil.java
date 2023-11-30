@@ -1,6 +1,5 @@
 package com.fleetpin.graphql.database.manager.dynamo;
 
-import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -92,7 +91,7 @@ public class HistoryUtil {
 					if (from) {
 						updatedAtId.put((byte) 0);
 					} else {
-						updatedAtId.put(UnsignedBytes.MAX_VALUE);
+						updatedAtId.put((byte) 0xFF);
 					}
 					updatedAtId.put(date.get());
 				}

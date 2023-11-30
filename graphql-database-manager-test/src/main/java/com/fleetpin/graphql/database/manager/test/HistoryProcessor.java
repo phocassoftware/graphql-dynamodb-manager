@@ -54,7 +54,7 @@ public class HistoryProcessor {
 						.shardIterator();
 					var response = streamClient.getRecords(builder -> builder.shardIterator(shardIterator)).get();
 					var processor = new Processor(client, table + "_history");
-					processor.process(response.records().stream());
+					processor.process(response.records());
 				}
 			}
 		} catch (Exception e) {

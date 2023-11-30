@@ -72,24 +72,20 @@
 			<artifactId>graphql-database-manager-dynamo</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb 
-			needed for kinesis stream and lambda don't support new api yet could write 
-			something custom here -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-dynamodb</artifactId>
-			<version>1.11.724</version>
+			<artifactId>aws-lambda-java-events-sdk-transformer</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-events</artifactId>
+			<version>3.11.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-lambda-java-core</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-events</artifactId>
-			<version>2.2.7</version>
+			<version>1.2.3</version>
 		</dependency>
 	</dependencies>
 

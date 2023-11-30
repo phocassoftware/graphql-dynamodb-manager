@@ -12,14 +12,7 @@
 
 package com.fleetpin.graphql.database.manager.dynamo;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.fleetpin.graphql.database.manager.DatabaseDriver;
 import com.fleetpin.graphql.database.manager.DatabaseManager;
 import com.google.common.base.Preconditions;
@@ -132,20 +125,8 @@ public final class DynamoDbManager extends DatabaseManager {
 		public DynamoDbManager build() {
 			Preconditions.checkNotNull(tables, "Tables must be set");
 			Preconditions.checkArgument(!tables.isEmpty(), "Empty table array");
+			Preconditions.checkNotNull(mapper, "Mapper is null");
 
-			if (mapper == null) {
-				mapper =
-					new ObjectMapper()
-						.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-						.registerModule(new ParameterNamesModule())
-						.registerModule(new Jdk8Module())
-						.registerModule(new JavaTimeModule())
-						.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-						.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-						.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-						.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-						.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-			}
 			if (client == null) {
 				client = DynamoDbAsyncClient.create();
 			}

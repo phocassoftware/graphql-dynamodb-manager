@@ -17,13 +17,14 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ParameterizedTest
-@ArgumentsSource(TestDatabaseProvider.class)
+@Test
+@ExtendWith(TestDatabaseProvider.class)
 public @interface TestDatabase {
 	String organisationId() default "organisation";
 

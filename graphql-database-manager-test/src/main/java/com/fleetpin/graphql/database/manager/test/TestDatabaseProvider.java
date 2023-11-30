@@ -14,84 +14,53 @@ package com.fleetpin.graphql.database.manager.test;
 
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.*;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams;
-import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
 import com.fleetpin.graphql.database.manager.test.annotations.GlobalEnabled;
 import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
+import com.fleetpin.graphql.database.manager.util.CompletableFutureUtil;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
-public final class TestDatabaseProvider implements ArgumentsProvider {
+public final class TestDatabaseProvider implements ParameterResolver, BeforeEachCallback, AfterEachCallback {
 
-	private DynamoDBProxyServer server;
-	private CompletableFuture<Object> finished;
+	private static final DbHolder HOLDER = new DbHolder();
 
 	@Override
-	public Stream<Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
-		closePreviousRun();
-
-		final String port = findFreePort();
-
-		server = startDynamoServer(port);
-		final var client = startDynamoClient(port);
-		final var streamClient = startDynamoStreamClient(port);
-
-		System.setProperty("sqlite4java.library.path", "native-libs");
-
-		finished = new CompletableFuture<>();
-
-		final var testMethod = extensionContext.getRequiredTestMethod();
-		final var organisationId = testMethod.getAnnotation(TestDatabase.class).organisationId();
-		final var hashed = testMethod.getAnnotation(TestDatabase.class).hashed();
-		final var classPath = testMethod.getAnnotation(TestDatabase.class).classPath();
-
-		final var withHistory = Arrays
-			.stream(testMethod.getParameters())
-			.map(parameter -> parameter.getType().isAssignableFrom(HistoryProcessor.class))
-			.filter(p -> p)
-			.findFirst()
-			.orElse(false);
-
-		final var argumentsList = Arrays
-			.stream(testMethod.getParameters())
-			.map(parameter -> {
-				try {
-					if (parameter.getType().isAssignableFrom(DynamoDbManager.class)) {
-						return createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath);
-					} else if (parameter.getType().isAssignableFrom(HistoryProcessor.class)) {
-						return new HistoryProcessor(client, streamClient, parameter, organisationId);
-					} else {
-						return createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath);
-					}
-				} catch (final Exception e) {
-					e.printStackTrace();
-					throw new ExceptionInInitializerError("Could not build parameters");
-				}
-			})
-			.collect(Collectors.toList());
-
-		return Stream.of(gatherArguments(argumentsList));
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+		if (parameterContext.getParameter().getType().isAssignableFrom(DynamoDbManager.class)) {
+			return true;
+		}
+		if (parameterContext.getParameter().getType().isAssignableFrom(HistoryProcessor.class)) {
+			return true;
+		}
+		if (parameterContext.getParameter().getType().isAssignableFrom(Database.class)) {
+			return true;
+		}
+		return false;
 	}
 
-	private void closePreviousRun() throws Exception {
-		if (server != null) {
-			finished.complete(null);
-			server.stop();
-		}
+	@Override
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+		var store = extensionContext.getStore(Namespace.create(extensionContext.getUniqueId()));
+		var arguments = store.get("arguments", List.class);
+		return arguments.get(parameterContext.getIndex());
 	}
 
 	private Database createDatabase(
@@ -101,7 +70,8 @@ public final class TestDatabaseProvider implements ArgumentsProvider {
 		final String organisationId,
 		final boolean withHistory,
 		final boolean hashed,
-		final String classPath
+		final String classPath,
+		CompletableFuture<Object> finished
 	) throws ExecutionException, InterruptedException {
 		final var databaseOrganisation = parameter.getAnnotation(DatabaseOrganisation.class);
 		final var correctOrganisationId = databaseOrganisation != null ? databaseOrganisation.value() : organisationId;
@@ -125,9 +95,6 @@ public final class TestDatabaseProvider implements ArgumentsProvider {
 		String historyTable = null;
 		for (final String table : tables) {
 			createTable(client, table);
-			var streamArn = client.describeTable(builder -> builder.tableName(table).build()).get().table().latestStreamArn();
-			var tName = streamClient.describeStream(builder -> builder.streamArn(streamArn).build()).get().streamDescription().tableName();
-			//System.out.println("find me: " + tName);
 			if (withHistory) {
 				historyTable = table + "_history";
 				createHistoryTable(client, historyTable);
@@ -144,12 +111,106 @@ public final class TestDatabaseProvider implements ArgumentsProvider {
 		return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath);
 	}
 
-	private Arguments gatherArguments(final List<Object> argumentsList) {
-		final var argumentObjects = new Object[argumentsList.size()];
-		for (int i = 0; i < argumentObjects.length; i++) {
-			argumentObjects[i] = argumentsList.get(i);
+	@Override
+	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+		var store = extensionContext.getStore(Namespace.create(extensionContext.getUniqueId()));
+		var test = store;
+		final var testMethod = extensionContext.getRequiredTestMethod();
+		final var testDatabase = testMethod.getAnnotation(TestDatabase.class);
+		var wrapper = HOLDER.getServer();
+
+		test.put("table", wrapper);
+
+		final var client = wrapper.client;
+		final var streamClient = wrapper.streamClient;
+
+		System.setProperty("sqlite4java.library.path", "native-libs");
+
+		var finished = new CompletableFuture<>();
+		store.put("future", finished);
+
+		var organisationId = testDatabase.organisationId();
+		var classPath = testDatabase.classPath();
+		var hashed = testDatabase.hashed();
+
+		final var withHistory = Arrays
+			.stream(testMethod.getParameters())
+			.map(parameter -> parameter.getType().isAssignableFrom(HistoryProcessor.class))
+			.filter(p -> p)
+			.findFirst()
+			.orElse(false);
+
+		final var argumentsList = Arrays
+			.stream(testMethod.getParameters())
+			.map(parameter -> {
+				try {
+					if (parameter.getType().isAssignableFrom(DynamoDbManager.class)) {
+						return createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath);
+					} else if (parameter.getType().isAssignableFrom(HistoryProcessor.class)) {
+						return new HistoryProcessor(client, streamClient, parameter, organisationId);
+					} else {
+						return createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath, finished);
+					}
+				} catch (final Exception e) {
+					e.printStackTrace();
+					throw new ExceptionInInitializerError("Could not build parameters");
+				}
+			})
+			.collect(Collectors.toList());
+		store.put("arguments", argumentsList);
+	}
+
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		var wrapper = context.getStore(Namespace.create(context.getUniqueId())).get("table", ServerWrapper.class);
+		CompletableFuture<?> future = context.getStore(Namespace.create(context.getUniqueId())).get("future", CompletableFuture.class);
+
+		if (future != null) {
+			future.complete(null);
+		}
+		if (wrapper != null) {
+			HOLDER.returnServer(wrapper);
+		}
+	}
+
+	static class DbHolder {
+
+		private final ConcurrentLinkedQueue<ServerWrapper> servers;
+
+		public DbHolder() {
+			this.servers = new ConcurrentLinkedQueue<>();
 		}
 
-		return Arguments.of(argumentObjects);
+		ServerWrapper getServer() throws Exception {
+			var wrapper = this.servers.poll();
+			if (wrapper == null) {
+				final String port = findFreePort();
+
+				startDynamoServer(port);
+				final var client = startDynamoClient(port);
+				final var streamClient = startDynamoStreamClient(port);
+
+				return new ServerWrapper(client, streamClient);
+			} else {
+				var tables = wrapper.client.listTables().get();
+				CompletableFutureUtil.sequence(tables.tableNames().stream().map(table -> wrapper.client.deleteTable(r -> r.tableName(table)))).get();
+				return wrapper;
+			}
+		}
+
+		void returnServer(ServerWrapper wrapper) {
+			this.servers.add(wrapper);
+		}
+	}
+
+	static class ServerWrapper {
+
+		private final DynamoDbAsyncClient client;
+		private final DynamoDbStreamsAsyncClient streamClient;
+
+		public ServerWrapper(DynamoDbAsyncClient client, DynamoDbStreamsAsyncClient streamClient) {
+			this.client = client;
+			this.streamClient = streamClient;
+		}
 	}
 }

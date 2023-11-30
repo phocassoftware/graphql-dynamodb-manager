@@ -8,10 +8,10 @@ import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
 import com.fleetpin.graphql.database.manager.dynamo.HistoryUtil;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.Record;
 import software.amazon.awssdk.services.dynamodb.model.WriteRequest;
@@ -26,17 +26,17 @@ public abstract class HistoryLambda implements RequestHandler<DynamodbEvent, Voi
 
 	@Override
 	public Void handleRequest(DynamodbEvent input, Context context) {
-		var records = input.getRecords().stream().map(DynamoUtil::toV2);
+		var records = com.amazonaws.services.lambda.runtime.events.transformers.v2.DynamodbEventTransformer.toRecordsV2(input);
 		process(records);
 		return null;
 	}
 
-	public void process(Stream<Record> records) {
+	public void process(List<Record> records) {
 		int chunkSize = 25;
 
 		AtomicInteger counter = new AtomicInteger();
 		var chunks = HistoryUtil
-			.toHistoryValue(records)
+			.toHistoryValue(records.stream())
 			.map(item -> WriteRequest.builder().putRequest(builder -> builder.item(item)).build())
 			.collect(groupingBy(x -> counter.getAndIncrement() / chunkSize))
 			.values();
@@ -47,7 +47,7 @@ public abstract class HistoryLambda implements RequestHandler<DynamodbEvent, Voi
 			.map(chunk -> {
 				var items = new HashMap<String, List<WriteRequest>>();
 				items.put(getTableName(), chunk);
-				return getClient().batchWriteItem(builder -> builder.requestItems(items));
+				return writeItems(items);
 			})
 			.toArray(CompletableFuture[]::new);
 
@@ -56,5 +56,19 @@ public abstract class HistoryLambda implements RequestHandler<DynamodbEvent, Voi
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private CompletableFuture<Object> writeItems(Map<String, List<WriteRequest>> items) {
+		return getClient()
+			.batchWriteItem(builder -> builder.requestItems(items))
+			.thenCompose(resposne -> {
+				var unprocessed = resposne.unprocessedItems();
+
+				if (unprocessed.isEmpty()) {
+					return CompletableFuture.completedFuture(null);
+				} else {
+					return writeItems(unprocessed);
+				}
+			});
 	}
 }

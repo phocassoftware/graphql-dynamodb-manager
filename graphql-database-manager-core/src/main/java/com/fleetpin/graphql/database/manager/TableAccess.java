@@ -1,12 +1,13 @@
 package com.fleetpin.graphql.database.manager;
 
-import com.google.common.collect.HashMultimap;
+import java.util.Map;
+import java.util.Set;
 
 public interface TableAccess {
 	public static <T extends Table> void setTableSource(
 		final T table,
 		final String sourceTable,
-		final HashMultimap<String, String> links,
+		final Map<String, Set<String>> links,
 		final String sourceOrganisationId
 	) {
 		table.setSource(sourceTable, links, sourceOrganisationId);
@@ -16,7 +17,7 @@ public interface TableAccess {
 		return table.getSourceOrganisationId();
 	}
 
-	public static <T extends Table> HashMultimap<String, String> getTableLinks(final T table) {
+	public static <T extends Table> Map<String, Set<String>> getTableLinks(final T table) {
 		return table.getLinks();
 	}
 }

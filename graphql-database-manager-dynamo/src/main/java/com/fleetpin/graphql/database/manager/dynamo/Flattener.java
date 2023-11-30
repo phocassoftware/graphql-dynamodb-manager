@@ -85,7 +85,14 @@ public final class Flattener {
 			item.put("item", existing.getItem().get("item"));
 		}
 		var toReturn = new DynamoItem(replace.getTable(), item);
-		toReturn.getLinks().putAll(existing.getLinks());
+		for (var entry : existing.getLinks().entrySet()) {
+			var current = toReturn.getLinks().get(entry.getKey());
+			if (current == null) {
+				toReturn.getLinks().put(entry.getKey(), entry.getValue());
+			} else {
+				current.addAll(entry.getValue());
+			}
+		}
 
 		return toReturn;
 	}

@@ -14,10 +14,11 @@ package com.fleetpin.graphql.database.manager;
 
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
-import com.google.common.collect.HashMultimap;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class DatabaseDriver {
@@ -83,7 +84,7 @@ public abstract class DatabaseDriver {
 		entity.setLinks(type, groupIds);
 	}
 
-	protected <T extends Table> HashMultimap<String, String> getLinks(final T entity) {
+	protected <T extends Table> Map<String, Set<String>> getLinks(final T entity) {
 		return entity.getLinks();
 	}
 
@@ -98,7 +99,7 @@ public abstract class DatabaseDriver {
 	protected <T extends Table> void setSource(
 		final T entity,
 		final String sourceTable,
-		final HashMultimap<String, String> links,
+		final Map<String, Set<String>> links,
 		final String sourceOrganisationId
 	) {
 		entity.setSource(sourceTable, links, sourceOrganisationId);

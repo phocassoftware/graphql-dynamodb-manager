@@ -404,6 +404,10 @@ public class Database {
 	}
 
 	public Set<String> getLinkIds(Table entity, Class<? extends Table> type) {
-		return Collections.unmodifiableSet(TableAccess.getTableLinks(entity).get(TableCoreUtil.table(type)));
+		var links = TableAccess.getTableLinks(entity).get(TableCoreUtil.table(type));
+		if (links == null) {
+			return Collections.emptySet();
+		}
+		return Collections.unmodifiableSet(links);
 	}
 }

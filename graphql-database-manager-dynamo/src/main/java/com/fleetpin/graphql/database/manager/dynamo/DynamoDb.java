@@ -31,11 +31,11 @@ import com.fleetpin.graphql.database.manager.annotations.Hash.HashExtractor;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator.HashQueryBuilder;
 import com.fleetpin.graphql.database.manager.util.*;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
+import graphql.VisibleForTesting;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -374,7 +374,6 @@ public class DynamoDb extends DatabaseDriver {
 
 		Map<String, AttributeValue> links = new HashMap<>();
 		getLinks(entity)
-			.asMap()
 			.forEach((table, link) -> {
 				if (!link.isEmpty()) {
 					links.put(table, AttributeValue.builder().ss(link).build());
@@ -525,6 +524,9 @@ public class DynamoDb extends DatabaseDriver {
 
 		String tableTarget = table(type);
 		var links = getLinks(entry).get(tableTarget);
+		if (links == null) {
+			links = Collections.emptySet();
+		}
 		Class<Table> query = (Class<Table>) type;
 		List<DatabaseKey<Table>> keys = links.stream().map(link -> createDatabaseKey(organisationId, query, link)).collect(Collectors.toList());
 		return items.loadMany(keys);
@@ -1227,6 +1229,9 @@ public class DynamoDb extends DatabaseDriver {
 		var existing = getLinks(entity).get(target);
 
 		var toAdd = new HashSet<>(groupIds);
+		if (existing == null) {
+			existing = Collections.emptySet();
+		}
 		toAdd.removeAll(existing);
 
 		var toRemove = new HashSet<>(existing);
@@ -1277,7 +1282,10 @@ public class DynamoDb extends DatabaseDriver {
 				return client.updateItem(updateTargetLinksRequest);
 			})
 			.thenApply(ignore -> {
-				getLinks(entity).remove(table(clazz), targetId);
+				var links = getLinks(entity).get(table(clazz));
+				if (links != null) {
+					links.remove(targetId);
+				}
 
 				return entity;
 			});
@@ -1293,7 +1301,6 @@ public class DynamoDb extends DatabaseDriver {
 			.builder()
 			.m(
 				getLinks(entity)
-					.asMap()
 					.entrySet()
 					.stream()
 					.filter(entry -> !entry.getValue().contains(targetId) && !entry.getKey().equals(table(clazz)))
@@ -1374,33 +1381,35 @@ public class DynamoDb extends DatabaseDriver {
 
 		//after we successfully clear out our object we clear the remote references
 		return clearEntity.thenCompose(r -> {
-			CompletableFuture<?> future = CompletableFuture.completedFuture(null);
-
 			var val = AttributeValue.builder().ss(entity.getId()).build();
 			String source = table(entity.getClass());
-			for (var link : getLinks(entity).entries()) {
-				var targetIdAttribute = AttributeValue.builder().s(link.getKey() + ":" + link.getValue()).build();
-				Map<String, AttributeValue> targetKey = new HashMap<>();
-				targetKey.put("organisationId", organisationIdAttribute);
-				targetKey.put("id", targetIdAttribute);
+			CompletableFuture<?> future = getLinks(entity)
+				.entrySet()
+				.stream()
+				.flatMap(s -> s.getValue().stream().map(v -> Map.entry(s.getKey(), v)))
+				.map(link -> {
+					var targetIdAttribute = AttributeValue.builder().s(link.getKey() + ":" + link.getValue()).build();
+					Map<String, AttributeValue> targetKey = new HashMap<>();
+					targetKey.put("organisationId", organisationIdAttribute);
+					targetKey.put("id", targetIdAttribute);
 
-				Map<String, AttributeValue> v = new HashMap<>();
-				v.put(":val", val);
-				v.put(":revisionIncrement", REVISION_INCREMENT);
+					Map<String, AttributeValue> v = new HashMap<>();
+					v.put(":val", val);
+					v.put(":revisionIncrement", REVISION_INCREMENT);
 
-				Map<String, String> k = new HashMap<>();
-				k.put("#table", source);
+					Map<String, String> k = new HashMap<>();
+					k.put("#table", source);
 
-				var destination = client.updateItem(request ->
-					request
-						.tableName(entityTable)
-						.key(targetKey)
-						.updateExpression("DELETE links.#table :val ADD revision :revisionIncrement")
-						.expressionAttributeNames(k)
-						.expressionAttributeValues(v)
-				);
-				future = future.thenCombine(destination, (a, b) -> b);
-			}
+					return client.updateItem(request ->
+						request
+							.tableName(entityTable)
+							.key(targetKey)
+							.updateExpression("DELETE links.#table :val ADD revision :revisionIncrement")
+							.expressionAttributeNames(k)
+							.expressionAttributeValues(v)
+					);
+				})
+				.reduce(CompletableFuture.completedFuture(null), (a, b) -> a.thenCombine(b, (c, d) -> d));
 			getLinks(entity).clear();
 			return future.thenApply(__ -> r);
 		});
