@@ -37,9 +37,9 @@
 	</repositories>
 
 	<scm>
-		<url>https://github.com/fleetpin/graphql-dynamodb-manager</url>
-		<connection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</connection>
-		<developerConnection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</developerConnection>
+		<url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
+		<connection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</connection>
+		<developerConnection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
