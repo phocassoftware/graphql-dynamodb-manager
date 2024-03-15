@@ -65,12 +65,18 @@ final class DynamoDbInitializer {
 						KeySchemaElement.builder().attributeName("id").keyType(KeyType.RANGE).build()
 					)
 					.streamSpecification(streamSpecification -> streamSpecification.streamEnabled(true).streamViewType(StreamViewType.NEW_IMAGE))
-					.globalSecondaryIndexes(builder ->
-						builder
-							.indexName("secondaryGlobal")
+					.globalSecondaryIndexes(
+						GlobalSecondaryIndex.builder().indexName("secondaryGlobal")
 							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
 							.projection(b -> b.projectionType(ProjectionType.ALL))
-							.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build())
+							.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build()).build(),
+						GlobalSecondaryIndex.builder().indexName("parallelIndex")
+								.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
+								.projection(b -> b.projectionType(ProjectionType.ALL))
+								.keySchema(
+										KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
+										KeySchemaElement.builder().attributeName("parallelHash").keyType(KeyType.RANGE).build()
+								).build()
 					)
 					.localSecondaryIndexes(builder ->
 						builder
@@ -85,7 +91,8 @@ final class DynamoDbInitializer {
 						AttributeDefinition.builder().attributeName("organisationId").attributeType(ScalarAttributeType.S).build(),
 						AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build(),
 						AttributeDefinition.builder().attributeName("secondaryGlobal").attributeType(ScalarAttributeType.S).build(),
-						AttributeDefinition.builder().attributeName("secondaryOrganisation").attributeType(ScalarAttributeType.S).build()
+						AttributeDefinition.builder().attributeName("secondaryOrganisation").attributeType(ScalarAttributeType.S).build(),
+						AttributeDefinition.builder().attributeName("parallelHash").attributeType(ScalarAttributeType.S).build()
 					)
 					.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L).build())
 			)
@@ -181,7 +188,8 @@ final class DynamoDbInitializer {
 		String historyTable,
 		boolean globalEnabled,
 		boolean hashed,
-		String classpath
+		String classpath,
+		String parallelIndex
 	) {
 		return DynamoDbManager
 			.builder()
@@ -191,6 +199,7 @@ final class DynamoDbInitializer {
 			.global(globalEnabled)
 			.hash(hashed)
 			.classPath(classpath)
+			.parallelIndex(parallelIndex)
 			.objectMapper(MAPPER)
 			.build();
 	}

@@ -108,7 +108,7 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			globalEnabled = globalEnabledAnnotation.value();
 		}
 
-		return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath);
+		return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath, "parallelIndex");
 	}
 
 	@Override

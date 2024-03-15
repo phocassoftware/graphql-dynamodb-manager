@@ -57,6 +57,8 @@ public final class DynamoDbManager extends DatabaseManager {
 		private boolean hash = false;
 		private String classPath = null;
 
+		private String parallelIndex = null;
+
 		public DyanmoDbManagerBuilder dynamoDbAsyncClient(DynamoDbAsyncClient client) {
 			this.client = client;
 			return this;
@@ -122,6 +124,11 @@ public final class DynamoDbManager extends DatabaseManager {
 			return this;
 		}
 
+		public DyanmoDbManagerBuilder parallelIndex(String parallelIndex) {
+			this.parallelIndex = parallelIndex;
+			return this;
+		}
+
 		public DynamoDbManager build() {
 			Preconditions.checkNotNull(tables, "Tables must be set");
 			Preconditions.checkArgument(!tables.isEmpty(), "Empty table array");
@@ -137,7 +144,7 @@ public final class DynamoDbManager extends DatabaseManager {
 			database =
 				Objects.requireNonNullElse(
 					database,
-					new DynamoDb(mapper, tables, historyTable, client, idGenerator, batchWriteSize, maxRetry, globalEnabled, hash, classPath)
+					new DynamoDb(mapper, tables, historyTable, client, idGenerator, batchWriteSize, maxRetry, globalEnabled, hash, classPath, parallelIndex)
 				);
 
 			return new DynamoDbManager(mapper, idGenerator, client, database);
