@@ -3,6 +3,7 @@ package com.fleetpin.graphql.database.manager;
 import java.util.Objects;
 
 public class Query<T extends Table> {
+
 	private final Class<T> type;
 	private final String startsWith;
 	private final String after;
@@ -19,11 +20,9 @@ public class Query<T extends Table> {
 			throw new RuntimeException("Thread count must be a power of two");
 		}
 
-
 		if ((threadCount != null && threadIndex == null) || (threadCount == null && threadIndex != null)) {
 			throw new RuntimeException("Thread count and thread index must both be defined if you are doing a parallel request");
 		}
-
 
 		this.type = type;
 		this.startsWith = startsWith;
@@ -49,9 +48,13 @@ public class Query<T extends Table> {
 		return limit;
 	}
 
-	public Integer getThreadCount() { return threadCount; }
+	public Integer getThreadCount() {
+		return threadCount;
+	}
 
-	public Integer getThreadIndex() { return threadIndex; }
+	public Integer getThreadIndex() {
+		return threadIndex;
+	}
 
 	public boolean hasLimit() {
 		return getLimit() != null;
@@ -78,13 +81,9 @@ public class Query<T extends Table> {
 		);
 	}
 
-	static boolean isPowerOfTwo(int n)
-	{
-		if (n == 0)
-			return false;
+	static boolean isPowerOfTwo(int n) {
+		if (n == 0) return false;
 
-		return (int)(Math.ceil((Math.log(n) / Math.log(2))))
-				== (int)(Math.floor(
-				((Math.log(n) / Math.log(2)))));
+		return (int) (Math.ceil((Math.log(n) / Math.log(2)))) == (int) (Math.floor(((Math.log(n) / Math.log(2)))));
 	}
 }

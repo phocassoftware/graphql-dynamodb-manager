@@ -3,6 +3,7 @@ package com.fleetpin.graphql.database.manager;
 import java.util.function.Consumer;
 
 public class QueryBuilder<V extends Table> {
+
 	private final Class<V> type;
 	private String startsWith;
 	private String after;

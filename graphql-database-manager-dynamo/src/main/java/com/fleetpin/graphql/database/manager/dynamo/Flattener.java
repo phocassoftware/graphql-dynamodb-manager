@@ -20,90 +20,35 @@ import java.util.*;
 import java.util.stream.Collectors;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-public final class Flattener {
+public abstract class Flattener {
 
-	private final Map<String, DynamoItem> lookup;
-	private final boolean includeOrganisationId;
-	private final List<String> tables;
-
-	Flattener(List<String> tables, boolean includeOrganisationId) {
-		this.tables = tables;
-		lookup = new HashMap<>();
-		this.includeOrganisationId = includeOrganisationId;
+	public static Flattener create(List<String> entityTables, boolean b) {
+		if (entityTables.size() > 1) {
+			return new FlattenerMulti(entityTables, b);
+		}
+		return new FlattenerSingle(b);
 	}
 
-	private String getId(DynamoItem item) {
-		if (includeOrganisationId) {
-			return item.getOrganisationId() + ":" + item.getId();
-		} else {
-			return item.getId();
-		}
-	}
+	public abstract DynamoItem get(Optional<Hash.HashExtractor> extractor, Class<? extends Table> type, String id);
 
-	public DynamoItem get(Optional<Hash.HashExtractor> extractor, Class<? extends Table> type, String id) {
-		String key;
-		if (extractor.isPresent()) {
-			key = TableCoreUtil.table(type) + ":" + extractor.get().hashId(id) + "\t" + extractor.get().sortId(id);
-		} else {
-			key = TableCoreUtil.table(type) + ":" + id;
-		}
-		var got = this.lookup.get(key);
-		if (got != null && got.isDeleted()) {
-			return null;
-		} else {
-			return got;
-		}
-	}
+	protected abstract void addItem(DynamoItem item);
 
-	public void addItems(List<DynamoItem> list) {
+	public final void addItems(List<DynamoItem> list) {
 		list.forEach(item -> {
 			addItem(item);
 		});
 	}
 
-	public void add(String table, List<Map<String, AttributeValue>> list) {
+	public final void add(String table, List<Map<String, AttributeValue>> list) {
 		list.forEach(item -> {
 			var i = new DynamoItem(table, item);
 			addItem(i);
 		});
 	}
 
-	private void addItem(DynamoItem item) {
-		lookup.merge(getId(item), item, this::merge);
-	}
-
-	private DynamoItem merge(DynamoItem existing, DynamoItem replace) {
-		if (tables.indexOf(existing.getTable()) > tables.indexOf(replace.getTable())) {
-			var tmp = existing;
-			existing = replace;
-			replace = tmp;
-		}
-
-		var item = new HashMap<>(replace.getItem());
-		//only links in parent
-		if (item.get("item") == null) {
-			item.put("item", existing.getItem().get("item"));
-		}
-		var toReturn = new DynamoItem(replace.getTable(), item);
-		for (var entry : existing.getLinks().entrySet()) {
-			var current = toReturn.getLinks().get(entry.getKey());
-			if (current == null) {
-				toReturn.getLinks().put(entry.getKey(), entry.getValue());
-			} else {
-				current.addAll(entry.getValue());
-			}
-		}
-
-		return toReturn;
-	}
-
-	public <T extends Table> List<T> results(ObjectMapper mapper, Class<T> type) {
+	public final <T extends Table> List<T> results(ObjectMapper mapper, Class<T> type) {
 		return results(mapper, type, Optional.empty());
 	}
 
-	public <T extends Table> List<T> results(ObjectMapper mapper, Class<T> type, Optional<Integer> limit) {
-		var items = new ArrayList<DynamoItem>(lookup.values());
-		Collections.sort(items);
-		return items.stream().limit(limit.orElse(Integer.MAX_VALUE)).map(t -> t.convertTo(mapper, type)).collect(Collectors.toList());
-	}
+	public abstract <T extends Table> List<T> results(ObjectMapper mapper, Class<T> type, Optional<Integer> limit);
 }

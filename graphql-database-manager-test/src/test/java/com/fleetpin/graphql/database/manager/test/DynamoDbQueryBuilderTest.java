@@ -111,26 +111,62 @@ final class DynamoDbQueryBuilderTest {
 		List<String> ids = Stream.iterate(1, i -> i + 1).map(i -> getId(i)).limit(n).collect(Collectors.toList());
 
 		var l = Stream
-				.iterate(1, i -> i + 1)
-				.limit(n)
-				// Must pick a sufficiently sized matrix in order to force multiple pages to test limit, 100 works well
-				.map(i -> new BigData(ids.get(i - 1), "bigdata-" + i.toString(), createMatrix(100)))
-				.collect(Collectors.toList());
+			.iterate(1, i -> i + 1)
+			.limit(n)
+			// Must pick a sufficiently sized matrix in order to force multiple pages to test limit, 100 works well
+			.map(i -> new BigData(ids.get(i - 1), "bigdata-" + i.toString(), createMatrix(100)))
+			.collect(Collectors.toList());
 
 		l.stream().map(db::put).forEach(this::swallow);
-
 
 		var allItems = db.query(BigData.class, builder -> builder).get();
 		var result1 = db.query(BigData.class, builder -> builder.threadCount(2).threadIndex(0)).get();
 		var result2 = db.query(BigData.class, builder -> builder.threadCount(2).threadIndex(1)).get();
 
-		var r1 = result1.stream().map(d -> d.name).toArray();
-		var r2 = result2.stream().map(d -> d.name).toArray();
-
 		Assertions.assertEquals(20, allItems.size());
 		Assertions.assertEquals(20, result1.size() + result2.size());
 		Assertions.assertNotEquals(20, result1.size());
 		Assertions.assertNotEquals(20, result2.size());
+
+		var allItemsPage = Stream.concat(result1.stream(), result2.stream()).map(s -> s.name).collect(Collectors.toList());
+		Assertions.assertEquals(true, allItems.stream().map(s -> s.name).collect(Collectors.toList()).containsAll(allItemsPage));
+	}
+
+	@TestDatabase(hashed = true)
+	void parallelPagingQuery(final Database db) throws InterruptedException, ExecutionException {
+		var n = 20;
+		List<String> ids = Stream.iterate(1, i -> i + 1).map(i -> getId(i)).limit(n).collect(Collectors.toList());
+
+		var l = Stream
+			.iterate(1, i -> i + 1)
+			.limit(n)
+			// Must pick a sufficiently sized matrix in order to force multiple pages to test limit, 100 works well
+			.map(i -> new BigData(ids.get(i - 1), "bigdata-" + i.toString(), createMatrix(100)))
+			.collect(Collectors.toList());
+
+		l.stream().map(db::put).forEach(this::swallow);
+
+		var allItems = db.query(BigData.class, builder -> builder).get();
+		var result1Page1 = db.query(BigData.class, builder -> builder.threadCount(2).threadIndex(0).limit(5)).get();
+		var result2Page2 = db.query(BigData.class, builder -> builder.threadCount(2).threadIndex(1).limit(5)).get();
+
+		Assertions.assertEquals(20, allItems.size());
+
+		Assertions.assertEquals(10, result1Page1.size() + result2Page2.size());
+
+		var lastPageIndex1 = result1Page1.get(result1Page1.size() - 1).getId();
+		var result1Page3 = db.query(BigData.class, builder -> builder.threadCount(2).after(lastPageIndex1).threadIndex(0).limit(5)).get();
+
+		var lastPageIndex2 = result2Page2.get(result2Page2.size() - 1).getId();
+		var result2Page4 = db.query(BigData.class, builder -> builder.threadCount(2).after(lastPageIndex2).threadIndex(1).limit(5)).get();
+
+		Assertions.assertEquals(10, result1Page3.size() + result2Page4.size());
+
+		var firstSide = Stream.concat(result1Page1.stream(), result2Page2.stream());
+		var secondSide = Stream.concat(result1Page3.stream(), result2Page4.stream());
+		var allItemsPage = Stream.concat(firstSide, secondSide).map(s -> s.name).collect(Collectors.toList());
+
+		Assertions.assertTrue(allItems.stream().map(s -> s.name).collect(Collectors.toList()).containsAll(allItemsPage));
 	}
 
 	// This test tests querying against large pieces of data which force Dynamoclient to return multiple pages.

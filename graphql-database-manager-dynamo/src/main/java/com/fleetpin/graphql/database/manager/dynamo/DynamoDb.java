@@ -104,7 +104,14 @@ public class DynamoDb extends DatabaseDriver {
 		this(mapper, entityTables, null, client, idGenerator, BATCH_WRITE_SIZE, MAX_RETRY, true, true, null, null);
 	}
 
-	public DynamoDb(ObjectMapper mapper, List<String> entityTables, List<String> historyTables, DynamoDbAsyncClient client, Supplier<String> idGenerator, String parallelHashIndex) {
+	public DynamoDb(
+		ObjectMapper mapper,
+		List<String> entityTables,
+		List<String> historyTables,
+		DynamoDbAsyncClient client,
+		Supplier<String> idGenerator,
+		String parallelHashIndex
+	) {
 		this(mapper, entityTables, null, client, idGenerator, BATCH_WRITE_SIZE, MAX_RETRY, true, true, null, parallelHashIndex);
 	}
 
@@ -476,7 +483,7 @@ public class DynamoDb extends DatabaseDriver {
 		for (String table : this.entityTables) {
 			items.put(table, KeysAndAttributes.builder().keys(entries).consistentRead(true).build());
 		}
-		return getItems(0, items, new Flattener(this.entityTables, false))
+		return getItems(0, items, Flattener.create(this.entityTables, false))
 			.thenApply(flattener -> {
 				var toReturn = new ArrayList<T>();
 				for (var key : keys) {
@@ -558,7 +565,7 @@ public class DynamoDb extends DatabaseDriver {
 		var future = CompletableFutureUtil.sequence(futures);
 
 		return future.thenApply(results -> {
-			var flattener = new Flattener(this.entityTables, false);
+			var flattener = Flattener.create(this.entityTables, false);
 
 			results.forEach(list -> flattener.addItems(list));
 			return flattener.results(mapper, key.getQuery().getType(), Optional.ofNullable(key.getQuery().getLimit()));
@@ -725,7 +732,7 @@ public class DynamoDb extends DatabaseDriver {
 				);
 		}
 		return future.thenApply(results -> {
-			var flattener = new Flattener(this.entityTables, true);
+			var flattener = Flattener.create(this.entityTables, true);
 			results.forEach(list -> flattener.addItems(list));
 			return flattener.results(mapper, type);
 		});
@@ -826,14 +833,19 @@ public class DynamoDb extends DatabaseDriver {
 
 		String index = null;
 		boolean consistentRead = true;
+		boolean parallelRequest;
 
 		if (query.getThreadIndex() != null && query.getThreadCount() != null) {
 			consistentRead = false;
+			parallelRequest = true;
 			index = this.parallelHashIndex;
 			keyConditions.put(":hash", AttributeValue.builder().s(toPaddedBinary(query.getThreadIndex(), query.getThreadCount())).build());
-		} else if (id != null && !id.s().trim().isEmpty()) {
-			index = null;
-			keyConditions.put(":table", id);
+		} else {
+			parallelRequest = false;
+			if (id != null && !id.s().trim().isEmpty()) {
+				index = null;
+				keyConditions.put(":table", id);
+			}
 		}
 
 		var s = new DynamoQuerySubscriber(table, query.getLimit());
@@ -862,7 +874,11 @@ public class DynamoDb extends DatabaseDriver {
 						}
 
 						if (query.getAfter() != null) {
-							b.exclusiveStartKey(mapWithKeys(organisationId, query.getType(), query.getAfter()));
+							var start = mapWithKeys(organisationId, query.getType(), query.getAfter());
+							if (parallelRequest) {
+								start.put("parallelHash", AttributeValue.builder().s(parallelHash(query.getAfter())).build());
+							}
+							b.exclusiveStartKey(start);
 						}
 					});
 			})
@@ -1603,8 +1619,8 @@ public class DynamoDb extends DatabaseDriver {
 	}
 
 	public static String toPaddedBinary(int number, int powerOfTwo) {
-		var paddingLength = (int)((Math.log(powerOfTwo) / Math.log(2)));
-        StringBuilder binaryString = new StringBuilder(Integer.toBinaryString(number));
+		var paddingLength = (int) ((Math.log(powerOfTwo) / Math.log(2)));
+		StringBuilder binaryString = new StringBuilder(Integer.toBinaryString(number));
 		while (binaryString.length() < paddingLength) {
 			binaryString.insert(0, "0");
 		}

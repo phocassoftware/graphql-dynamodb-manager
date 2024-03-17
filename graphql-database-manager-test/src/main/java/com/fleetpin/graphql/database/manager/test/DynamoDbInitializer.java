@@ -66,17 +66,23 @@ final class DynamoDbInitializer {
 					)
 					.streamSpecification(streamSpecification -> streamSpecification.streamEnabled(true).streamViewType(StreamViewType.NEW_IMAGE))
 					.globalSecondaryIndexes(
-						GlobalSecondaryIndex.builder().indexName("secondaryGlobal")
+						GlobalSecondaryIndex
+							.builder()
+							.indexName("secondaryGlobal")
 							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
 							.projection(b -> b.projectionType(ProjectionType.ALL))
-							.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build()).build(),
-						GlobalSecondaryIndex.builder().indexName("parallelIndex")
-								.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
-								.projection(b -> b.projectionType(ProjectionType.ALL))
-								.keySchema(
-										KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
-										KeySchemaElement.builder().attributeName("parallelHash").keyType(KeyType.RANGE).build()
-								).build()
+							.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build())
+							.build(),
+						GlobalSecondaryIndex
+							.builder()
+							.indexName("parallelIndex")
+							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
+							.projection(b -> b.projectionType(ProjectionType.ALL))
+							.keySchema(
+								KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
+								KeySchemaElement.builder().attributeName("parallelHash").keyType(KeyType.RANGE).build()
+							)
+							.build()
 					)
 					.localSecondaryIndexes(builder ->
 						builder
