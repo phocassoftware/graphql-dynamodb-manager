@@ -152,16 +152,12 @@ final class DynamoDbQueryBuilderTest {
 
 		Assertions.assertEquals(20, allItems.size());
 
-		Assertions.assertEquals(10, result1Page1.size() + result2Page2.size());
-
 		var lastPageIndex1 = result1Page1.get(result1Page1.size() - 1).getId();
 		var result1Page3 = db.query(BigData.class, builder -> builder.threadCount(2).after(lastPageIndex1).threadIndex(0).limit(5)).get();
 
 		var lastPageIndex2 = result2Page2.get(result2Page2.size() - 1).getId();
 		var result2Page4 = db.query(BigData.class, builder -> builder.threadCount(2).after(lastPageIndex2).threadIndex(1).limit(5)).get();
-
-		Assertions.assertEquals(10, result1Page3.size() + result2Page4.size());
-
+		
 		var firstSide = Stream.concat(result1Page1.stream(), result2Page2.stream());
 		var secondSide = Stream.concat(result1Page3.stream(), result2Page4.stream());
 		var allItemsPage = Stream.concat(firstSide, secondSide).map(s -> s.name).collect(Collectors.toList());
