@@ -157,7 +157,7 @@ final class DynamoDbQueryBuilderTest {
 
 		var lastPageIndex2 = result2Page2.get(result2Page2.size() - 1).getId();
 		var result2Page4 = db.query(BigData.class, builder -> builder.threadCount(2).after(lastPageIndex2).threadIndex(1).limit(5)).get();
-		
+
 		var firstSide = Stream.concat(result1Page1.stream(), result2Page2.stream());
 		var secondSide = Stream.concat(result1Page3.stream(), result2Page4.stream());
 		var allItemsPage = Stream.concat(firstSide, secondSide).map(s -> s.name).collect(Collectors.toList());

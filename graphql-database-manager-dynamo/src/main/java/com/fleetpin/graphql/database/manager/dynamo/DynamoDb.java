@@ -917,12 +917,7 @@ public class DynamoDb extends DatabaseDriver {
 
 				return client
 					.batchWriteItem(batchPutRequest)
-					.thenApply(items -> {
-						do {
-							client.batchWriteItem(BatchWriteItemRequest.builder().requestItems(items.unprocessedItems()).build());
-						} while (items.unprocessedItems().size() > 0);
-						return items;
-					})
+					.thenCompose(this::batchWriteRetry)
 					.exceptionally(failure -> {
 						if (failure.getCause() instanceof ConditionalCheckFailedException) {
 							throw new RevisionMismatchException(failure.getCause());
@@ -934,6 +929,14 @@ public class DynamoDb extends DatabaseDriver {
 			.collect(Collectors.toList());
 
 		return CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]));
+	}
+
+	private CompletableFuture<BatchWriteItemResponse> batchWriteRetry(BatchWriteItemResponse items) {
+		if (items.unprocessedItems().size() > 0) {
+			return client.batchWriteItem(BatchWriteItemRequest.builder().requestItems(items.unprocessedItems()).build()).thenCompose(this::batchWriteRetry);
+		} else {
+			return CompletableFuture.completedFuture(items);
+		}
 	}
 
 	@Override
