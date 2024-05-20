@@ -52,6 +52,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -889,21 +890,23 @@ public class DynamoDb extends DatabaseDriver {
 
 	@Override
 	public CompletableFuture<Void> restoreBackup(List<BackupItem> entities) {
-		return restoreBackup(entities, BackupTableType.Entity);
+		return restoreBackup(entities, BackupTableType.Entity, TableUtil::toAttributes);
 	}
 
 	@Override
 	public CompletableFuture<Void> restoreHistoryBackup(List<HistoryBackupItem> entities) {
-		return restoreBackup(entities, BackupTableType.History);
+		return restoreBackup(entities, BackupTableType.History, HistoryUtil::toAttributes);
 	}
 
-	private <T extends BackupItem> CompletableFuture<Void> restoreBackup(List<T> entities, BackupTableType backupTableType) {
+
+
+	private <T extends BackupItem> CompletableFuture<Void> restoreBackup(List<T> entities, BackupTableType backupTableType, BiFunction<ObjectMapper, BackupItem, Map<String, AttributeValue>> toAttributes) {
 		List<CompletableFuture<BatchWriteItemResponse>> completableFutures = Lists
 			.partition(
 				entities
 					.stream()
 					.map(item -> {
-						return WriteRequest.builder().putRequest(builder -> builder.item(TableUtil.toAttributes(mapper, item)).build()).build();
+						return WriteRequest.builder().putRequest(builder -> builder.item(toAttributes.apply(mapper, item)).build()).build();
 					})
 					.collect(Collectors.toList()),
 				BATCH_WRITE_SIZE
