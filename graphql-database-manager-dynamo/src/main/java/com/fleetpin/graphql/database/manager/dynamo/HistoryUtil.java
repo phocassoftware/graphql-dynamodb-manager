@@ -1,27 +1,23 @@
 package com.fleetpin.graphql.database.manager.dynamo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.Record;
 
 public class HistoryUtil {
 
-	static Map<String, AttributeValue> toAttributes(ObjectMapper mapper, BackupItem entity) {
+	static Map<String, AttributeValue> toAttributes(ObjectMapper mapper, HistoryBackupItem entity) {
 		var attributes = TableUtil.toAttributes(mapper, entity);
-		attributes.put("idRevision", AttributeValue.builder().b(SdkBytes.fromUtf8String(attributes.get("idRevision").s())).build());
-		attributes.put("idDate", AttributeValue.builder().b(SdkBytes.fromUtf8String(attributes.get("idDate").s())).build());
-		attributes.put("startsWithUpdatedAt", AttributeValue.builder().b(SdkBytes.fromUtf8String(attributes.get("startsWithUpdatedAt").s())).build());
+		attributes.put("idRevision", AttributeValue.builder().b(SdkBytes.fromByteArray(entity.getIdRevision())).build());
+		attributes.put("idDate", AttributeValue.builder().b(SdkBytes.fromByteArray(entity.getIdDate())).build());
+		attributes.put("startsWithUpdatedAt", AttributeValue.builder().b(SdkBytes.fromByteArray(entity.getStartsWithUpdatedAt())).build());
 
 		return attributes;
 	}

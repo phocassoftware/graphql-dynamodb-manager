@@ -898,9 +898,11 @@ public class DynamoDb extends DatabaseDriver {
 		return restoreBackup(entities, BackupTableType.History, HistoryUtil::toAttributes);
 	}
 
-
-
-	private <T extends BackupItem> CompletableFuture<Void> restoreBackup(List<T> entities, BackupTableType backupTableType, BiFunction<ObjectMapper, BackupItem, Map<String, AttributeValue>> toAttributes) {
+	private <T extends BackupItem> CompletableFuture<Void> restoreBackup(
+		List<T> entities,
+		BackupTableType backupTableType,
+		BiFunction<ObjectMapper, T, Map<String, AttributeValue>> toAttributes
+	) {
 		List<CompletableFuture<BatchWriteItemResponse>> completableFutures = Lists
 			.partition(
 				entities

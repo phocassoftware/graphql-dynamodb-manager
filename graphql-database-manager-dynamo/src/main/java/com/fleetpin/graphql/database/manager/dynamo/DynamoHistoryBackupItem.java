@@ -2,7 +2,6 @@ package com.fleetpin.graphql.database.manager.dynamo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
