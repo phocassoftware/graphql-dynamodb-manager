@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
+          distribution: zulu
       - name: Build with Maven
         run: mvn -B test --file pom.xml
       - uses: ashley-taylor/junit-report-annotations-action@master
