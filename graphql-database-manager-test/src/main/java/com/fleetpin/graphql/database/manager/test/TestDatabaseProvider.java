@@ -12,9 +12,17 @@
 
 package com.fleetpin.graphql.database.manager.test;
 
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.*;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.createHistoryTable;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.createTable;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.findFreePort;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.getDatabaseManager;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.getEmbeddedDatabase;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoClient;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoServer;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoStreamClient;
 
 import com.fleetpin.graphql.database.manager.Database;
+import com.fleetpin.graphql.database.manager.VirtualDatabase;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
@@ -51,6 +59,9 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			return true;
 		}
 		if (parameterContext.getParameter().getType().isAssignableFrom(Database.class)) {
+			return true;
+		}
+		if (parameterContext.getParameter().getType().isAssignableFrom(VirtualDatabase.class)) {
 			return true;
 		}
 		return false;
@@ -149,7 +160,12 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 					} else if (parameter.getType().isAssignableFrom(HistoryProcessor.class)) {
 						return new HistoryProcessor(client, streamClient, parameter, organisationId);
 					} else {
-						return createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath, finished);
+						var database = createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath, finished);
+						if (parameter.getType().isAssignableFrom(VirtualDatabase.class)) {
+							return new VirtualDatabase(database);
+						} else {
+							return database;
+						}
 					}
 				} catch (final Exception e) {
 					e.printStackTrace();

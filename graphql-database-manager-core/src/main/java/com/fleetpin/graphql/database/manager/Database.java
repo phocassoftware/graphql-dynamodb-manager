@@ -17,7 +17,13 @@ import com.fleetpin.graphql.database.manager.access.ModificationPermission;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -228,7 +234,7 @@ public class Database {
 				if (!allow) {
 					throw new ForbiddenWriteException("Delete links not allowed for " + TableCoreUtil.table(entity.getClass()) + " with id " + entity.getId());
 				}
-				//impact of clearing links to tricky
+				// impact of clearing links to tricky
 				items.clearAll();
 				queries.clearAll();
 				return driver.deleteLinks(organisationId, entity);
@@ -245,18 +251,18 @@ public class Database {
 	 * @param <T>    database entity type to update
 	 * @param entity revision must match database or request will fail
 	 * @return updated entity with the revision incremented by one
-	 * CompletableFuture will fail with a RevisionMismatchException
+	 *         CompletableFuture will fail with a RevisionMismatchException
 	 */
 	public <T extends Table> CompletableFuture<T> put(T entity) {
 		return put(entity, true);
 	}
 
 	/**
-	 * @param <T> database entity type to update
+	 * @param <T>    database entity type to update
 	 * @param entity revision must match database or request will fail
-	 * @param check Will only pass if the entity revision matches what is currently in the database
+	 * @param check  Will only pass if the entity revision matches what is currently in the database
 	 * @return updated entity with the revision incremented by one
-	 * CompletableFuture will fail with a RevisionMismatchException
+	 *         CompletableFuture will fail with a RevisionMismatchException
 	 */
 	public <T extends Table> CompletableFuture<T> put(T entity, boolean check) {
 		return putAllow
@@ -318,11 +324,18 @@ public class Database {
 			CompletableFuture
 				.allOf(all)
 				.whenComplete((response, error) -> {
-					//go around again
+					// go around again
 					start(toReturn);
 				});
 		} else {
 			CompletableFuture.supplyAsync(() -> null, DELAYER).acceptEither(toReturn, __ -> start(toReturn));
+		}
+	}
+
+	void start() {
+		if (items.dispatchDepth() > 0 || queries.dispatchDepth() > 0 || queryHistories.dispatchDepth() > 0 || put.dispatchSize() > 0) {
+			CompletableFuture<?>[] all = new CompletableFuture[] { items.dispatch(), queries.dispatch(), queryHistories.dispatch(), put.dispatch() };
+			CompletableFuture.allOf(all).join();
 		}
 	}
 
