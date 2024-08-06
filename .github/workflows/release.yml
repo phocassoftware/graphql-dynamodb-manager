@@ -18,7 +18,7 @@ jobs:
         with:
           java-version: 21
       - name: Release
-        uses: qcastel/github-actions-maven-release@v1.11.1
+        uses: qcastel/github-actions-maven-release@v1.12.41
         with:
           release-branch-name: "master"
           maven-args: "-P sonatype"
@@ -33,4 +33,4 @@ jobs:
           maven-repo-server-username: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
           maven-repo-server-password: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
 
-          access-token: ${{ secrets.GITHUB_TOKEN }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
