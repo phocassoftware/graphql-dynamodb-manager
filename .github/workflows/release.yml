@@ -7,20 +7,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Release
-        uses: qcastel/github-actions-maven-release@v1.12.41
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-21-openjdk/
+      - uses: whelk-io/maven-settings-xml-action@v22
         with:
-          release-branch-name: "master"
-          maven-args: "-P sonatype"
-          git-release-bot-name: "release-bot"
-          git-release-bot-email: "release-bot@fleetpin.co.nz"
+          servers: >
+            [
+              { "id": "sonatype", "username": "${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}", "password": "${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}" }
+            ]
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: zulu
 
-          gpg-enabled: "true"
-          gpg-key-id: ${{ secrets.GPG_KEY_ID }}
-          gpg-key: ${{ secrets.GPG_KEY }}
+      - name: set name
+        run: |
+          git config --global user.name "release-bot";
+          git config --global user.email "release-bot@fleetpin.co.nz";
 
-          maven-servers: '[{"id": "sonatype", "username": "${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}", "password": "${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}"}]'
+      - name: add key
+        run: |
+          echo  "${{ secrets.GPG_KEY }}" | base64 -d > private.key
+          gpg --batch --import ./private.key
+          rm ./private.key
 
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: prepare
+        run: |
+          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }}
+
+      - name: release
+        run: |
+          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }}
