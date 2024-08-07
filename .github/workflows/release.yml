@@ -35,6 +35,7 @@ jobs:
           echo  "${{ secrets.GPG_KEY }}" | base64 -d > private.key
           gpg --batch --import ./private.key
           rm ./private.key
+          gpg --list-secret-keys --keyid-format LONG
 
       - name: prepare
         run: |
