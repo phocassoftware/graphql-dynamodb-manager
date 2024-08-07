@@ -7,12 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: whelk-io/maven-settings-xml-action@v22
-        with:
-          servers: >
-            [
-              { "id": "sonatype", "username": "${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}", "password": "${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}" }
-            ]
+
       - uses: actions/cache@v4
         with:
           path: ~/.m2/repository
@@ -24,7 +19,12 @@ jobs:
         with:
           java-version: 21
           distribution: zulu
-
+      - uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          servers: >
+            [
+              { "id": "sonatype", "username": "${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}", "password": "${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}" }
+            ]
       - name: set name
         run: |
           git config --global user.name "release-bot";
@@ -38,8 +38,8 @@ jobs:
 
       - name: prepare
         run: |
-          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }}
+          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype
 
       - name: release
         run: |
-          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }}
+          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype
