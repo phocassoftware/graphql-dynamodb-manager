@@ -30,7 +30,11 @@ import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.annotations.Hash.HashExtractor;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator.HashQueryBuilder;
-import com.fleetpin.graphql.database.manager.util.*;
+import com.fleetpin.graphql.database.manager.util.BackupItem;
+import com.fleetpin.graphql.database.manager.util.CompletableFutureUtil;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
+import com.fleetpin.graphql.database.manager.util.HistoryCoreUtil;
+import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -78,7 +82,7 @@ public class DynamoDb extends DatabaseDriver {
 	private static final int BATCH_WRITE_SIZE = 25;
 	private static final int MAX_RETRY = 10;
 
-	private final List<String> entityTables; //is in reverse order so easy to override as we go through
+	private final List<String> entityTables; // is in reverse order so easy to override as we go through
 	private final String historyTable;
 	private final String entityTable;
 	private final DynamoDbAsyncClient client;
@@ -184,7 +188,7 @@ public class DynamoDb extends DatabaseDriver {
 		String sourceOrganisation = getSourceOrganisationId(entity);
 
 		if (!sourceOrganisation.equals(organisationId)) {
-			//trying to delete a global or something just return without doing anything
+			// trying to delete a global or something just return without doing anything
 			return CompletableFuture.completedFuture(entity);
 		}
 
@@ -202,12 +206,12 @@ public class DynamoDb extends DatabaseDriver {
 							if (!sourceOrganisationId.equals(organisationId)) {
 								return;
 							}
-							if (entity.getRevision() == 0) { //we confirm row does not exist with a revision since entry might predate feature
+							if (entity.getRevision() == 0) { // we confirm row does not exist with a revision since entry might predate feature
 								mutator.conditionExpression("attribute_not_exists(revision)");
 							} else {
 								Map<String, AttributeValue> variables = new HashMap<>();
 								variables.put(":revision", AttributeValue.builder().n(Long.toString(entity.getRevision())).build());
-								//check exists and matches revision
+								// check exists and matches revision
 								mutator.expressionAttributeValues(variables);
 								mutator.conditionExpression("revision = :revision");
 							}
@@ -224,7 +228,7 @@ public class DynamoDb extends DatabaseDriver {
 					throw new RuntimeException(failure);
 				});
 		} else {
-			//we mark as deleted not actual delete
+			// we mark as deleted not actual delete
 			Map<String, AttributeValue> item = mapWithKeys(organisationId, entity, true);
 			item.put("deleted", AttributeValue.builder().bool(true).build());
 
@@ -374,7 +378,7 @@ public class DynamoDb extends DatabaseDriver {
 			setCreatedAt(entity, Instant.now());
 		}
 		if (entity.getCreatedAt() == null) {
-			setCreatedAt(entity, Instant.now()); //if missing for what ever reason
+			setCreatedAt(entity, Instant.now()); // if missing for what ever reason
 		}
 		final long revision = entity.getRevision();
 		setUpdatedAt(entity, Instant.now());
@@ -433,12 +437,14 @@ public class DynamoDb extends DatabaseDriver {
 						if (check) {
 							String sourceOrganisationId = getSourceOrganisationId(entity);
 
-							if (sourceTable != null && !sourceTable.equals(entityTable) || !sourceOrganisationId.equals(organisationId) || revision == 0) { //we confirm row does not exist with a revision since entry might predate feature
+							if (sourceTable != null && !sourceTable.equals(entityTable) || !sourceOrganisationId.equals(organisationId) || revision == 0) { // we confirm row does not exist with a
+								// revision since entry might predate
+								// feature
 								mutator.conditionExpression("attribute_not_exists(revision)");
 							} else {
 								Map<String, AttributeValue> variables = new HashMap<>();
 								variables.put(":revision", AttributeValue.builder().n(Long.toString(revision)).build());
-								//check exists and matches revision
+								// check exists and matches revision
 								mutator.expressionAttributeValues(variables);
 								mutator.conditionExpression("revision = :revision");
 							}
@@ -816,7 +822,7 @@ public class DynamoDb extends DatabaseDriver {
 					.stream()
 					.map(item -> item.get("id").s())
 					.map(itemId -> {
-						return itemId.substring(itemId.indexOf(':') + 1); //Id contains entity name
+						return itemId.substring(itemId.indexOf(':') + 1); // Id contains entity name
 					})
 					.forEach(toReturn::add);
 			})
@@ -1138,7 +1144,7 @@ public class DynamoDb extends DatabaseDriver {
 						return CompletableFuture.completedFuture(r);
 					})
 					.thenCompose(a -> a)
-					.handle((r, e) -> { //nasty if attribute now exists use first approach again...
+					.handle((r, e) -> { // nasty if attribute now exists use first approach again...
 						if (e != null) {
 							if (e.getCause() instanceof ConditionalCheckFailedException) {
 								return client.updateItem(request ->
@@ -1188,8 +1194,8 @@ public class DynamoDb extends DatabaseDriver {
 
 		String sourceTable = getSourceTable(entity);
 		String sourceOrganisationId = getSourceOrganisationId(entity);
-		//revision checks don't really work when reading from one env and writing to another, or read from global write to organisation.
-		//revision would only practically be empty if reading object before revision concept is present
+		// revision checks don't really work when reading from one env and writing to another, or read from global write to organisation.
+		// revision would only practically be empty if reading object before revision concept is present
 		if (sourceTable.equals(entityTable) && sourceOrganisationId.equals(organisationId) && entity.getRevision() != 0) {
 			values.put(":revision", AttributeValue.builder().n(Long.toString(entity.getRevision())).build());
 			extraConditions = " AND revision = :revision";
@@ -1288,11 +1294,11 @@ public class DynamoDb extends DatabaseDriver {
 		var entityFuture = updateEntityLinks(organisationId, entity, class1, groupIds);
 
 		return entityFuture.thenCompose(e -> {
-			//wait until the entity has been updated in-case that fails then update the other targets.
+			// wait until the entity has been updated in-case that fails then update the other targets.
 
-			//remove links that have been removed
+			// remove links that have been removed
 			CompletableFuture<?> removeFuture = removeLinks(organisationId, class1, toRemove, source, entity.getId());
-			//add the new links
+			// add the new links
 			CompletableFuture<?> addFuture = addLinks(organisationId, class1, toAdd, source, entity.getId());
 
 			return CompletableFuture
@@ -1378,7 +1384,7 @@ public class DynamoDb extends DatabaseDriver {
 
 		var organisationIdAttribute = AttributeValue.builder().s(organisationId).build();
 		var id = AttributeValue.builder().s(table(entity.getClass()) + ":" + entity.getId()).build();
-		//we first clear out our own object
+		// we first clear out our own object
 
 		long revision = entity.getRevision();
 		Map<String, AttributeValue> values = new HashMap<>();
@@ -1398,7 +1404,7 @@ public class DynamoDb extends DatabaseDriver {
 					.returnValues(ReturnValue.UPDATED_NEW)
 					.applyMutation(mutator -> {
 						String sourceTable = getSourceTable(entity);
-						//revision checks don't really work when reading from one env and writing to another.
+						// revision checks don't really work when reading from one env and writing to another.
 						if (sourceTable != null && !sourceTable.equals(entityTable)) {
 							return;
 						}
@@ -1406,7 +1412,7 @@ public class DynamoDb extends DatabaseDriver {
 						if (!sourceOrganisationId.equals(organisationId)) {
 							return;
 						}
-						if (revision == 0) { //we confirm row does not exist with a revision since entry might predate feature
+						if (revision == 0) { // we confirm row does not exist with a revision since entry might predate feature
 							mutator.conditionExpression("attribute_not_exists(revision)");
 						} else {
 							values.put(":revision", AttributeValue.builder().n(Long.toString(entity.getRevision())).build());
@@ -1427,7 +1433,7 @@ public class DynamoDb extends DatabaseDriver {
 				throw new RuntimeException(failure);
 			});
 
-		//after we successfully clear out our object we clear the remote references
+		// after we successfully clear out our object we clear the remote references
 		return clearEntity.thenCompose(r -> {
 			var val = AttributeValue.builder().ss(entity.getId()).build();
 			String source = table(entity.getClass());

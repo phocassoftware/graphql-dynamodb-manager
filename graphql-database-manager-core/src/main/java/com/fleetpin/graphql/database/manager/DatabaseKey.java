@@ -13,9 +13,48 @@
 package com.fleetpin.graphql.database.manager;
 
 import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
+import java.util.Objects;
 
-public record DatabaseKey<T extends Table>(String organisationId, String type, String id) {
+public class DatabaseKey<T extends Table> {
+
+	private final String organisationId;
+	private final Class<T> type;
+	private final String id;
+
 	DatabaseKey(String organisationId, Class<T> type, String id) {
-		this(organisationId, TableCoreUtil.table(type), id);
+		this.organisationId = organisationId;
+		this.type = TableCoreUtil.baseClass(type);
+		this.id = id;
+	}
+
+	public String getOrganisationId() {
+		return organisationId;
+	}
+
+	public Class<T> getType() {
+		return type;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, organisationId, type);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		DatabaseKey other = (DatabaseKey) obj;
+		return Objects.equals(id, other.id) && Objects.equals(organisationId, other.organisationId) && Objects.equals(type, other.type);
+	}
+
+	@Override
+	public String toString() {
+		return "DatabaseKey [organisationId=" + organisationId + ", type=" + type + ", id=" + id + "]";
 	}
 }
