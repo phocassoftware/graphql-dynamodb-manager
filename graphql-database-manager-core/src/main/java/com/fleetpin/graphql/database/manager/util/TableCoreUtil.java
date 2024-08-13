@@ -24,13 +24,12 @@ public final class TableCoreUtil {
 		TableName name = null;
 		while (name == null && tmp != null) {
 			name = tmp.getDeclaredAnnotation(TableName.class);
+			if (name != null) {
+				return (Class<T>) tmp;
+			}
 			tmp = tmp.getSuperclass();
 		}
-		if (name == null) {
-			return type;
-		} else {
-			return (Class<T>) tmp;
-		}
+		return type;
 	}
 
 	public static <T> CompletableFuture<List<T>> all(List<CompletableFuture<T>> collect) {
