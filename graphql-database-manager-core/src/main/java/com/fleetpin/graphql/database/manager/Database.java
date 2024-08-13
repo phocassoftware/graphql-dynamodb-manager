@@ -26,8 +26,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +37,8 @@ import org.dataloader.DataLoaderOptions;
 
 @SuppressWarnings("unchecked")
 public class Database {
+
+	public static ExecutorService VIRTUAL_THREAD_POOL = Executors.newVirtualThreadPerTaskExecutor();
 
 	private String organisationId;
 	private final DatabaseDriver driver;
@@ -47,10 +50,13 @@ public class Database {
 
 	private final Function<Table, CompletableFuture<Boolean>> putAllow;
 
+	private final AtomicInteger submitted;
+
 	Database(String organisationId, DatabaseDriver driver, ModificationPermission putAllow) {
 		this.organisationId = organisationId;
 		this.driver = driver;
 		this.putAllow = putAllow;
+		this.submitted = new AtomicInteger();
 
 		items =
 			new TableDataLoader<>(
@@ -59,7 +65,8 @@ public class Database {
 						return driver.get(keys);
 					},
 					DataLoaderOptions.newOptions().setMaxBatchSize(driver.maxBatchSize())
-				)
+				),
+				this::handleFuture
 			); // will auto call global
 
 		queries =
@@ -69,7 +76,8 @@ public class Database {
 						return merge(keys.stream().map(driver::query));
 					},
 					DataLoaderOptions.newOptions().setBatchingEnabled(false)
-				)
+				),
+				this::handleFuture
 			); // will auto call global
 
 		queryHistories =
@@ -79,10 +87,11 @@ public class Database {
 						return merge(keys.stream().map(driver::queryHistory));
 					},
 					DataLoaderOptions.newOptions().setBatchingEnabled(false)
-				)
+				),
+				this::handleFuture
 			); // will auto call global
 
-		put = new DataWriter(driver::bulkPut);
+		put = new DataWriter(driver::bulkPut, this::handleFuture);
 	}
 
 	public <T extends Table> CompletableFuture<List<T>> query(Class<T> type, Function<QueryBuilder<T>, QueryBuilder<T>> func) {
@@ -311,31 +320,14 @@ public class Database {
 			});
 	}
 
-	private static final Executor DELAYER = CompletableFuture.delayedExecutor(10, TimeUnit.MILLISECONDS);
-
-	@SuppressWarnings("rawtypes")
-	public void start(CompletableFuture<?> toReturn) {
-		if (toReturn.isDone()) {
-			return;
-		}
-
-		if (items.dispatchDepth() > 0 || queries.dispatchDepth() > 0 || queryHistories.dispatchDepth() > 0 || put.dispatchSize() > 0) {
-			CompletableFuture[] all = new CompletableFuture[] { items.dispatch(), queries.dispatch(), queryHistories.dispatch(), put.dispatch() };
-			CompletableFuture
-				.allOf(all)
-				.whenComplete((response, error) -> {
-					// go around again
-					start(toReturn);
-				});
-		} else {
-			CompletableFuture.supplyAsync(() -> null, DELAYER).acceptEither(toReturn, __ -> start(toReturn));
-		}
-	}
-
-	void start() {
+	private void start() {
 		if (items.dispatchDepth() > 0 || queries.dispatchDepth() > 0 || queryHistories.dispatchDepth() > 0 || put.dispatchSize() > 0) {
 			CompletableFuture<?>[] all = new CompletableFuture[] { items.dispatch(), queries.dispatch(), queryHistories.dispatch(), put.dispatch() };
-			CompletableFuture.allOf(all).join();
+			try {
+				CompletableFuture.allOf(all).join();
+			} catch (Exception e) {
+				// swallow futures throw the same error
+			}
 		}
 	}
 
@@ -422,5 +414,37 @@ public class Database {
 			return Collections.emptySet();
 		}
 		return Collections.unmodifiableSet(links);
+	}
+
+	private void handleFuture(CompletableFuture<?> future) {
+		if (future.isDone()) {
+			return;
+		}
+		while (true) {
+			var current = submitted.get();
+			if (current == 0) {
+				if (submitted.compareAndSet(0, 1)) {
+					run();
+				} else {
+					continue;
+				}
+			} else {
+				if (submitted.compareAndSet(current, current + 1)) {
+					return;
+				}
+			}
+		}
+	}
+
+	private void run() {
+		VIRTUAL_THREAD_POOL.submit(() -> {
+			while (true) {
+				var start = submitted.get();
+				start();
+				if (submitted.compareAndSet(start, 0)) {
+					break;
+				}
+			}
+		});
 	}
 }

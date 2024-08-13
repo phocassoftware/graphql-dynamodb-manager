@@ -14,6 +14,7 @@ package com.fleetpin.graphql.database.manager.virtual;
 
 import com.fleetpin.graphql.builder.DataFetcherRunner;
 import com.fleetpin.graphql.builder.annotations.Context;
+import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.VirtualDatabase;
 import graphql.schema.DataFetcher;
 import java.lang.reflect.Method;
@@ -36,7 +37,7 @@ public class VirtualDataRunner implements DataFetcherRunner {
 								throw new RuntimeException(e);
 							}
 						},
-						VirtualDatabase.VIRTUAL_THREAD_POOL
+						Database.VIRTUAL_THREAD_POOL
 					);
 
 					if (isCompletableFuture) {

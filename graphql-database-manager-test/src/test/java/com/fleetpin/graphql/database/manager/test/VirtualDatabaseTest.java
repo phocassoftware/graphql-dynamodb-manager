@@ -12,6 +12,7 @@
 
 package com.fleetpin.graphql.database.manager.test;
 
+import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.VirtualDatabase;
 import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
@@ -35,7 +36,7 @@ public class VirtualDatabaseTest {
 					fc.setId("a:b:c:" + f);
 					return database.put(fc);
 				},
-				VirtualDatabase.VIRTUAL_THREAD_POOL
+				Database.VIRTUAL_THREAD_POOL
 			);
 			futures.add(future);
 		}
@@ -52,7 +53,7 @@ public class VirtualDatabaseTest {
 					Assertions.assertNotNull(fc);
 					return fc;
 				},
-				VirtualDatabase.VIRTUAL_THREAD_POOL
+				Database.VIRTUAL_THREAD_POOL
 			);
 			futures.add(future);
 		}

@@ -15,7 +15,7 @@ final class DynamoDbDataWriterTest {
 	void testDispatchSize() {
 		DatabaseDriver my = Mockito.mock(DatabaseDriver.class, Mockito.CALLS_REAL_METHODS);
 		DynamoDbIndexesTest.SimpleTable entry1 = new DynamoDbIndexesTest.SimpleTable("garry", "john");
-		var dataWriter = new DataWriter(my::bulkPut);
+		var dataWriter = new DataWriter(my::bulkPut, __ -> {});
 		dataWriter.put("test", entry1, true);
 		Assertions.assertEquals(1, dataWriter.dispatchSize());
 	}
@@ -24,7 +24,7 @@ final class DynamoDbDataWriterTest {
 	void testDispatch() {
 		DatabaseDriver my = Mockito.mock(DatabaseDriver.class, Mockito.CALLS_REAL_METHODS);
 		DynamoDbIndexesTest.SimpleTable entry1 = new DynamoDbIndexesTest.SimpleTable("garry", "john");
-		var dataWriter = new DataWriter(my::bulkPut);
+		var dataWriter = new DataWriter(my::bulkPut, __ -> {});
 		dataWriter.put("test", entry1, true);
 		dataWriter.dispatch();
 		verify(my, times(1)).bulkPut(Mockito.anyList());

@@ -12,8 +12,6 @@
 
 package com.fleetpin.graphql.database.manager.test.hashed;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
@@ -71,7 +69,7 @@ final class DynamoDbPutGetDeleteTest {
 
 		db.delete(entry1, false).get();
 
-		//will not actually delete as is in global space
+		// will not actually delete as is in global space
 		entry1 = db.get(SimpleTable.class, id).get();
 		Assertions.assertEquals("garry", entry1.getName());
 		Assertions.assertEquals(id, entry1.getId());
@@ -148,7 +146,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertEquals("garry", entry1.getName());
 		Assertions.assertEquals(id, entry1.getId());
 
-		//is global so should do nothing
+		// is global so should do nothing
 		db.delete(entry1, false).get();
 		entry1 = db.get(SimpleTable.class, id).get();
 
@@ -199,9 +197,6 @@ final class DynamoDbPutGetDeleteTest {
 		final var db = dynamoDbManager.getDatabase("test");
 		final var db2 = dynamoDbManager.getDatabase("test");
 
-		db.start(new CompletableFuture<>());
-		db2.start(new CompletableFuture<>());
-
 		final var joPutEntry = db.put(new SimpleTable("jo")).get();
 		Assertions.assertEquals("jo", joPutEntry.getName());
 		Assertions.assertNotNull(joPutEntry.getId());
@@ -222,9 +217,6 @@ final class DynamoDbPutGetDeleteTest {
 	void testTwoManagedDatabasesPutGetDelete(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db = dynamoDbManager.getDatabase("test");
 		final var db2 = dynamoDbManager.getDatabase("test2");
-
-		db.start(new CompletableFuture<>());
-		db2.start(new CompletableFuture<>());
 
 		final var janePutEntry = db.put(new SimpleTable("jane")).get();
 		Assertions.assertEquals("jane", janePutEntry.getName());
@@ -264,7 +256,7 @@ final class DynamoDbPutGetDeleteTest {
 
 	@TestDatabase(hashed = true)
 	void testLotsOfDataPerPartition(final Database db) throws InterruptedException, ExecutionException {
-		//putting 400 entries split across 4 partitions
+		// putting 400 entries split across 4 partitions
 
 		var futures = new ArrayList<CompletableFuture<?>>();
 

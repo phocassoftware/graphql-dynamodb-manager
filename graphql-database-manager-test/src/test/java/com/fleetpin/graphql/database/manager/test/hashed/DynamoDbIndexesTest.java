@@ -29,7 +29,6 @@ import com.fleetpin.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
@@ -101,8 +100,6 @@ final class DynamoDbIndexesTest {
 	void testMultiOrganisationSecondaryIndexWithDynamoDbManager(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		final var db1 = dynamoDbManager.getDatabase("organisation-1");
-		db0.start(new CompletableFuture<>());
-		db1.start(new CompletableFuture<>());
 
 		final var putAvocado = db0.put(new SimpleTable("avocado", "fruit")).get();
 

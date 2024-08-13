@@ -19,7 +19,6 @@ import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
 import com.fleetpin.graphql.database.manager.test.annotations.GlobalEnabled;
 import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
@@ -65,7 +64,7 @@ final class DynamoDbPutGetDeleteTest {
 
 		db.delete(entry1, false).get();
 
-		//will not actually delete as is in global space
+		// will not actually delete as is in global space
 		entry1 = db.get(SimpleTable.class, id).get();
 		Assertions.assertEquals("garry", entry1.getName());
 		Assertions.assertEquals(id, entry1.getId());
@@ -142,7 +141,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertEquals("garry", entry1.getName());
 		Assertions.assertEquals(id, entry1.getId());
 
-		//is global so should do nothing
+		// is global so should do nothing
 		db.delete(entry1, false).get();
 		entry1 = db.get(SimpleTable.class, id).get();
 
@@ -193,9 +192,6 @@ final class DynamoDbPutGetDeleteTest {
 		final var db = dynamoDbManager.getDatabase("test");
 		final var db2 = dynamoDbManager.getDatabase("test");
 
-		db.start(new CompletableFuture<>());
-		db2.start(new CompletableFuture<>());
-
 		final var joPutEntry = db.put(new SimpleTable("jo")).get();
 		Assertions.assertEquals("jo", joPutEntry.getName());
 		Assertions.assertNotNull(joPutEntry.getId());
@@ -216,9 +212,6 @@ final class DynamoDbPutGetDeleteTest {
 	void testTwoManagedDatabasesPutGetDelete(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db = dynamoDbManager.getDatabase("test");
 		final var db2 = dynamoDbManager.getDatabase("test2");
-
-		db.start(new CompletableFuture<>());
-		db2.start(new CompletableFuture<>());
 
 		final var janePutEntry = db.put(new SimpleTable("jane")).get();
 		Assertions.assertEquals("jane", janePutEntry.getName());

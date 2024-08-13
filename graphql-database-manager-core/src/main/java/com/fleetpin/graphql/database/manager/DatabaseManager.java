@@ -18,4 +18,12 @@ public abstract class DatabaseManager {
 	public Database getDatabase(String organisationId, ModificationPermission putAllow) {
 		return new Database(organisationId, dynamoDb, putAllow);
 	}
+
+	public VirtualDatabase getVirtualDatabase(String organisationId) {
+		return new VirtualDatabase(getDatabase(organisationId));
+	}
+
+	public VirtualDatabase getVirtualDatabase(String organisationId, ModificationPermission putAllow) {
+		return new VirtualDatabase(getDatabase(organisationId, putAllow));
+	}
 }
