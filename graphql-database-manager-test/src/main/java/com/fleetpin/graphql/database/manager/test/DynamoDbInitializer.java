@@ -152,7 +152,7 @@ final class DynamoDbInitializer {
 			.get();
 	}
 
-	static DynamoDBProxyServer startDynamoServer(final String port) throws Exception {
+	static synchronized DynamoDBProxyServer startDynamoServer(final String port) throws Exception {
 		final String[] localArgs = { "-inMemory", "-disableTelemetry", "-port", port };
 		final var server = ServerRunner.createServerFromCommandLineArgs(localArgs);
 		server.start();
