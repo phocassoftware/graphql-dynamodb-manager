@@ -321,13 +321,17 @@ public class Database {
 	}
 
 	private void start() {
-		if (items.dispatchDepth() > 0 || queries.dispatchDepth() > 0 || queryHistories.dispatchDepth() > 0 || put.dispatchSize() > 0) {
-			CompletableFuture<?>[] all = new CompletableFuture[] { items.dispatch(), queries.dispatch(), queryHistories.dispatch(), put.dispatch() };
-			try {
-				CompletableFuture.allOf(all).join();
-			} catch (Exception e) {
-				// swallow futures throw the same error
-			}
+		if (items.dispatchDepth() > 0) {
+			items.dispatch();
+		}
+		if (queries.dispatchDepth() > 0) {
+			queries.dispatch();
+		}
+		if (queryHistories.dispatchDepth() > 0) {
+			queryHistories.dispatch();
+		}
+		if (put.dispatchSize() > 0) {
+			put.dispatch();
 		}
 	}
 
@@ -438,13 +442,12 @@ public class Database {
 
 	private void run() {
 		VIRTUAL_THREAD_POOL.submit(() -> {
-			while (true) {
-				var start = submitted.get();
-				start();
-				if (submitted.compareAndSet(start, 0)) {
-					break;
-				}
+			var start = submitted.get();
+			start();
+			if (submitted.compareAndSet(start, 0)) {
+				return;
 			}
+			run();
 		});
 	}
 }
