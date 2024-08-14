@@ -2,31 +2,29 @@ package com.fleetpin.graphql.database.manager;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.dataloader.DataLoader;
 
 public class TableDataLoader<K> {
 
 	private final DataLoader<K, ?> loader;
-	private final Consumer<CompletableFuture<?>> handleFuture;
+	private final Function<CompletableFuture<?>, CompletableFuture<?>> handleFuture;
 
-	TableDataLoader(DataLoader<K, ?> loader, Consumer<CompletableFuture<?>> handleFuture) {
+	TableDataLoader(DataLoader<K, ?> loader, Function<CompletableFuture<?>, CompletableFuture<?>> handleFuture) {
 		this.loader = loader;
 		this.handleFuture = handleFuture;
 	}
 
 	public <T> CompletableFuture<T> load(K key) {
-		var future = (CompletableFuture<T>) loader.load(key);
-		this.handleFuture.accept(future);
-		return future;
+		var future = loader.load(key);
+		return (CompletableFuture<T>) this.handleFuture.apply(future);
 	}
 
 	public <T> CompletableFuture<List<T>> loadMany(List<K> keys) {
 		// annoying waste of memory/cpu to get around cast :(
 		var future = loader.loadMany(keys).thenApply(r -> r.stream().map(t -> (T) t).collect(Collectors.toList()));
-		this.handleFuture.accept(future);
-		return future;
+		return (CompletableFuture<List<T>>) this.handleFuture.apply(future);
 	}
 
 	public void clear(K key) {

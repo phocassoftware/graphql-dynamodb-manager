@@ -416,9 +416,9 @@ public class Database {
 		return Collections.unmodifiableSet(links);
 	}
 
-	private void handleFuture(CompletableFuture<?> future) {
+	private CompletableFuture<?> handleFuture(CompletableFuture<?> future) {
 		if (future.isDone()) {
-			return;
+			return future;
 		}
 		while (true) {
 			var current = submitted.get();
@@ -430,7 +430,7 @@ public class Database {
 				}
 			} else {
 				if (submitted.compareAndSet(current, current + 1)) {
-					return;
+					return future.thenApplyAsync(t -> t, VIRTUAL_THREAD_POOL);
 				}
 			}
 		}
