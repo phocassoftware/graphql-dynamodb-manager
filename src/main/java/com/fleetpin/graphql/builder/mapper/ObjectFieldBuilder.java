@@ -14,7 +14,6 @@ package com.fleetpin.graphql.builder.mapper;
 import com.fleetpin.graphql.builder.EntityProcessor;
 import com.fleetpin.graphql.builder.TypeMeta;
 import graphql.GraphQLContext;
-import graphql.com.google.common.base.Throwables;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -44,7 +43,6 @@ public class ObjectFieldBuilder implements InputTypeBuilder {
 
 						return toReturn;
 					} catch (Throwable e) {
-						Throwables.throwIfUnchecked(e);
 						throw new RuntimeException(e);
 					}
 				};
