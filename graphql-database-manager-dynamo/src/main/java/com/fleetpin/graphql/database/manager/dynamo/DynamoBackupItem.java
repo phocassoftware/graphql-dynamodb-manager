@@ -36,8 +36,6 @@ public class DynamoBackupItem implements Comparable<DynamoBackupItem>, BackupIte
 	public DynamoBackupItem() {}
 
 	public DynamoBackupItem(String table, Map<String, AttributeValue> item, ObjectMapper objectMapper) {
-		objectMapper.setSerializationInclusion(Include.NON_NULL);
-
 		this.table = table;
 		this.item = (Map<String, Object>) TableUtil.convertTo(objectMapper, item, Map.class);
 
