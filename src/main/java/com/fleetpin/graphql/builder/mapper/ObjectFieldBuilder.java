@@ -14,6 +14,8 @@ package com.fleetpin.graphql.builder.mapper;
 import com.fleetpin.graphql.builder.EntityProcessor;
 import com.fleetpin.graphql.builder.TypeMeta;
 import graphql.GraphQLContext;
+import graphql.com.google.common.base.Preconditions;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -43,6 +45,7 @@ public class ObjectFieldBuilder implements InputTypeBuilder {
 
 						return toReturn;
 					} catch (Throwable e) {
+						throwIfUnchecked(e);
 						throw new RuntimeException(e);
 					}
 				};
@@ -82,6 +85,16 @@ public class ObjectFieldBuilder implements InputTypeBuilder {
 
 		public static FieldMapper build(EntityProcessor entityProcessor, TypeMeta inputType, String name, Method method) {
 			return new FieldMapper(name, method, entityProcessor.getResolver(inputType));
+		}
+	}
+
+	// copied from guava
+	public static void throwIfUnchecked(Throwable throwable) {
+		Preconditions.checkNotNull(throwable);
+		if (throwable instanceof RuntimeException) {
+			throw (RuntimeException)throwable;
+		} else if (throwable instanceof Error) {
+			throw (Error)throwable;
 		}
 	}
 }
