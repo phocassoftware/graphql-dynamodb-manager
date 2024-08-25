@@ -15,7 +15,6 @@ import com.fleetpin.graphql.builder.EntityProcessor;
 import com.fleetpin.graphql.builder.TypeMeta;
 import graphql.GraphQLContext;
 import graphql.com.google.common.base.Preconditions;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -92,9 +91,9 @@ public class ObjectFieldBuilder implements InputTypeBuilder {
 	public static void throwIfUnchecked(Throwable throwable) {
 		Preconditions.checkNotNull(throwable);
 		if (throwable instanceof RuntimeException) {
-			throw (RuntimeException)throwable;
+			throw (RuntimeException) throwable;
 		} else if (throwable instanceof Error) {
-			throw (Error)throwable;
+			throw (Error) throwable;
 		}
 	}
 }

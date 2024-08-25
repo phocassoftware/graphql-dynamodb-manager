@@ -103,6 +103,9 @@ public class TypeMeta {
 							}
 						}
 						return true;
+					} else if (arg instanceof ParameterizedType pType) {
+						process((Class) pType.getRawType(), pType, element);
+						return true;
 					} else {
 						var klass = (Class) arg;
 						process(klass, klass, element);
@@ -119,7 +122,7 @@ public class TypeMeta {
 		var startClass = (Class) start;
 		var genericDeclaration = type.getGenericDeclaration();
 		if (start.equals(genericDeclaration)) {
-			//we don't have any implementing logic we are at this level so take the bounds
+			// we don't have any implementing logic we are at this level so take the bounds
 			for (var bound : type.getBounds()) {
 				if (bound instanceof ParameterizedType) {
 					process((Class<?>) ((ParameterizedType) bound).getRawType(), bound, element);
@@ -284,7 +287,7 @@ public class TypeMeta {
 				for (int i = 0; i < pt.length; i++) {
 					var p = pt[i];
 					if (p.equals(variable)) {
-						var generic = (ParameterizedType) genericType; //safe as has to if equal vaiable
+						var generic = (ParameterizedType) genericType; // safe as has to if equal vaiable
 						var implementingType = generic.getActualTypeArguments()[i];
 						if (implementingType instanceof Class) {
 							return (Class) implementingType;
@@ -301,7 +304,7 @@ public class TypeMeta {
 			for (int i = 0; i < pt.length; i++) {
 				var p = pt[i];
 				if (p.equals(variable)) {
-					var superClass = (ParameterizedType) parentType.getGenericSuperclass(); //safe as has to if equal vaiable
+					var superClass = (ParameterizedType) parentType.getGenericSuperclass(); // safe as has to if equal vaiable
 					var implementingType = superClass.getActualTypeArguments()[i];
 
 					if (implementingType instanceof Class) {

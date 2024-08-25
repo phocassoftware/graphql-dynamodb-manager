@@ -24,7 +24,7 @@ public class ObjectEntity extends EntityHolder {
 	private TypeBuilder typeBuilder;
 
 	public ObjectEntity(EntityProcessor entityProcessor, TypeMeta meta) {
-		if (EntityUtil.isRecord(meta.getType())) {
+		if (meta.getType().isRecord()) {
 			typeBuilder = new TypeBuilder.Record(entityProcessor, meta);
 		} else {
 			typeBuilder = new TypeBuilder.ObjectType(entityProcessor, meta);
@@ -32,7 +32,7 @@ public class ObjectEntity extends EntityHolder {
 
 		if (meta.getType().isAnnotationPresent(OneOf.class)) {
 			inputBuilder = new InputBuilder.OneOfInputBuilder(entityProcessor, meta);
-		} else if (EntityUtil.isRecord(meta.getType())) {
+		} else if (meta.getType().isRecord()) {
 			inputBuilder = new InputBuilder.Record(entityProcessor, meta);
 		} else {
 			var constructors = meta.getType().getDeclaredConstructors();

@@ -9,33 +9,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.record;
+package com.fleetpin.graphql.builder.inputgenericsRecords;
 
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
 import com.fleetpin.graphql.builder.annotations.Query;
+import jakarta.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nullable;
 
-public class Queries {
-
+public record Change(@Nullable Wrapper<List<String>> name) {
 	@Query
-	public static InputType passthrough(InputType type) {
-		return type;
+	public static String doChange(Change input) {
+		if (input.name == null) {
+			return "empty";
+		}
+		return input.name.wrap().getFirst();
 	}
-
-	@Query
-	@Nullable
-	public static Boolean nullableTest(@Nullable Boolean type) {
-		return type;
-	}
-
-	@Query
-	@Nullable
-	public static List<Boolean> nullableArrayTest(@Nullable List<Boolean> type) {
-		return type;
-	}
-
-	@GraphQLDescription("record Type")
-	static final record InputType(@GraphQLDescription("the name") String name, int age, Optional<Integer> weight) {}
 }

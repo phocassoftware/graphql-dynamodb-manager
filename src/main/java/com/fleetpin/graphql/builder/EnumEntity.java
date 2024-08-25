@@ -43,6 +43,7 @@ public class EnumEntity extends EntityHolder {
 			if (field.isAnnotationPresent(GraphQLIgnore.class)) {
 				continue;
 			}
+			var name = EntityUtil.getName(a.name(), field);
 			var valueDef = newEnumValueDefinition().name(a.name()).value(a);
 			var desc = field.getAnnotation(GraphQLDescription.class);
 			if (desc != null) {

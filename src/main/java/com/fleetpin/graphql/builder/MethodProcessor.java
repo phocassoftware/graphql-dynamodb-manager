@@ -2,12 +2,23 @@ package com.fleetpin.graphql.builder;
 
 import static com.fleetpin.graphql.builder.EntityUtil.isContext;
 
-import com.fleetpin.graphql.builder.annotations.*;
+import com.fleetpin.graphql.builder.annotations.Directive;
+import com.fleetpin.graphql.builder.annotations.GraphQLDeprecated;
+import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
+import com.fleetpin.graphql.builder.annotations.Mutation;
+import com.fleetpin.graphql.builder.annotations.Query;
+import com.fleetpin.graphql.builder.annotations.Subscription;
 import graphql.GraphQLContext;
-import graphql.Scalars;
-import graphql.language.StringValue;
-import graphql.schema.*;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.FieldCoordinates;
+import graphql.schema.GraphQLAppliedDirective;
+import graphql.schema.GraphQLAppliedDirectiveArgument;
+import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLCodeRegistry;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLFieldDefinition.Builder;
+import graphql.schema.GraphQLObjectType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -47,13 +58,13 @@ class MethodProcessor {
 		FieldCoordinates coordinates;
 		GraphQLObjectType.Builder object;
 		if (method.isAnnotationPresent(Query.class)) {
-			coordinates = FieldCoordinates.coordinates("Query", method.getName());
+			coordinates = FieldCoordinates.coordinates("Query", EntityUtil.getName(method.getName(), method));
 			object = graphQuery;
 		} else if (method.isAnnotationPresent(Mutation.class)) {
-			coordinates = FieldCoordinates.coordinates("Mutations", method.getName());
+			coordinates = FieldCoordinates.coordinates("Mutations", EntityUtil.getName(method.getName(), method));
 			object = graphMutations;
 		} else if (method.isAnnotationPresent(Subscription.class)) {
-			coordinates = FieldCoordinates.coordinates("Subscriptions", method.getName());
+			coordinates = FieldCoordinates.coordinates("Subscriptions", EntityUtil.getName(method.getName(), method));
 			object = graphSubscriptions;
 		} else {
 			return;
@@ -84,20 +95,20 @@ class MethodProcessor {
 		var type = entityProcessor.getType(meta, method.getAnnotations());
 		field.type(type);
 		for (int i = 0; i < method.getParameterCount(); i++) {
+			var parameter = method.getParameters()[i];
 			GraphQLArgument.Builder argument = GraphQLArgument.newArgument();
-			if (isContext(method.getParameterTypes()[i], method.getParameterAnnotations()[i])) {
+			if (isContext(parameter.getType(), parameter.getAnnotations())) {
 				continue;
 			}
 
-			TypeMeta inputMeta = new TypeMeta(null, method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameters()[i]);
-			argument.type(entityProcessor.getInputType(inputMeta, method.getParameterAnnotations()[i])); //TODO:dirty cast
+			TypeMeta inputMeta = new TypeMeta(null, parameter.getType(), method.getGenericParameterTypes()[i], parameter);
+			argument.type(entityProcessor.getInputType(inputMeta, method.getParameterAnnotations()[i])); // TODO:dirty cast
 
-			description = method.getParameters()[i].getAnnotation(GraphQLDescription.class);
+			description = parameter.getAnnotation(GraphQLDescription.class);
 			if (description != null) {
 				argument.description(description.value());
 			}
 
-			var parameter = method.getParameters()[i];
 			for (Annotation annotation : parameter.getAnnotations()) {
 				// Check to see if the annotation is a directive
 				if (!annotation.annotationType().isAnnotationPresent(Directive.class)) {
@@ -112,8 +123,8 @@ class MethodProcessor {
 				argument.withAppliedDirective(appliedDirective);
 			}
 
-			argument.name(method.getParameters()[i].getName());
-			//TODO: argument.defaultValue(defaultValue)
+			argument.name(EntityUtil.getName(parameter.getName(), parameter));
+			// TODO: argument.defaultValue(defaultValue)
 			field.argument(argument);
 		}
 
@@ -155,11 +166,12 @@ class MethodProcessor {
 		method.setAccessible(true);
 
 		for (int i = 0; i < resolvers.length; i++) {
-			Class<?> type = method.getParameterTypes()[i];
-			var name = method.getParameters()[i].getName();
+			var parameter = method.getParameters()[i];
+			Class<?> type = parameter.getType();
+			var name = EntityUtil.getName(parameter.getName(), parameter);
 			var generic = method.getGenericParameterTypes()[i];
-			var argMeta = new TypeMeta(meta, type, generic, method.getParameters()[i]);
-			resolvers[i] = buildResolver(name, argMeta, method.getParameterAnnotations()[i]);
+			var argMeta = new TypeMeta(meta, type, generic, parameter);
+			resolvers[i] = buildResolver(name, argMeta, parameter.getAnnotations());
 		}
 
 		DataFetcher<?> fetcher = env -> {
