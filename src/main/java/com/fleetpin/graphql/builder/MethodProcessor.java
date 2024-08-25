@@ -55,13 +55,13 @@ class MethodProcessor {
 		FieldCoordinates coordinates;
 		GraphQLObjectType.Builder object;
 		if (method.isAnnotationPresent(Query.class)) {
-			coordinates = FieldCoordinates.coordinates("Query", method.getName());
+			coordinates = FieldCoordinates.coordinates("Query", EntityUtil.getName(method.getName(), method));
 			object = graphQuery;
 		} else if (method.isAnnotationPresent(Mutation.class)) {
-			coordinates = FieldCoordinates.coordinates("Mutations", method.getName());
+			coordinates = FieldCoordinates.coordinates("Mutations", EntityUtil.getName(method.getName(), method));
 			object = graphMutations;
 		} else if (method.isAnnotationPresent(Subscription.class)) {
-			coordinates = FieldCoordinates.coordinates("Subscriptions", method.getName());
+			coordinates = FieldCoordinates.coordinates("Subscriptions", EntityUtil.getName(method.getName(), method));
 			object = graphSubscriptions;
 		} else {
 			return;
@@ -91,21 +91,22 @@ class MethodProcessor {
 		var type = entityProcessor.getType(meta, method.getAnnotations());
 		field.type(type);
 		for (int i = 0; i < method.getParameterCount(); i++) {
+			var parameter = method.getParameters()[0];
 			GraphQLArgument.Builder argument = GraphQLArgument.newArgument();
-			if (isContext(method.getParameterTypes()[i], method.getParameterAnnotations()[i])) {
+			if (isContext(parameter.getType(), parameter.getAnnotations())) {
 				continue;
 			}
 
-			TypeMeta inputMeta = new TypeMeta(null, method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameters()[i]);
-			argument.type(entityProcessor.getInputType(inputMeta, method.getParameterAnnotations()[i])); //TODO:dirty cast
+			TypeMeta inputMeta = new TypeMeta(null, parameter.getType(), method.getGenericParameterTypes()[i], parameter);
+			argument.type(entityProcessor.getInputType(inputMeta, method.getParameterAnnotations()[i])); // TODO:dirty cast
 
-			description = method.getParameters()[i].getAnnotation(GraphQLDescription.class);
+			description = parameter.getAnnotation(GraphQLDescription.class);
 			if (description != null) {
 				argument.description(description.value());
 			}
 
-			argument.name(method.getParameters()[i].getName());
-			//TODO: argument.defaultValue(defaultValue)
+			argument.name(EntityUtil.getName(parameter.getName(), parameter));
+			// TODO: argument.defaultValue(defaultValue)
 			field.argument(argument);
 		}
 
@@ -130,11 +131,12 @@ class MethodProcessor {
 		method.setAccessible(true);
 
 		for (int i = 0; i < resolvers.length; i++) {
-			Class<?> type = method.getParameterTypes()[i];
-			var name = method.getParameters()[i].getName();
+			var parameter = method.getParameters()[i];
+			Class<?> type = parameter.getType();
+			var name = EntityUtil.getName(parameter.getName(), parameter);
 			var generic = method.getGenericParameterTypes()[i];
-			var argMeta = new TypeMeta(meta, type, generic, method.getParameters()[i]);
-			resolvers[i] = buildResolver(name, argMeta, method.getParameterAnnotations()[i]);
+			var argMeta = new TypeMeta(meta, type, generic, parameter);
+			resolvers[i] = buildResolver(name, argMeta, parameter.getAnnotations());
 		}
 
 		DataFetcher<?> fetcher = env -> {

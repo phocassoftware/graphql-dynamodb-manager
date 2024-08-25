@@ -36,31 +36,6 @@ public class Queries {
 		return type;
 	}
 
-	// once move to java 17 change this to be a real record
 	@GraphQLDescription("record Type")
-	static final class InputType {
-
-		private final String name;
-		private final int age;
-		private final Optional<Integer> weight;
-
-		private InputType(@GraphQLDescription("the name") String name, int age, Optional<Integer> weight) {
-			super();
-			this.name = name;
-			this.age = age;
-			this.weight = weight;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public int getAge() {
-			return age;
-		}
-
-		public Optional<Integer> getWeight() {
-			return weight;
-		}
-	}
+	static final record InputType(@GraphQLDescription("the name") String name, int age, Optional<Integer> weight) {}
 }

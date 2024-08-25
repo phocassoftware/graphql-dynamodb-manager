@@ -231,9 +231,9 @@ public abstract class InputBuilder {
 					if (Modifier.isStatic(field.getModifiers())) {
 						continue;
 					} else {
-						//getter type
+						// getter type
 						if (!field.isAnnotationPresent(InputIgnore.class)) {
-							String name = field.getName();
+							String name = EntityUtil.getName(field.getName(), field);
 							GraphQLInputObjectField.Builder fieldBuilder = GraphQLInputObjectField.newInputObjectField();
 							fieldBuilder.name(name);
 							entityProcessor.addSchemaDirective(field, meta.getType(), fieldBuilder::withAppliedDirective);
@@ -271,11 +271,12 @@ public abstract class InputBuilder {
 					if (Modifier.isStatic(field.getModifiers())) {
 						continue;
 					} else {
-						//getter type
+						// getter type
 						if (!field.isAnnotationPresent(InputIgnore.class)) {
 							TypeMeta innerMeta = new TypeMeta(meta, field.getType(), field.getGenericType(), field);
 							var resolver = entityProcessor.getResolver(innerMeta);
-							fieldMappers.add(new RecordMapper(field.getName(), field.getType(), resolver));
+							var name = EntityUtil.getName(field.getName(), field);
+							fieldMappers.add(new RecordMapper(name, field.getType(), resolver));
 						}
 					}
 				}

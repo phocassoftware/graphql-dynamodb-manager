@@ -13,11 +13,12 @@ package com.fleetpin.graphql.builder;
 
 import com.fleetpin.graphql.builder.annotations.Context;
 import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
+import com.fleetpin.graphql.builder.annotations.GraphQLName;
 import com.fleetpin.graphql.builder.annotations.InputIgnore;
-import com.fleetpin.graphql.builder.mapper.ObjectFieldBuilder.FieldMapper;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetchingEnvironment;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -25,30 +26,6 @@ import java.lang.reflect.TypeVariable;
 import java.util.Optional;
 
 class EntityUtil {
-
-	private static final Method IS_RECORD_METHOD;
-
-	static {
-		Class<? extends Class> classClass = Class.class;
-		Method isRecord;
-		try {
-			isRecord = classClass.getMethod("isRecord");
-		} catch (NoSuchMethodException e) {
-			isRecord = null;
-		}
-		IS_RECORD_METHOD = isRecord;
-	}
-
-	static boolean isRecord(Class<?> type) {
-		if (IS_RECORD_METHOD == null) {
-			return false;
-		}
-		try {
-			return (Boolean) IS_RECORD_METHOD.invoke(type);
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	static String getName(TypeMeta meta) {
 		var type = meta.getType();
@@ -94,22 +71,20 @@ class EntityUtil {
 		if (method.isAnnotationPresent(GraphQLIgnore.class)) {
 			return Optional.empty();
 		}
-		//will also be on implementing class
+		// will also be on implementing class
 		if (Modifier.isAbstract(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
 			return Optional.empty();
 		}
 		if (Modifier.isStatic(method.getModifiers())) {
 			return Optional.empty();
-		} else {
-			if (method.getName().matches("(get|is)[A-Z].*")) {
-				String name;
-				if (method.getName().startsWith("get")) {
-					name = method.getName().substring("get".length(), "get".length() + 1).toLowerCase() + method.getName().substring("get".length() + 1);
-				} else {
-					name = method.getName().substring("is".length(), "is".length() + 1).toLowerCase() + method.getName().substring("is".length() + 1);
-				}
-				return Optional.of(name);
+		} else if (method.getName().matches("(get|is)[A-Z].*")) {
+			String name;
+			if (method.getName().startsWith("get")) {
+				name = method.getName().substring("get".length(), "get".length() + 1).toLowerCase() + method.getName().substring("get".length() + 1);
+			} else {
+				name = method.getName().substring("is".length(), "is".length() + 1).toLowerCase() + method.getName().substring("is".length() + 1);
 			}
+			return Optional.of(getName(name, method));
 		}
 		return Optional.empty();
 	}
@@ -124,22 +99,28 @@ class EntityUtil {
 		if (method.isAnnotationPresent(GraphQLIgnore.class)) {
 			return Optional.empty();
 		}
-		//will also be on implementing class
+		// will also be on implementing class
 		if (Modifier.isAbstract(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
 			return Optional.empty();
 		}
 		if (Modifier.isStatic(method.getModifiers())) {
 			return Optional.empty();
-		} else {
-			//getter type
-			if (method.getName().matches("set[A-Z].*")) {
-				if (method.getParameterCount() == 1 && !method.isAnnotationPresent(InputIgnore.class)) {
-					String name = method.getName().substring("set".length(), "set".length() + 1).toLowerCase() + method.getName().substring("set".length() + 1);
-					return Optional.of(name);
-				}
+		} else if (method.getName().matches("set[A-Z].*")) {
+			if (method.getParameterCount() == 1 && !method.isAnnotationPresent(InputIgnore.class)) {
+				String name = method.getName().substring("set".length(), "set".length() + 1).toLowerCase() + method.getName().substring("set".length() + 1);
+				return Optional.of(getName(name, method));
 			}
 		}
 		return Optional.empty();
+	}
+
+	static String getName(String fallback, AnnotatedElement... annotated) {
+		for (var anno : annotated) {
+			if (anno.isAnnotationPresent(GraphQLName.class)) {
+				return anno.getAnnotation(GraphQLName.class).value();
+			}
+		}
+		return fallback;
 	}
 
 	static boolean isContext(Class<?> class1, Annotation[] annotations) {

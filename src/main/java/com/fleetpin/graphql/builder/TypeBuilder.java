@@ -82,7 +82,7 @@ public abstract class TypeBuilder {
 			}
 			parent = parent.getSuperclass();
 		}
-		//generics
+		// generics
 		TypeMeta innerMeta = new TypeMeta(meta, type, type);
 		if (!EntityUtil.getName(innerMeta).equals(typeName)) {
 			var interfaceName = entityProcessor.getEntity(innerMeta).getInnerType(innerMeta);
@@ -205,7 +205,7 @@ public abstract class TypeBuilder {
 					if (field.isAnnotationPresent(GraphQLIgnore.class)) {
 						continue;
 					}
-					//will also be on implementing class
+					// will also be on implementing class
 					if (Modifier.isAbstract(field.getModifiers()) || field.getDeclaringClass().isInterface()) {
 						continue;
 					}
@@ -216,8 +216,8 @@ public abstract class TypeBuilder {
 						if (method.isAnnotationPresent(GraphQLIgnore.class)) {
 							continue;
 						}
-						//getter type
-						String name = field.getName();
+
+						var name = EntityUtil.getName(field.getName(), field, method);
 
 						var f = entityProcessor.getMethodProcessor().process(null, FieldCoordinates.coordinates(typeName, name), meta, method);
 						graphType.field(f);
