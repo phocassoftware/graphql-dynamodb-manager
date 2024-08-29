@@ -19,13 +19,12 @@ import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 final class DynamoDbLinkTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testSimpleQuery(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		var garry = db.put(new SimpleTable("garry")).get();

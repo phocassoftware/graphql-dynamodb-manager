@@ -9,16 +9,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.fleetpin.graphql.database.manager;
 
-package com.fleetpin.graphql.database.manager.test;
+import java.util.List;
 
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.Table;
-import java.util.Comparator;
-import java.util.concurrent.ExecutionException;
-import org.junit.jupiter.api.Assertions;
+public record TableScanQuery(TableScanMonitor monitor, Integer parallelism, List<ScanUpdater<?>> updaters) {
+	interface TableScanMonitor {
+		public void onScanSegmentStart(int segment, int itemCount, Object from);
 
-class DynamoDbPermission {
-	//TODO: to check the allowed to write logic.
-
+		public void onScanSegmentComplete(int segment);
+	}
 }

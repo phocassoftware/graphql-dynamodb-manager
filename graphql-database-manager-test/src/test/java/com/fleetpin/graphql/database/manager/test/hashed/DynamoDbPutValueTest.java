@@ -2,13 +2,12 @@ package com.fleetpin.graphql.database.manager.test.hashed;
 
 import com.fleetpin.graphql.database.manager.PutValue;
 import com.fleetpin.graphql.database.manager.RevisionMismatchException;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Assertions;
 
 public class DynamoDbPutValueTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testSuccess() {
 		DynamoDbIndexesTest.SimpleTable entry1 = new DynamoDbIndexesTest.SimpleTable("garry", "john");
 
@@ -24,7 +23,7 @@ public class DynamoDbPutValueTest {
 		Assertions.assertEquals(1, putValue.getEntity().getRevision());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testFailure() {
 		DynamoDbIndexesTest.SimpleTable entry1 = new DynamoDbIndexesTest.SimpleTable("garry", "john");
 

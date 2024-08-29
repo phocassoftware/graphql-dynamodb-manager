@@ -14,14 +14,7 @@ package com.fleetpin.graphql.database.manager.test;
 
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import java.io.IOException;
@@ -33,6 +26,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
 import software.amazon.awssdk.services.dynamodb.model.GlobalSecondaryIndex;
 import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
@@ -43,17 +37,6 @@ import software.amazon.awssdk.services.dynamodb.model.StreamViewType;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
 final class DynamoDbInitializer {
-
-	static ObjectMapper MAPPER = new ObjectMapper()
-		.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-		.registerModule(new ParameterNamesModule())
-		.registerModule(new Jdk8Module())
-		.registerModule(new JavaTimeModule())
-		.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-		.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-		.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-		.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-		.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
 	@SuppressWarnings("unchecked")
 	static void createTable(final DynamoDbAsyncClient client, final String name) throws ExecutionException, InterruptedException {
@@ -160,8 +143,17 @@ final class DynamoDbInitializer {
 		return server;
 	}
 
-	static DynamoDbAsyncClient startDynamoClient(final String port) throws URISyntaxException {
+	static DynamoDbAsyncClient startDynamoAsyncClient(final String port) throws URISyntaxException {
 		return DynamoDbAsyncClient
+			.builder()
+			.region(Region.AWS_GLOBAL)
+			.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("anything", "anything")))
+			.endpointOverride(new URI("http://localhost:" + port))
+			.build();
+	}
+
+	static DynamoDbClient startDynamoClient(final String port) throws URISyntaxException {
+		return DynamoDbClient
 			.builder()
 			.region(Region.AWS_GLOBAL)
 			.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("anything", "anything")))
@@ -199,7 +191,8 @@ final class DynamoDbInitializer {
 		boolean globalEnabled,
 		boolean hashed,
 		String classpath,
-		String parallelIndex
+		String parallelIndex,
+		ObjectMapper objectMapper
 	) {
 		return DynamoDbManager
 			.builder()
@@ -210,7 +203,7 @@ final class DynamoDbInitializer {
 			.hash(hashed)
 			.classPath(classpath)
 			.parallelIndex(parallelIndex)
-			.objectMapper(MAPPER)
+			.objectMapper(objectMapper)
 			.build();
 	}
 }

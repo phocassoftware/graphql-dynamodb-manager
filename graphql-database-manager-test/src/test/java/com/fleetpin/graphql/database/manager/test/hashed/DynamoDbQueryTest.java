@@ -17,12 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.ExecutionException;
 
 final class DynamoDbQueryTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testSimpleQuery(final Database db) throws InterruptedException, ExecutionException {
 		db.put(new SimpleTable("garry")).get();
 		db.put(new SimpleTable("bob")).get();

@@ -2,6 +2,7 @@ package com.fleetpin.graphql.database.manager;
 
 import com.fleetpin.graphql.database.manager.access.ModificationPermission;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public abstract class DatabaseManager {
 
@@ -25,5 +26,9 @@ public abstract class DatabaseManager {
 
 	public VirtualDatabase getVirtualDatabase(String organisationId, ModificationPermission putAllow) {
 		return new VirtualDatabase(getDatabase(organisationId, putAllow));
+	}
+
+	public TableScanner startTableScan(Function<TableScanQueryBuilder, TableScanQueryBuilder> builder) {
+		return new TableScanner(builder.apply(new TableScanQueryBuilder()).build(), dynamoDb, this);
 	}
 }

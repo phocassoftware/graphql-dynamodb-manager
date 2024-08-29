@@ -9,16 +9,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.fleetpin.graphql.database.manager;
 
-package com.fleetpin.graphql.database.manager.test;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.Table;
-import java.util.Comparator;
-import java.util.concurrent.ExecutionException;
-import org.junit.jupiter.api.Assertions;
-
-class DynamoDbPermission {
-	//TODO: to check the allowed to write logic.
-
+public record ScanResult(ArrayList<Item<?>> items, Object next) {
+	public record Item<T extends Table>(String organisationId, T entity, Consumer<T> replace, Consumer<T> delete) {}
 }

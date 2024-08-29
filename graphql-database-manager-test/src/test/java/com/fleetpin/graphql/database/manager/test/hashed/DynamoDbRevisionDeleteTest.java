@@ -17,7 +17,6 @@ import com.fleetpin.graphql.database.manager.RevisionMismatchException;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
@@ -29,7 +28,7 @@ import org.junit.jupiter.api.Assertions;
  */
 public class DynamoDbRevisionDeleteTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testDelete(final Database db) throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -56,7 +55,7 @@ public class DynamoDbRevisionDeleteTest {
 		Assertions.assertNull(db.get(SimpleTable.class, "12345").get());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testMultipleEnv(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
@@ -81,7 +80,7 @@ public class DynamoDbRevisionDeleteTest {
 		Assertions.assertEquals(2, dbProd.get(SimpleTable.class, "12345").get().getRevision());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testMultipleEnvCheckLinks(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");

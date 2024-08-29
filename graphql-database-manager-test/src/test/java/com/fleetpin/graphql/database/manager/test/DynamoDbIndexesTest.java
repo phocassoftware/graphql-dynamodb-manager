@@ -21,7 +21,6 @@ import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.List;

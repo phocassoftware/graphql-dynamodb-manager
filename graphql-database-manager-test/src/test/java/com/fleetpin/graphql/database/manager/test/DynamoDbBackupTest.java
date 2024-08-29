@@ -22,7 +22,6 @@ import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoBackupItem;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoHistoryBackupItem;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import java.sql.Timestamp;
@@ -63,7 +62,7 @@ final class DynamoDbBackupTest {
 		checkResponseNameField(orgQuery2, 0, List.of(putTomato.getName()));
 	}
 
-	@TestDatabase(classPath = "com.fleetpin.graphql.database.manager.test")
+	@TestDatabase
 	void testTakeHistoryBackup(final DynamoDbManager dynamoDbManager, final HistoryProcessor historyProcessor) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation");
 
@@ -133,7 +132,7 @@ final class DynamoDbBackupTest {
 		Assertions.assertEquals("fruit", simpleTableExists.getGlobalLookup());
 	}
 
-	@TestDatabase(classPath = "com.fleetpin.graphql.database.manager.test")
+	@TestDatabase
 	void testRestoreHistoryBackup(final DynamoDbManager dynamoDbManager, HistoryProcessor historyProcessor) throws ExecutionException, InterruptedException {
 		final String DRINK_ID = "1234";
 		final String SIMPLE_ID = "6789";

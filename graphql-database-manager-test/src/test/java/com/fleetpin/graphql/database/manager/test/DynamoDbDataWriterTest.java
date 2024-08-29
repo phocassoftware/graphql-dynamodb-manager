@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 
 import com.fleetpin.graphql.database.manager.DataWriter;
 import com.fleetpin.graphql.database.manager.DatabaseDriver;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 

@@ -9,29 +9,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.fleetpin.graphql.database.manager.test.hashed;
 
-package com.fleetpin.graphql.database.manager.test.annotations;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.test.TestDatabaseProvider;
-import java.lang.annotation.ElementType;
+import com.fleetpin.graphql.database.manager.test.ObjectMapperCreator;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.function.Supplier;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Test
-@ExtendWith(TestDatabaseProvider.class)
+@com.fleetpin.graphql.database.manager.test.annotations.TestDatabase(
+	objectMapper = ObjectMapperCreator.class,
+	classPath = "com.fleetpin.graphql.database.manager.test.hashed",
+	hashed = true
+)
 public @interface TestDatabase {
-	String organisationId() default "organisation";
-
-	boolean hashed() default false;
-
-	String classPath() default "";
-
-	Class<? extends Supplier<ObjectMapper>> objectMapper();
 }

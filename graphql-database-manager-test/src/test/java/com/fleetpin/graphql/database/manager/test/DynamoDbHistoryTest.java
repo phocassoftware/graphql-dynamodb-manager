@@ -17,10 +17,6 @@ import com.fleetpin.graphql.database.manager.QueryHistoryBuilder;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.History;
 import com.fleetpin.graphql.database.manager.annotations.TableName;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
-import java.time.Instant;
-import java.util.Comparator;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 

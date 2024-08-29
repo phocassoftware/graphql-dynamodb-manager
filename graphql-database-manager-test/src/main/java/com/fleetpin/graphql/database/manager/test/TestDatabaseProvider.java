@@ -17,10 +17,12 @@ import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.cre
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.findFreePort;
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.getDatabaseManager;
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.getEmbeddedDatabase;
+import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoAsyncClient;
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoClient;
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoServer;
 import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoStreamClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.VirtualDatabase;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
@@ -43,6 +45,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
 public final class TestDatabaseProvider implements ParameterResolver, BeforeEachCallback, AfterEachCallback {
@@ -63,6 +66,12 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		if (parameterContext.getParameter().getType().isAssignableFrom(VirtualDatabase.class)) {
 			return true;
 		}
+		if (parameterContext.getParameter().getType().isAssignableFrom(DynamoDbAsyncClient.class)) {
+			return true;
+		}
+		if (parameterContext.getParameter().getType().isAssignableFrom(DynamoDbClient.class)) {
+			return true;
+		}
 		return false;
 	}
 
@@ -80,12 +89,13 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		final String organisationId,
 		final boolean withHistory,
 		final boolean hashed,
-		final String classPath
+		final String classPath,
+		final ObjectMapper objectMapper
 	) throws ExecutionException, InterruptedException {
 		final var databaseOrganisation = parameter.getAnnotation(DatabaseOrganisation.class);
 		final var correctOrganisationId = databaseOrganisation != null ? databaseOrganisation.value() : organisationId;
 
-		final var dynamoDbManager = createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath);
+		final var dynamoDbManager = createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath, objectMapper);
 
 		return getEmbeddedDatabase(dynamoDbManager, correctOrganisationId);
 	}
@@ -96,7 +106,8 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		final AnnotatedElement parameter,
 		final boolean withHistory,
 		final boolean hashed,
-		final String classPath
+		final String classPath,
+		final ObjectMapper objectMapper
 	) throws ExecutionException, InterruptedException {
 		final var databaseNames = parameter.getAnnotation(DatabaseNames.class);
 		var tables = databaseNames != null ? databaseNames.value() : new String[] { "table" };
@@ -117,7 +128,7 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			globalEnabled = globalEnabledAnnotation.value();
 		}
 
-		return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath, "parallelIndex");
+		return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath, "parallelIndex", objectMapper);
 	}
 
 	@Override
@@ -125,12 +136,13 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		var store = extensionContext.getStore(Namespace.create(extensionContext.getUniqueId()));
 		var test = store;
 		final var testMethod = extensionContext.getRequiredTestMethod();
-		final var testDatabase = testMethod.getAnnotation(TestDatabase.class);
+		var testDatabase = getTestDatabase(testMethod);
+
 		var wrapper = HOLDER.getServer();
 
 		test.put("table", wrapper);
 
-		final var client = wrapper.client;
+		final var client = wrapper.clientAsync;
 		final var streamClient = wrapper.streamClient;
 
 		System.setProperty("sqlite4java.library.path", "native-libs");
@@ -138,6 +150,7 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		var organisationId = testDatabase.organisationId();
 		var classPath = testDatabase.classPath();
 		var hashed = testDatabase.hashed();
+		var objectMapper = testDatabase.objectMapper().getConstructor().newInstance().get();
 
 		final var withHistory = Arrays
 			.stream(testMethod.getParameters())
@@ -151,11 +164,15 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			.map(parameter -> {
 				try {
 					if (parameter.getType().isAssignableFrom(DynamoDbManager.class)) {
-						return createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath);
+						return createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath, objectMapper);
 					} else if (parameter.getType().isAssignableFrom(HistoryProcessor.class)) {
-						return new HistoryProcessor(client, streamClient, parameter, organisationId);
+						return new HistoryProcessor(wrapper.client, streamClient, parameter, organisationId);
+					} else if (parameter.getType().isAssignableFrom(DynamoDbAsyncClient.class)) {
+						return wrapper.clientAsync;
+					} else if (parameter.getType().isAssignableFrom(DynamoDbClient.class)) {
+						return wrapper.client;
 					} else {
-						var database = createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath);
+						var database = createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath, objectMapper);
 						if (parameter.getType().isAssignableFrom(VirtualDatabase.class)) {
 							return new VirtualDatabase(database);
 						} else {
@@ -169,6 +186,20 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			})
 			.collect(Collectors.toList());
 		store.put("arguments", argumentsList);
+	}
+
+	private TestDatabase getTestDatabase(AnnotatedElement annotatedElement) {
+		var annotation = annotatedElement.getAnnotation(TestDatabase.class);
+		if (annotation != null) {
+			return annotation;
+		}
+		for (var a : annotatedElement.getAnnotations()) {
+			annotation = getTestDatabase(a.annotationType());
+			if (annotation != null) {
+				return annotation;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -193,13 +224,15 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 				final String port = findFreePort();
 
 				startDynamoServer(port);
+				final var clientAsync = startDynamoAsyncClient(port);
 				final var client = startDynamoClient(port);
+
 				final var streamClient = startDynamoStreamClient(port);
 
-				return new ServerWrapper(client, streamClient);
+				return new ServerWrapper(client, clientAsync, streamClient);
 			} else {
-				var tables = wrapper.client.listTables().get();
-				CompletableFutureUtil.sequence(tables.tableNames().stream().map(table -> wrapper.client.deleteTable(r -> r.tableName(table)))).get();
+				var tables = wrapper.client.listTables();
+				CompletableFutureUtil.sequence(tables.tableNames().stream().map(table -> wrapper.clientAsync.deleteTable(r -> r.tableName(table)))).get();
 				return wrapper;
 			}
 		}
@@ -209,14 +242,5 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		}
 	}
 
-	static class ServerWrapper {
-
-		private final DynamoDbAsyncClient client;
-		private final DynamoDbStreamsAsyncClient streamClient;
-
-		public ServerWrapper(DynamoDbAsyncClient client, DynamoDbStreamsAsyncClient streamClient) {
-			this.client = client;
-			this.streamClient = streamClient;
-		}
-	}
+	record ServerWrapper(DynamoDbClient client, DynamoDbAsyncClient clientAsync, DynamoDbStreamsAsyncClient streamClient) {}
 }

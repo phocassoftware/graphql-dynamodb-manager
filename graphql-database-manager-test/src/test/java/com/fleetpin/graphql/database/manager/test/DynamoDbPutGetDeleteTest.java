@@ -18,7 +18,6 @@ import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
 import com.fleetpin.graphql.database.manager.test.annotations.GlobalEnabled;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 

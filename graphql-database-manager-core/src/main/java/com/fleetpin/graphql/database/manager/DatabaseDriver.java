@@ -112,4 +112,6 @@ public abstract class DatabaseDriver {
 	protected <T extends Table> DatabaseKey<T> createDatabaseKey(final String organisationId, final Class<T> type, final String id) {
 		return new DatabaseKey<>(organisationId, type, id);
 	}
+
+	protected abstract ScanResult startTableScan(TableScanQuery tableScanQuery, int segment, Object from);
 }

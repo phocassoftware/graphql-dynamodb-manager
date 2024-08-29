@@ -17,13 +17,12 @@ import com.fleetpin.graphql.database.manager.RevisionMismatchException;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
 public class DynamoDbRevisionPutTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testCreateNewObject(final Database db) throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 		db.put(entry).get();
@@ -47,7 +46,7 @@ public class DynamoDbRevisionPutTest {
 		Assertions.assertEquals(1, entries.get(0).getRevision());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testRevisionMustStartAt0(final Database db) throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 		entry.setRevision(1);
@@ -56,7 +55,7 @@ public class DynamoDbRevisionPutTest {
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testIncrementsAfterExists(final Database db) throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -94,7 +93,7 @@ public class DynamoDbRevisionPutTest {
 		}
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testMultipleEnv(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
@@ -116,7 +115,7 @@ public class DynamoDbRevisionPutTest {
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testMultipleEnvConfirmRevisionIgnored(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
@@ -137,7 +136,7 @@ public class DynamoDbRevisionPutTest {
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	public void testMultipleEnvCreatedInDbBeforePut(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");

@@ -16,7 +16,6 @@ import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.RevisionMismatchException;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 

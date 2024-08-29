@@ -24,8 +24,11 @@ import com.fleetpin.graphql.database.manager.PutValue;
 import com.fleetpin.graphql.database.manager.Query;
 import com.fleetpin.graphql.database.manager.QueryBuilder;
 import com.fleetpin.graphql.database.manager.RevisionMismatchException;
+import com.fleetpin.graphql.database.manager.ScanResult;
+import com.fleetpin.graphql.database.manager.ScanResult.Item;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.TableDataLoader;
+import com.fleetpin.graphql.database.manager.TableScanQuery;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.annotations.Hash.HashExtractor;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator;
@@ -73,6 +76,7 @@ import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest.Builder;
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue;
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.WriteRequest;
 
@@ -104,6 +108,7 @@ public class DynamoDb extends DatabaseDriver {
 	}
 
 	private final Map<String, HashQueryBuilder> hashKeyExpander;
+	private final Map<String, Class<? extends Table>> classes;
 
 	public DynamoDb(ObjectMapper mapper, List<String> entityTables, List<String> historyTables, DynamoDbAsyncClient client, Supplier<String> idGenerator) {
 		this(mapper, entityTables, null, client, idGenerator, BATCH_WRITE_SIZE, MAX_RETRY, true, true, null, null);
@@ -150,8 +155,10 @@ public class DynamoDb extends DatabaseDriver {
 			var tableObjects = new Reflections(classPath).getSubTypesOf(Table.class);
 
 			this.hashKeyExpander = new HashMap<>();
+			this.classes = new HashMap<>();
 
 			for (var obj : tableObjects) {
+				classes.put(TableCoreUtil.table(obj), TableCoreUtil.baseClass(obj));
 				HashLocator hashLocator = null;
 				Class<?> tmp = obj;
 				while (hashLocator == null && tmp != null) {
@@ -172,6 +179,7 @@ public class DynamoDb extends DatabaseDriver {
 			}
 		} else {
 			hashKeyExpander = null;
+			classes = null;
 		}
 	}
 
@@ -244,7 +252,7 @@ public class DynamoDb extends DatabaseDriver {
 		var all = items
 			.stream()
 			.map(i ->
-				put(i.getOrganisationId(), i.getEntity(), i.getCheck())
+				put(i.getOrganisationId(), i.getEntity(), i.getCheck(), true)
 					.whenComplete((res, e) -> {
 						if (e == null) {
 							i.resolve();
@@ -372,21 +380,24 @@ public class DynamoDb extends DatabaseDriver {
 		}
 	}
 
-	public <T extends Table> Map<String, AttributeValue> buildPutEntity(String organisationId, T entity) {
-		if (entity.getId() == null) {
-			entity.setId(idGenerator.get());
-			setCreatedAt(entity, Instant.now());
+	public <T extends Table> Map<String, AttributeValue> buildPutEntity(String organisationId, T entity, boolean update) {
+		long revision = entity.getRevision();
+		if (update) {
+			if (entity.getId() == null) {
+				entity.setId(idGenerator.get());
+				setCreatedAt(entity, Instant.now());
+			}
+			if (entity.getCreatedAt() == null) {
+				setCreatedAt(entity, Instant.now()); // if missing for what ever reason
+			}
+			setUpdatedAt(entity, Instant.now());
+			revision++;
 		}
-		if (entity.getCreatedAt() == null) {
-			setCreatedAt(entity, Instant.now()); // if missing for what ever reason
-		}
-		final long revision = entity.getRevision();
-		setUpdatedAt(entity, Instant.now());
 		Map<String, AttributeValue> item = mapWithKeys(organisationId, entity, true);
 
 		var entries = TableUtil.toAttributes(mapper, entity);
 		entries.remove("revision"); // needs to be at the top level as a limit on dynamo to be able to perform an atomic addition
-		item.put("revision", AttributeValue.builder().n(Long.toString(revision + 1)).build());
+		item.put("revision", AttributeValue.builder().n(Long.toString(revision)).build());
 		if (HistoryCoreUtil.hasHistory(entity)) {
 			item.put("history", AttributeValue.builder().bool(true).build());
 		}
@@ -418,15 +429,15 @@ public class DynamoDb extends DatabaseDriver {
 	}
 
 	public WriteRequest buildWriteRequest(PutValue value) {
-		var item = buildPutEntity(value.getOrganisationId(), value.getEntity());
+		var item = buildPutEntity(value.getOrganisationId(), value.getEntity(), true);
 
 		return WriteRequest.builder().putRequest(builder -> builder.item(item)).build();
 	}
 
-	private <T extends Table> CompletableFuture<T> put(String organisationId, T entity, boolean check) {
+	private <T extends Table> CompletableFuture<T> put(String organisationId, T entity, boolean check, boolean updateEntity) {
 		final long revision = entity.getRevision();
 		String sourceTable = getSourceTable(entity);
-		var item = buildPutEntity(organisationId, entity);
+		var item = buildPutEntity(organisationId, entity, updateEntity);
 
 		return client
 			.putItem(request ->
@@ -1648,5 +1659,69 @@ public class DynamoDb extends DatabaseDriver {
 		var bits = hash.asInt() & 0xFF;
 		var toReturn = Integer.toBinaryString(bits);
 		return empty.substring(0, empty.length() - toReturn.length()) + toReturn;
+	}
+
+	@Override
+	protected ScanResult startTableScan(TableScanQuery tableScanQuery, int segment, Object from) {
+		return startTableScan(tableScanQuery, segment, from, entityTable);
+	}
+
+	private ScanResult startTableScan(TableScanQuery tableScanQuery, int segment, Object from, String table) {
+		var builder = ScanRequest.builder().tableName(table).totalSegments(tableScanQuery.parallelism()).segment(segment);
+
+		if (from != null) {
+			var startKey = TableUtil.toAttributes(mapper, from);
+			builder.exclusiveStartKey(startKey);
+		}
+
+		var scan = client.scan(b -> b.tableName(entityTables.getLast()).totalSegments(tableScanQuery.parallelism()).segment(segment)).join();
+
+		var items = new ArrayList<ScanResult.Item<?>>();
+		for (var item : scan.items()) {
+			if (!item.containsKey("id") || !item.containsKey("organisationId") || !item.containsKey("item")) {
+				continue;
+			}
+			var id = item.get("id").s();
+			var organisationId = item.get("organisationId").s();
+			var innerItem = item.get("item").m();
+			if (innerItem == null || !innerItem.containsKey("id")) {
+				continue;
+			}
+			var fullId = innerItem.get("id").s();
+
+			String typeId;
+			if (id.endsWith(fullId)) {
+				// not hashed
+				typeId = id.substring(0, id.indexOf(":"));
+			} else {
+				//hashed
+				var parts = organisationId.split(":");
+				typeId = parts[1];
+				organisationId = parts[0];
+			}
+			var type = this.classes.get(typeId);
+			if (type != null) {
+				var entity = new DynamoItem(table, item).convertTo(mapper, type);
+
+				var orgIdFinal = organisationId;
+				items.add(
+					new Item<Table>(
+						organisationId,
+						entity,
+						replacement -> put(orgIdFinal, replacement, true, false).join(),
+						delete -> {
+							delete(orgIdFinal, delete);
+						}
+					)
+				);
+			}
+		}
+
+		Object next = null;
+		if (!scan.lastEvaluatedKey().isEmpty()) {
+			next = TableUtil.convertTo(mapper, scan.lastEvaluatedKey(), Object.class);
+		}
+
+		return new ScanResult(items, next);
 	}
 }
