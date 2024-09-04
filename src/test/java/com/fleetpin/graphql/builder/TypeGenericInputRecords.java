@@ -23,10 +23,21 @@ public class TypeGenericInputRecords {
 	@Test
 	public void textQuery() throws ReflectiveOperationException {
 		Map<String, String> response = execute("""
-			query {doChange(input: {name: { wrap: ["felix"]}})}
-			""").getData();
+			query {doChange(input: {
+				name: { 
+					wrap: ["felix"]
+				},
+				age: {
+					wrap: [234]
+				},
+				description: {
+					wrap: "cat"
+				}
+			})}
+			""")
+			.getData();
 		var change = response.get("doChange");
-		assertEquals("felix", change);
+		assertEquals("felix[234]cat", change);
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Optional;
 
@@ -30,9 +31,18 @@ class EntityUtil {
 	static String getName(TypeMeta meta) {
 		var type = meta.getType();
 
-		String name = type.getSimpleName();
-
 		var genericType = meta.getGenericType();
+
+		var name = buildUpName(meta, type, genericType);
+		if (meta.isDirect()) {
+			name += "_DIRECT";
+		}
+
+		return name;
+	}
+
+	private static String buildUpName(TypeMeta meta, Class<?> type, Type genericType) {
+		String name = type.getSimpleName();
 
 		for (int i = 0; i < type.getTypeParameters().length; i++) {
 			if (genericType instanceof ParameterizedType) {
@@ -46,6 +56,14 @@ class EntityUtil {
 					if (extra != null) {
 						name += "_" + extra.getSimpleName();
 					}
+				} else if (t instanceof ParameterizedType pType) {
+					var rawType = pType.getRawType();
+					if (rawType instanceof Class rawClass) {
+						var extra = buildUpName(meta, rawClass, pType);
+						name += "_" + extra;
+					} else {
+						throw new RuntimeException("Generics are more complex that logic currently can handle");
+					}
 				}
 			} else {
 				Class extra = meta.resolveToType(type.getTypeParameters()[i]);
@@ -54,10 +72,6 @@ class EntityUtil {
 				}
 			}
 		}
-		if (meta.isDirect()) {
-			name += "_DIRECT";
-		}
-
 		return name;
 	}
 

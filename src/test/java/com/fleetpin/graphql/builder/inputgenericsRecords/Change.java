@@ -15,12 +15,12 @@ import com.fleetpin.graphql.builder.annotations.Query;
 import jakarta.annotation.Nullable;
 import java.util.List;
 
-public record Change(@Nullable Wrapper<List<String>> name) {
+public record Change(@Nullable Wrapper<List<String>> name, @Nullable Wrapper<List<Integer>> age, @Nullable Wrapper<String> description) {
 	@Query
 	public static String doChange(Change input) {
 		if (input.name == null) {
 			return "empty";
 		}
-		return input.name.wrap().getFirst();
+		return input.name.wrap().getFirst() + input.age.wrap() + input.description.wrap();
 	}
 }
