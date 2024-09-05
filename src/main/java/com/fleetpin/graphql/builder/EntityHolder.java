@@ -13,10 +13,8 @@ package com.fleetpin.graphql.builder;
 
 import com.fleetpin.graphql.builder.TypeMeta.Flag;
 import com.fleetpin.graphql.builder.annotations.Id;
-import com.fleetpin.graphql.builder.annotations.Union;
 import com.fleetpin.graphql.builder.mapper.InputTypeBuilder;
 import graphql.Scalars;
-import graphql.com.google.common.collect.Sets;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNamedInputType;
@@ -25,7 +23,6 @@ import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
-import graphql.schema.GraphQLUnionType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -171,6 +168,14 @@ public abstract class EntityHolder {
 			}
 			var type = iterator.next();
 
+			if (Optional.class.isAssignableFrom(type)) {
+				return processOptional(iterator, flags, resolver);
+			}
+
+			if (flag == Flag.OPTIONAL) {
+				return processNull(type, iterator, flags, resolver);
+			}
+
 			if (List.class.isAssignableFrom(type)) {
 				return processCollection(ArrayList::new, iterator, flags, resolver);
 			}
@@ -179,18 +184,12 @@ public abstract class EntityHolder {
 				return processCollection(size -> new LinkedHashSet<>((int) (size / 0.75 + 1)), iterator, flags, resolver);
 			}
 
-			if (Optional.class.isAssignableFrom(type)) {
-				return processOptional(iterator, flags, resolver);
-			}
 			if (type.isArray()) {
 				return processArray(type, iterator, flags, resolver);
 			}
 
 			if (iterator.hasNext()) {
 				throw new RuntimeException("Unsupported type " + type);
-			}
-			if (flag == Flag.OPTIONAL) {
-				return processNull(type, resolver);
 			}
 
 			if (type.isEnum()) {
@@ -233,9 +232,12 @@ public abstract class EntityHolder {
 		};
 	}
 
-	private static InputTypeBuilder processNull(Class<?> type, InputTypeBuilder resolver) {
-		Iterator<Class<?>> iterator = List.<Class<?>>of(type).iterator();
-		var mapper = process(iterator, Collections.emptyIterator(), resolver);
+	private static InputTypeBuilder processNull(Class<?> type, Iterator<Class<?>> iterator, Iterator<Flag> flags, InputTypeBuilder resolver) {
+		var classes = new ArrayList<Class<?>>();
+		classes.add(type);
+		iterator.forEachRemaining(classes::add);
+
+		var mapper = process(classes.iterator(), flags, resolver);
 		return (obj, context, locale) -> {
 			if (obj == null) {
 				return null;

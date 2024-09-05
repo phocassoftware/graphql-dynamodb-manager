@@ -159,6 +159,12 @@ public class TypeMeta {
 	}
 
 	private void process(Class<?> type, Type genericType, AnnotatedElement element) {
+		if (element != null && (element.isAnnotationPresent(Nullable.class) || element.isAnnotationPresent(jakarta.annotation.Nullable.class))) {
+			if (!flags.contains(Flag.OPTIONAL)) {
+				flags.add(Flag.OPTIONAL);
+			}
+		}
+
 		if (type.isArray()) {
 			flags.add(Flag.ARRAY);
 			types.add(type);
@@ -224,12 +230,6 @@ public class TypeMeta {
 		if (genericType != null && genericType instanceof TypeVariable) {
 			processGeneric(parent, (TypeVariable) genericType, element);
 			return;
-		}
-
-		if (element != null && (element.isAnnotationPresent(Nullable.class) || element.isAnnotationPresent(jakarta.annotation.Nullable.class))) {
-			if (!flags.contains(Flag.OPTIONAL)) {
-				flags.add(Flag.OPTIONAL);
-			}
 		}
 
 		this.type = type;

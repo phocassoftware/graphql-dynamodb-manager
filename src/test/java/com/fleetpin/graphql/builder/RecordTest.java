@@ -96,11 +96,19 @@ public class RecordTest {
 	@Test
 	public void testNullableArray() {
 		List<Boolean> array = new ArrayList<>();
-		array.add(null);
 		array.add(true);
-		var response = execute("query nullableArrayTest($type: [Boolean]!){nullableArrayTest(type: $type)}", Map.of("type", array));
+		var response = execute("query nullableArrayTest($type: [Boolean!]){nullableArrayTest(type: $type)}", Map.of("type", array));
 		var expected = new HashMap<String, List<Boolean>>();
 		expected.put("nullableArrayTest", array);
+		assertTrue(response.getErrors().isEmpty());
+		assertEquals(expected, response.getData());
+	}
+
+	@Test
+	public void testNullable2Array() {
+		var response = execute("query nullableArrayTest($type: [Boolean!]){nullableArrayTest(type: $type)}", Map.of());
+		var expected = new HashMap<String, List<Boolean>>();
+		expected.put("nullableArrayTest", null);
 		assertTrue(response.getErrors().isEmpty());
 		assertEquals(expected, response.getData());
 	}
@@ -110,6 +118,26 @@ public class RecordTest {
 		List<Boolean> array = new ArrayList<>();
 		array.add(true);
 		var response = execute("query nullableArrayTest($type: [Boolean]){nullableArrayTest(type: $type)}", Map.of("type", array));
+		assertFalse(response.getErrors().isEmpty());
+	}
+
+	@Test
+	public void testNullableInnerArray() {
+		List<Boolean> array = new ArrayList<>();
+		array.add(null);
+		array.add(true);
+		var response = execute("query nullableInnerArrayTest($type: [Boolean]!){nullableInnerArrayTest(type: $type)}", Map.of("type", array));
+		var expected = new HashMap<String, List<Boolean>>();
+		expected.put("nullableInnerArrayTest", array);
+		assertTrue(response.getErrors().isEmpty());
+		assertEquals(expected, response.getData());
+	}
+
+	@Test
+	public void testNullableInnerArrayFails() {
+		List<Boolean> array = new ArrayList<>();
+		array.add(true);
+		var response = execute("query nullableInnerArrayTest($type: [Boolean]){nullableInnerArrayTest(type: $type)}", Map.of("type", array));
 		assertFalse(response.getErrors().isEmpty());
 	}
 
