@@ -13,6 +13,7 @@ package com.fleetpin.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import java.util.Map;
@@ -41,6 +42,24 @@ public class TypeGenericInputRecords {
 	}
 
 	@Test
+	public void textCorrectNullableQuery() throws ReflectiveOperationException {
+		Map<String, String> response = execute("""
+			query {doChange(input: {
+				name: {
+					wrap: ["felix"]
+				},
+				age: {
+				},
+				description: {
+					wrap: "cat"
+				}
+			})}
+			""").getData();
+		var change = response.get("doChange");
+		assertEquals("felixnullcat", change);
+	}
+
+	@Test
 	public void textQueryNull() throws ReflectiveOperationException {
 		Map<String, String> response = execute("""
 			query {doChange(input: {})}
@@ -53,6 +72,8 @@ public class TypeGenericInputRecords {
 		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.inputgenericsRecords")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
+			ExceptionWhileDataFetching d = (ExceptionWhileDataFetching) result.getErrors().get(0);
+			d.getException().printStackTrace();
 			throw new RuntimeException(result.getErrors().toString());
 		}
 		return result;

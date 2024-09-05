@@ -36,6 +36,11 @@ public class Queries {
 		return type;
 	}
 
+	@Query
+	public static List<Optional<Boolean>> nullableInnerArrayTest(List<Optional<Boolean>> type) {
+		return type;
+	}
+
 	@GraphQLDescription("record Type")
 	static final record InputType(@GraphQLDescription("the name") String name, int age, Optional<Integer> weight) {}
 }
