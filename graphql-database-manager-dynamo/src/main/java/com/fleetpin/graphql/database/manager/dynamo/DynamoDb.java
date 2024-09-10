@@ -84,7 +84,7 @@ public class DynamoDb extends DatabaseDriver {
 
 	private static final AttributeValue REVISION_INCREMENT = AttributeValue.builder().n("1").build();
 	private static final int BATCH_WRITE_SIZE = 25;
-	private static final int MAX_RETRY = 10;
+	private static final int MAX_RETRY = 20;
 
 	private final List<String> entityTables; // is in reverse order so easy to override as we go through
 	private final String historyTable;
