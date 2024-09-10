@@ -59,7 +59,7 @@ public final class DynamoDbManager extends DatabaseManager {
 		private DatabaseDriver database;
 		private String historyTable;
 		private int batchWriteSize = 25;
-		private int maxRetry = 10;
+		private int maxRetry = 20;
 		private boolean globalEnabled = true;
 		private boolean hash = false;
 		private String classPath = null;
