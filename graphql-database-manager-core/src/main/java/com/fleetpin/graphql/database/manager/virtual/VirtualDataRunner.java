@@ -34,6 +34,9 @@ public class VirtualDataRunner implements DataFetcherRunner {
 							try {
 								return fetcher.get(env);
 							} catch (Exception e) {
+								if (e instanceof RuntimeException runtime) {
+									throw runtime;
+								}
 								throw new RuntimeException(e);
 							}
 						},
