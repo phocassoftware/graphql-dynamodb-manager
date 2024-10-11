@@ -147,4 +147,26 @@ class EntityUtil {
 			class1.isAssignableFrom(GraphQLContext.class) || class1.isAssignableFrom(DataFetchingEnvironment.class) || class1.isAnnotationPresent(Context.class)
 		);
 	}
+
+	static <T extends Annotation> T getAnnotation(Class<?> type, Class<T> annotation) {
+		var response = type.getAnnotation(annotation);
+		if (response != null) {
+			return response;
+		}
+
+		if (type.getSuperclass() != null) {
+			response = getAnnotation(type.getSuperclass(), annotation);
+			if (response != null) {
+				return response;
+			}
+		}
+
+		for (var parent : type.getInterfaces()) {
+			response = getAnnotation(parent, annotation);
+			if (response != null) {
+				return response;
+			}
+		}
+		return null;
+	}
 }

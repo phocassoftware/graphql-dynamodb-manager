@@ -139,7 +139,7 @@ public class SchemaBuilder {
 				List<RestrictTypeFactory<?>> globalRestricts = new ArrayList<>();
 
 				for (var r : restrict) {
-					Restrict annotation = r.getAnnotation(Restrict.class);
+					Restrict annotation = EntityUtil.getAnnotation(r, Restrict.class);
 					var factoryClass = annotation.value();
 					var factory = factoryClass.getConstructor().newInstance();
 					if (!factory.extractType().isAssignableFrom(r)) {
@@ -151,7 +151,7 @@ public class SchemaBuilder {
 				}
 
 				for (var r : restricts) {
-					Restricts annotations = r.getAnnotation(Restricts.class);
+					Restricts annotations = EntityUtil.getAnnotation(r, Restricts.class);
 					for (Restrict annotation : annotations.value()) {
 						var factoryClass = annotation.value();
 						var factory = factoryClass.getConstructor().newInstance();
