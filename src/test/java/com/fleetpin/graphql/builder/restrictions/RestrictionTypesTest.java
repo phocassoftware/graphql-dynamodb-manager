@@ -42,6 +42,13 @@ public class RestrictionTypesTest {
 	private static String singleOptionalQueryGql = "query entityQuery( $allowed: Boolean ) { singleOptional(allowed: $allowed) { __typename } }";
 	private static String listQueryGql = "query entityQuery( $allowed: [Boolean!]! ) { list(allowed: $allowed) { __typename } }";
 	private static String listOptionalQueryGql = "query entityQuery( $allowed: [Boolean!] ) { listOptional(allowed: $allowed) { __typename } }";
+	private static final String LIST_QUERY_INHERITANCE_GPL = """
+		query entityQuery( $allowed: [Boolean!]! ) {
+			listInheritance(allowed: $allowed) {
+				__typename
+			}
+		}
+		""";
 
 	@Test
 	public void singleEntityQuery() throws ReflectiveOperationException, JsonMappingException, JsonProcessingException {
@@ -82,6 +89,23 @@ public class RestrictionTypesTest {
 		variables.put("allowed", Arrays.asList(false, false, false));
 		Map<String, List<Object>> responseNoneAllowed = execute(listQueryGql, variables).getData();
 		Assertions.assertEquals(0, responseNoneAllowed.get("list").size());
+	}
+
+	@Test
+	public void listEntityInheritanceQuery() throws ReflectiveOperationException, JsonMappingException, JsonProcessingException {
+		Map<String, Object> variables = new HashMap<>();
+
+		variables.put("allowed", Arrays.asList(true, true, true));
+		Map<String, List<Object>> responseAllAllowed = execute(LIST_QUERY_INHERITANCE_GPL, variables).getData();
+		Assertions.assertEquals(3, responseAllAllowed.get("listInheritance").size());
+
+		variables.put("allowed", Arrays.asList(true, false, true));
+		Map<String, List<Object>> responseSomeAllowed = execute(LIST_QUERY_INHERITANCE_GPL, variables).getData();
+		Assertions.assertEquals(2, responseSomeAllowed.get("listInheritance").size());
+
+		variables.put("allowed", Arrays.asList(false, false, false));
+		Map<String, List<Object>> responseNoneAllowed = execute(LIST_QUERY_INHERITANCE_GPL, variables).getData();
+		Assertions.assertEquals(0, responseNoneAllowed.get("listInheritance").size());
 	}
 
 	@Test
