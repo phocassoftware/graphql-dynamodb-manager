@@ -12,6 +12,7 @@
 package com.fleetpin.graphql.builder.record;
 
 import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
+import com.fleetpin.graphql.builder.annotations.InnerNullable;
 import com.fleetpin.graphql.builder.annotations.Query;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,12 @@ public class Queries {
 	@Query
 	@Nullable
 	public static List<Boolean> nullableArrayTest(@Nullable List<Boolean> type) {
+		return type;
+	}
+
+	@Query
+	@InnerNullable
+	public static List<Boolean> innerNullableArrayTest(@InnerNullable List<Boolean> type) {
 		return type;
 	}
 
