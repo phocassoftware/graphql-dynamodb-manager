@@ -141,6 +141,26 @@ public class RecordTest {
 		assertFalse(response.getErrors().isEmpty());
 	}
 
+	@Test
+	public void testInnerNullableArray() {
+		List<Boolean> array = new ArrayList<>();
+		array.add(null);
+		array.add(true);
+		var response = execute("query innerNullableArrayTest($type: [Boolean]!){innerNullableArrayTest(type: $type)}", Map.of("type", array));
+		var expected = new HashMap<String, List<Boolean>>();
+		expected.put("innerNullableArrayTest", array);
+		assertTrue(response.getErrors().isEmpty());
+		assertEquals(expected, response.getData());
+	}
+
+	@Test
+	public void testInnerNullableArrayFails() {
+		List<Boolean> array = new ArrayList<>();
+		array.add(true);
+		var response = execute("query innerNullableArrayTest($type: [Boolean]){innerNullableArrayTest(type: $type)}", Map.of("type", array));
+		assertFalse(response.getErrors().isEmpty());
+	}
+
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
 		GraphQL schema = GraphQL.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.fleetpin.graphql.builder.record"))).build();
 		var input = ExecutionInput.newExecutionInput();

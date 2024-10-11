@@ -11,6 +11,7 @@
  */
 package com.fleetpin.graphql.builder;
 
+import com.fleetpin.graphql.builder.annotations.InnerNullable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -230,6 +231,12 @@ public class TypeMeta {
 		if (genericType != null && genericType instanceof TypeVariable) {
 			processGeneric(parent, (TypeVariable) genericType, element);
 			return;
+		}
+
+		if (element != null && (element.isAnnotationPresent(InnerNullable.class))) {
+			if (!flags.contains(Flag.OPTIONAL)) {
+				flags.add(Flag.OPTIONAL);
+			}
 		}
 
 		this.type = type;
