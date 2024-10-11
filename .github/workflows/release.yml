@@ -1,7 +1,19 @@
 name: Release
 permissions:
-  contents: write
-on: workflow_dispatch
+    contents: write
+    packages: write
+on:
+  workflow_dispatch:
+    inputs:
+      releaseType:
+        type: choice
+        description: "Release type"
+        required: true
+        default: minor
+        options:
+          - patch
+          - minor
+          - major
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -37,10 +49,42 @@ jobs:
           rm ./private.key
           gpg --list-secret-keys --keyid-format LONG
 
+      - name: Get current development version
+        id: get_version
+        run: |
+          VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//' )
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate versions
+        id: generate_versions
+        uses: WyriHaximus/github-action-next-semvers@v1.2.1
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+
+      - name: Pick release version
+        id: pick_release_version
+        run: |
+          VERSION=$(
+            case ${{ github.event.inputs.releaseType }} in
+              ("minor") echo "${{ steps.generate_versions.outputs.minor }}" ;;
+              ("major") echo "${{ steps.generate_versions.outputs.major }}" ;;
+              ("patch") echo "${{ steps.generate_versions.outputs.patch }}" ;;
+            esac
+          )
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+
       - name: prepare
         run: |
-          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype
+          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} \
+          -DreleaseVersion=${{ steps.pick_release_version.outputs.version }} \
+          -DdevelopmentVersion=${{ steps.pick_release_version.outputs.version }}-SNAPSHOT \
+          -P sonatype
 
       - name: release
         run: |
-          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype
+          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} \
+          -DreleaseVersion=${{ steps.pick_release_version.outputs.version }} \
+          -DdevelopmentVersion=${{ steps.pick_release_version.outputs.version }}-SNAPSHOT \
+          -Darguments="-DskipTests" \
+          -P sonatype
