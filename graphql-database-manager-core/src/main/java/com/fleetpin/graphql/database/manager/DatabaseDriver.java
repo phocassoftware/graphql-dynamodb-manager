@@ -13,10 +13,12 @@
 package com.fleetpin.graphql.database.manager;
 
 import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.google.common.collect.HashMultimap;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class DatabaseDriver {
@@ -42,7 +44,11 @@ public abstract class DatabaseDriver {
 
 	public abstract CompletableFuture<Void> restoreBackup(List<BackupItem> entities);
 
+	public abstract CompletableFuture<Void> restoreHistoryBackup(List<HistoryBackupItem> entities);
+
 	public abstract CompletableFuture<List<BackupItem>> takeBackup(String organisationId);
+
+	public abstract CompletableFuture<List<HistoryBackupItem>> takeHistoryBackup(String organisationId);
 
 	public abstract <T extends Table> CompletableFuture<List<T>> queryHistory(DatabaseQueryHistoryKey<T> key);
 
@@ -78,7 +84,7 @@ public abstract class DatabaseDriver {
 		entity.setLinks(type, groupIds);
 	}
 
-	protected <T extends Table> HashMultimap<String, String> getLinks(final T entity) {
+	protected <T extends Table> Map<String, Set<String>> getLinks(final T entity) {
 		return entity.getLinks();
 	}
 
@@ -93,7 +99,7 @@ public abstract class DatabaseDriver {
 	protected <T extends Table> void setSource(
 		final T entity,
 		final String sourceTable,
-		final HashMultimap<String, String> links,
+		final Map<String, Set<String>> links,
 		final String sourceOrganisationId
 	) {
 		entity.setSource(sourceTable, links, sourceOrganisationId);
@@ -106,4 +112,6 @@ public abstract class DatabaseDriver {
 	protected <T extends Table> DatabaseKey<T> createDatabaseKey(final String organisationId, final Class<T> type, final String id) {
 		return new DatabaseKey<>(organisationId, type, id);
 	}
+
+	protected abstract ScanResult startTableScan(TableScanQuery tableScanQuery, int segment, Object from);
 }

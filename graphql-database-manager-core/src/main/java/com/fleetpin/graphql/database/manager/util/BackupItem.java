@@ -12,16 +12,15 @@
 
 package com.fleetpin.graphql.database.manager.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.HashMultimap;
 import java.util.Map;
+import java.util.Set;
 
 public interface BackupItem {
 	String getTable();
 
-	Map<String, JsonNode> getItem();
+	Map<String, Object> getItem();
 
-	HashMultimap<String, String> getLinks();
+	Map<String, Set<String>> getLinks();
 
 	String getId();
 

@@ -28,11 +28,8 @@ import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.GlobalIndex;
 import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -223,7 +220,7 @@ public class TableUtil {
 		}
 		if (value.n() != null) {
 			double v = Double.parseDouble(value.n());
-			if (Math.floor(v) == v && value.n().indexOf('.') == -1 && Long.MAX_VALUE < v && Long.MIN_VALUE > v) {
+			if (Math.floor(v) == v && value.n().indexOf('.') == -1 && Long.MAX_VALUE > v && Long.MIN_VALUE < v) {
 				return LongNode.valueOf(Long.parseLong(value.n()));
 			}
 			return DoubleNode.valueOf(v);

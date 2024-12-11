@@ -1,7 +1,6 @@
 package com.fleetpin.graphql.database.manager;
 
 import com.fleetpin.graphql.database.manager.util.HistoryCoreUtil;
-import com.google.common.base.Preconditions;
 import java.time.Instant;
 import java.util.function.Consumer;
 
@@ -55,14 +54,20 @@ public class QueryHistoryBuilder<V extends Table> {
 	}
 
 	public QueryHistory<V> build() {
-		Preconditions.checkArgument(HistoryCoreUtil.hasHistory(type), "Can only do history when history annotation is present.");
-		Preconditions.checkArgument(!(id != null && startsWith != null), "ID and StartsWith cannot both be set.");
-		Preconditions.checkArgument(!(id == null && startsWith == null), "ID or StartsWith must be set.");
+		checkArgument(HistoryCoreUtil.hasHistory(type), "Can only do history when history annotation is present.");
+		checkArgument(!(id != null && startsWith != null), "ID and StartsWith cannot both be set.");
+		checkArgument(!(id == null && startsWith == null), "ID or StartsWith must be set.");
 		if (fromRevision != null || toRevision != null) {
-			Preconditions.checkArgument(fromUpdatedAt == null && toUpdatedAt == null, "Revision and CreatedAt cannot both be set.");
-			Preconditions.checkArgument(startsWith == null, "StartsWith can only be used with updatedAt.");
+			checkArgument(fromUpdatedAt == null && toUpdatedAt == null, "Revision and CreatedAt cannot both be set.");
+			checkArgument(startsWith == null, "StartsWith can only be used with updatedAt.");
 		}
 		return new QueryHistory<V>(type, startsWith, id, fromRevision, toRevision, fromUpdatedAt, toUpdatedAt);
+	}
+
+	private void checkArgument(boolean pass, String msg) {
+		if (!pass) {
+			throw new IllegalArgumentException(msg);
+		}
 	}
 
 	public static <V extends Table> QueryHistoryBuilder<V> create(Class<V> type) {

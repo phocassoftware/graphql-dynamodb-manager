@@ -1,16 +1,20 @@
 package com.fleetpin.graphql.database.manager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class DataWriter {
 
 	private final Function<List<PutValue>, CompletableFuture<Void>> bulkWriter;
 	private final List<PutValue> toPut = new ArrayList<>();
+	private final Consumer<CompletableFuture<?>> handleFuture;
 
-	public DataWriter(Function<List<PutValue>, CompletableFuture<Void>> bulkWriter) {
+	public DataWriter(Function<List<PutValue>, CompletableFuture<Void>> bulkWriter, Consumer<CompletableFuture<?>> handleFuture) {
 		this.bulkWriter = bulkWriter;
+		this.handleFuture = handleFuture;
 	}
 
 	public int dispatchSize() {
@@ -40,6 +44,7 @@ public class DataWriter {
 		synchronized (toPut) {
 			toPut.add(putValue);
 		}
+		handleFuture.accept(future);
 		return future;
 	}
 }

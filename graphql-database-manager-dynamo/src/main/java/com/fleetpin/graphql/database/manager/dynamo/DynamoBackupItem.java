@@ -12,24 +12,23 @@
 
 package com.fleetpin.graphql.database.manager.dynamo;
 
-import static com.fleetpin.graphql.database.manager.util.TableCoreUtil.table;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.google.common.collect.HashMultimap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 public class DynamoBackupItem implements Comparable<DynamoBackupItem>, BackupItem {
 
 	private String table;
-	private Map<String, JsonNode> item;
+	private Map<String, Object> item;
 	private String id;
 
-	private HashMultimap<String, String> links;
+	private Map<String, Set<String>> links;
 	private String organisationId;
 	private boolean hashed;
 	private String parallelHash;
@@ -37,19 +36,17 @@ public class DynamoBackupItem implements Comparable<DynamoBackupItem>, BackupIte
 	public DynamoBackupItem() {}
 
 	public DynamoBackupItem(String table, Map<String, AttributeValue> item, ObjectMapper objectMapper) {
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
 		this.table = table;
-		this.item = (Map<String, JsonNode>) TableUtil.convertTo(objectMapper, item, Map.class);
+		this.item = (Map<String, Object>) TableUtil.convertTo(objectMapper, item, Map.class);
 
-		this.links = HashMultimap.create();
+		this.links = new HashMap<>();
 
 		var links = item.get("links");
 		if (links != null) {
 			links
 				.m()
 				.forEach((t, value) -> {
-					this.links.putAll(t, value.ss());
+					this.links.put(t, new HashSet<>(value.ss()));
 				});
 		}
 		this.id = item.get("id").s();
@@ -71,12 +68,12 @@ public class DynamoBackupItem implements Comparable<DynamoBackupItem>, BackupIte
 		return table;
 	}
 
-	public Map<String, JsonNode> getItem() {
+	public Map<String, Object> getItem() {
 		return item;
 	}
 
 	@JsonIgnore
-	public HashMultimap<String, String> getLinks() {
+	public Map<String, Set<String>> getLinks() {
 		return links;
 	}
 

@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.fleetpin</groupId>
         <artifactId>graphql-database-manager</artifactId>
-        <version>0.2.3</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>graphql-database-manager-memory</artifactId>
 
     <properties>
-        <junit.jupiter.version>5.6.0</junit.jupiter.version>
+        <junit.jupiter.version>5.11.0</junit.jupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -31,9 +31,9 @@
     </distributionManagement>
 
     <scm>
-        <url>https://github.com/fleetpin/graphql-dynamodb-manager</url>
-        <connection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</connection>
-        <developerConnection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</developerConnection>
+        <url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
+        <connection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</connection>
+        <developerConnection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</developerConnection>
     </scm>
 
     <licenses>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.fleetpin</groupId>
             <artifactId>graphql-builder</artifactId>
-            <version>0.1.1</version>
+            <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -85,7 +85,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>copy</id>
@@ -116,7 +116,7 @@
                             <execution>
                                 <id>attach-sources</id>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>jar-no-fork</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -124,7 +124,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.1</version>
+                        <version>3.10.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -137,7 +137,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.2.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -151,7 +151,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
+                        <version>1.7.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>sonatype</serverId>

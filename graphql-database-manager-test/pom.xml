@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.fleetpin</groupId>
         <artifactId>graphql-database-manager</artifactId>
-        <version>0.2.30-SNAPSHOT</version>
+        <version>3.0.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>graphql-database-manager-test</artifactId>
 
     <properties>
-        <junit.jupiter.version>5.6.0</junit.jupiter.version>
+        <junit.jupiter.version>5.11.0</junit.jupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -28,18 +28,10 @@
         </repository>
     </distributionManagement>
          
-    <repositories>
-        <repository>
-           <id>dynamodb-local-oregon</id>
-           <name>DynamoDB Local Release Repository</name>
-           <url>https://s3-us-west-2.amazonaws.com/dynamodb-local/release</url>
-       </repository>
-   </repositories>
-
     <scm>
-        <url>https://github.com/fleetpin/graphql-dynamodb-manager</url>
-        <connection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</connection>
-        <developerConnection>scm:git:https://github.com/fleetpin/graphql-dynamodb-manager.git</developerConnection>
+        <url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
+        <connection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</connection>
+        <developerConnection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
 
@@ -70,7 +62,7 @@
         <dependency>
             <groupId>com.fleetpin</groupId>
             <artifactId>graphql-builder</artifactId>
-            <version>0.1.1</version>
+            <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -88,17 +80,48 @@
             <artifactId>graphql-database-dynmodb-history-lambda</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>DynamoDBLocal</artifactId>
-            <version>1.11.477</version>
-        </dependency>
-
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.13.0</version>
+		</dependency>
+ 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.jupiter.version}</version>
             <scope>provided</scope>
+        </dependency>
+ 
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-parameter-names</artifactId>
+		    <version>${jackson.version}</version>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+		    <version>${jackson.version}</version>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		    <version>${jackson.version}</version>
+		    <scope>test</scope>
+		</dependency>
+		
+       	<dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>DynamoDBLocal</artifactId>
+            <version>2.5.2</version>
         </dependency>
     </dependencies>
 
@@ -107,7 +130,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>copy</id>
@@ -138,7 +161,7 @@
                             <execution>
                                 <id>attach-sources</id>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>jar-no-fork</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -146,7 +169,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.1</version>
+                        <version>3.10.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -159,7 +182,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.2.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -173,7 +196,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
+                        <version>1.7.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>sonatype</serverId>

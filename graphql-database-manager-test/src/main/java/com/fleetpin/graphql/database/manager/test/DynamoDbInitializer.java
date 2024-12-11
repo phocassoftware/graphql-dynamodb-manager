@@ -14,19 +14,26 @@ package com.fleetpin.graphql.database.manager.test;
 
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
+import software.amazon.awssdk.services.dynamodb.model.GlobalSecondaryIndex;
+import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
+import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
+import software.amazon.awssdk.services.dynamodb.model.StreamViewType;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
 final class DynamoDbInitializer {
@@ -46,12 +53,24 @@ final class DynamoDbInitializer {
 						KeySchemaElement.builder().attributeName("id").keyType(KeyType.RANGE).build()
 					)
 					.streamSpecification(streamSpecification -> streamSpecification.streamEnabled(true).streamViewType(StreamViewType.NEW_IMAGE))
-					.globalSecondaryIndexes(builder ->
-						builder
+					.globalSecondaryIndexes(
+						GlobalSecondaryIndex
+							.builder()
 							.indexName("secondaryGlobal")
 							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
 							.projection(b -> b.projectionType(ProjectionType.ALL))
 							.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build())
+							.build(),
+						GlobalSecondaryIndex
+							.builder()
+							.indexName("parallelIndex")
+							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
+							.projection(b -> b.projectionType(ProjectionType.ALL))
+							.keySchema(
+								KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
+								KeySchemaElement.builder().attributeName("parallelHash").keyType(KeyType.RANGE).build()
+							)
+							.build()
 					)
 					.localSecondaryIndexes(builder ->
 						builder
@@ -66,7 +85,8 @@ final class DynamoDbInitializer {
 						AttributeDefinition.builder().attributeName("organisationId").attributeType(ScalarAttributeType.S).build(),
 						AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build(),
 						AttributeDefinition.builder().attributeName("secondaryGlobal").attributeType(ScalarAttributeType.S).build(),
-						AttributeDefinition.builder().attributeName("secondaryOrganisation").attributeType(ScalarAttributeType.S).build()
+						AttributeDefinition.builder().attributeName("secondaryOrganisation").attributeType(ScalarAttributeType.S).build(),
+						AttributeDefinition.builder().attributeName("parallelHash").attributeType(ScalarAttributeType.S).build()
 					)
 					.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L).build())
 			)
@@ -115,16 +135,25 @@ final class DynamoDbInitializer {
 			.get();
 	}
 
-	static DynamoDBProxyServer startDynamoServer(final String port) throws Exception {
-		final String[] localArgs = { "-inMemory", "-port", port };
+	static synchronized DynamoDBProxyServer startDynamoServer(final String port) throws Exception {
+		final String[] localArgs = { "-inMemory", "-disableTelemetry", "-port", port };
 		final var server = ServerRunner.createServerFromCommandLineArgs(localArgs);
 		server.start();
 
 		return server;
 	}
 
-	static DynamoDbAsyncClient startDynamoClient(final String port) throws URISyntaxException {
+	static DynamoDbAsyncClient startDynamoAsyncClient(final String port) throws URISyntaxException {
 		return DynamoDbAsyncClient
+			.builder()
+			.region(Region.AWS_GLOBAL)
+			.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("anything", "anything")))
+			.endpointOverride(new URI("http://localhost:" + port))
+			.build();
+	}
+
+	static DynamoDbClient startDynamoClient(final String port) throws URISyntaxException {
+		return DynamoDbClient
 			.builder()
 			.region(Region.AWS_GLOBAL)
 			.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("anything", "anything")))
@@ -149,9 +178,8 @@ final class DynamoDbInitializer {
 		return port;
 	}
 
-	static Database getEmbeddedDatabase(final DynamoDbManager dynamoDbManager, final String organisationId, final CompletableFuture<Object> future) {
+	static Database getEmbeddedDatabase(final DynamoDbManager dynamoDbManager, final String organisationId) {
 		final var database = dynamoDbManager.getDatabase(organisationId);
-		database.start(future);
 
 		return database;
 	}
@@ -162,7 +190,9 @@ final class DynamoDbInitializer {
 		String historyTable,
 		boolean globalEnabled,
 		boolean hashed,
-		String classpath
+		String classpath,
+		String parallelIndex,
+		ObjectMapper objectMapper
 	) {
 		return DynamoDbManager
 			.builder()
@@ -172,35 +202,8 @@ final class DynamoDbInitializer {
 			.global(globalEnabled)
 			.hash(hashed)
 			.classPath(classpath)
+			.parallelIndex(parallelIndex)
+			.objectMapper(objectMapper)
 			.build();
 	}
-	//    static Database getInMemoryDatabase(
-	//            final String organisationId,
-	//            final ConcurrentHashMap<DatabaseKey, Table> map,
-	//            final CompletableFuture<Object> future
-	//    ) {
-	//        final var objectMapper = new ObjectMapper()
-	//                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-	//                .registerModule(new ParameterNamesModule())
-	//                .registerModule(new Jdk8Module())
-	//                .registerModule(new JavaTimeModule())
-	//                .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-	//                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-	//                .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-	//                .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-	//                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-	//
-	//        final var factory = new JsonNodeFactory(false);
-	//
-	//        final Supplier<String> idGenerator = () -> UUID.randomUUID().toString();
-	//
-	//        final var database = DynamoDbManager.builder()
-	//                .tables("local")
-	//                .dynamoDb(new InMemoryDynamoDb(objectMapper, factory, map, idGenerator))
-	//                .build()
-	//                .getDatabase(organisationId);
-	//
-	//        database.start(future);
-	//        return database;
-	//    }
 }

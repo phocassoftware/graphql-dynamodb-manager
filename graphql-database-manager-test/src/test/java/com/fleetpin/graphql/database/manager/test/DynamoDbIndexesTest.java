@@ -21,12 +21,10 @@ import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
@@ -75,7 +73,6 @@ final class DynamoDbIndexesTest {
 	void testSecondary(final Database db) throws InterruptedException, ExecutionException {
 		var list = db.querySecondary(SimpleTable.class, "garry").get();
 		Assertions.assertEquals(0, list.size());
-
 		SimpleTable entry1 = new SimpleTable("garry", "john");
 		entry1 = db.put(entry1).get();
 		Assertions.assertEquals("garry", entry1.getName());
@@ -145,8 +142,6 @@ final class DynamoDbIndexesTest {
 	void testMultiOrganisationSecondaryIndexWithDynamoDbManager(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		final var db1 = dynamoDbManager.getDatabase("organisation-1");
-		db0.start(new CompletableFuture<>());
-		db1.start(new CompletableFuture<>());
 
 		final var putAvocado = db0.put(new SimpleTable("avocado", "fruit")).get();
 

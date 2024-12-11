@@ -25,23 +25,19 @@ import com.fleetpin.graphql.database.manager.annotations.HashLocator.HashQuery;
 import com.fleetpin.graphql.database.manager.annotations.HashLocator.HashQueryBuilder;
 import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
 final class DynamoDbBackupTest {
 
-	@TestDatabase(hashed = true, classPath = "com.fleetpin.graphql.database.manager.test.hashed")
+	@TestDatabase
 	void testTakeBackup(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		final var db1 = dynamoDbManager.getDatabase("organisation-1");
-		db0.start(new CompletableFuture<>());
-		db1.start(new CompletableFuture<>());
 
 		final var putAvocado = db0.put(new SimpleTable("Beer:avocado", "fruit")).get();
 		final var putBanana = db0.put(new SimpleTable("Beer:banana", "fruit")).get();
@@ -64,12 +60,10 @@ final class DynamoDbBackupTest {
 		checkResponseNameField(orgQuery2, 0, List.of(putBeer.getName(), putTomato.getName()));
 	}
 
-	@TestDatabase(hashed = true, classPath = "com.fleetpin.graphql.database.manager.test.hashed")
+	@TestDatabase
 	void testRestoreBackup(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		final var db1 = dynamoDbManager.getDatabase("organisation-1");
-		db0.start(new CompletableFuture<>());
-		db1.start(new CompletableFuture<>());
 
 		final var putAvocado = db0.put(new SimpleTable("Beer:avocado", "fruit")).get();
 		final var putBanana = db0.put(new SimpleTable("Beer:banana", "fruit")).get();
@@ -105,18 +99,16 @@ final class DynamoDbBackupTest {
 		Assertions.assertEquals("fruit", simpleTableExists.getGlobalLookup());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testDeleteItems(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		assertThrows(UnsupportedOperationException.class, () -> db0.delete("organisation-0", SimpleTable.class));
 	}
 
-	@TestDatabase(hashed = true, classPath = "com.fleetpin.graphql.database.manager.test.hashed")
+	@TestDatabase
 	void testBatchDestroyOrganisation(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		final var db1 = dynamoDbManager.getDatabase("organisation-1");
-		db0.start(new CompletableFuture<>());
-		db1.start(new CompletableFuture<>());
 		int count = 100;
 		for (int i = 0; i < count; i++) {
 			var entry = new SimpleTable("avocado", "fruit");
@@ -133,9 +125,9 @@ final class DynamoDbBackupTest {
 		var destroyResponse = db0.destroyOrganisation("organisation-0").get();
 		Assertions.assertEquals(true, destroyResponse);
 
-		//For some reason this fails on the test DynamoDB but is fine on the real one?
-		//response0 = db0.query(SimpleTable.class).get();
-		//Assertions.assertEquals(0, response0.size());
+		// For some reason this fails on the test DynamoDB but is fine on the real one?
+		// response0 = db0.query(SimpleTable.class).get();
+		// Assertions.assertEquals(0, response0.size());
 
 		var response1 = db1.query(SimpleTable.class, q -> q.startsWith("1234")).get();
 		Assertions.assertEquals(1, response1.size());

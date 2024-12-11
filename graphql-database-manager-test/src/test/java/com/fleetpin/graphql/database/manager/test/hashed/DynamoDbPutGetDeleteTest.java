@@ -19,21 +19,16 @@ import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
 import com.fleetpin.graphql.database.manager.test.annotations.GlobalEnabled;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.Assertions;
 
 final class DynamoDbPutGetDeleteTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testSimplePutGetDelete(final Database db) throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		entry1 = db.put(entry1).get();
@@ -52,7 +47,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertNull(entry1);
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testGlobalPutGetDelete(final Database db, final Database dbProd) throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		entry1 = db.putGlobal(entry1).get();
@@ -73,13 +68,13 @@ final class DynamoDbPutGetDeleteTest {
 
 		db.delete(entry1, false).get();
 
-		//will not actually delete as is in global space
+		// will not actually delete as is in global space
 		entry1 = db.get(SimpleTable.class, id).get();
 		Assertions.assertEquals("garry", entry1.getName());
 		Assertions.assertEquals(id, entry1.getId());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testGlobalDisabledPutGetDelete(@GlobalEnabled(false) final Database db, @GlobalEnabled(false) final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
@@ -98,7 +93,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertNull(entry1);
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testClimbingSimplePutGetDelete(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
@@ -135,7 +130,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertEquals(id, entry1.getId());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testClimbingGlobalPutGetDelete(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames("prod") final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
@@ -150,7 +145,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertEquals("garry", entry1.getName());
 		Assertions.assertEquals(id, entry1.getId());
 
-		//is global so should do nothing
+		// is global so should do nothing
 		db.delete(entry1, false).get();
 		entry1 = db.get(SimpleTable.class, id).get();
 
@@ -175,7 +170,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertEquals(id, entry1.getId());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testTwoOrganisationsPutGetDelete(final Database db, @DatabaseOrganisation("org-777") final Database db2)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
@@ -196,13 +191,10 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertNull(entry1);
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testTwoManagedDatabasesOnSameOrganisationPutGetDelete(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db = dynamoDbManager.getDatabase("test");
 		final var db2 = dynamoDbManager.getDatabase("test");
-
-		db.start(new CompletableFuture<>());
-		db2.start(new CompletableFuture<>());
 
 		final var joPutEntry = db.put(new SimpleTable("jo")).get();
 		Assertions.assertEquals("jo", joPutEntry.getName());
@@ -220,13 +212,10 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertNull(joWasDeleted);
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testTwoManagedDatabasesPutGetDelete(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db = dynamoDbManager.getDatabase("test");
 		final var db2 = dynamoDbManager.getDatabase("test2");
-
-		db.start(new CompletableFuture<>());
-		db2.start(new CompletableFuture<>());
 
 		final var janePutEntry = db.put(new SimpleTable("jane")).get();
 		Assertions.assertEquals("jane", janePutEntry.getName());
@@ -244,7 +233,7 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertNull(janeWasDeleted);
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testSameIdDifferentTypes(final Database db) throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		SimpleTable2 entry2 = new SimpleTable2("bob");
@@ -264,38 +253,35 @@ final class DynamoDbPutGetDeleteTest {
 		Assertions.assertEquals("bob", entry2Future.get().getName());
 	}
 
-	
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testLotsOfDataPerPartition(final Database db) throws InterruptedException, ExecutionException {
-		
-//putting 400 entries split across 4 partitions
-		
+		// putting 400 entries split across 4 partitions
+
 		var futures = new ArrayList<CompletableFuture<?>>();
-		
+
 		List<String> ids = new ArrayList<>();
-		
+
 		List<String> expected = new ArrayList<>();
-		
-		for(int i = 0; i < 400; i++) {
+
+		for (int i = 0; i < 400; i++) {
 			SimpleTable entry = new SimpleTable("id" + i);
 			entry.setId("###" + (i / 100) + ":" + i);
 			ids.add(entry.getId());
 			expected.add(entry.getName());
 			futures.add(db.put(entry, false));
 		}
-		
-		for(var f: futures) {
+
+		for (var f : futures) {
 			f.join();
 		}
-		
+
 		var get = db.get(SimpleTable.class, ids).get();
-		
+
 		var actual = get.stream().map(t -> t.getName()).collect(Collectors.toList());
-		
+
 		Assertions.assertEquals(expected, actual);
 	}
-	
-	
+
 	@Hash(SimplerHasher.class)
 	static class SimpleTable extends Table {
 

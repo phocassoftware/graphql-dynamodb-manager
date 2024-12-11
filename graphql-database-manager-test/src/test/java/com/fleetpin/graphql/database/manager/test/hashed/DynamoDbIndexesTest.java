@@ -24,12 +24,10 @@ import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
 import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
 import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
@@ -37,7 +35,7 @@ final class DynamoDbIndexesTest {
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testGlobal(final Database db) throws InterruptedException, ExecutionException {
 		var list = db.queryGlobal(SimpleTable.class, "john").get();
 		Assertions.assertEquals(0, list.size());
@@ -54,7 +52,7 @@ final class DynamoDbIndexesTest {
 		Assertions.assertEquals("garry", db.queryGlobalUnique(SimpleTable.class, "john").get().getName());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testGlobalInheritance(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames({ "prod" }) final Database dbProd)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry", "john");
@@ -74,12 +72,12 @@ final class DynamoDbIndexesTest {
 		Assertions.assertEquals("barry", db.queryGlobalUnique(SimpleTable.class, "john").get().getName());
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testSecondary(final Database db) throws InterruptedException, ExecutionException {
 		assertThrows(RuntimeException.class, () -> db.querySecondary(SimpleTable.class, "garry"));
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testGlobalUnique(final Database db) throws InterruptedException, ExecutionException {
 		var entry = db.queryGlobalUnique(SimpleTable.class, "john").get();
 		Assertions.assertNull(entry);
@@ -97,12 +95,10 @@ final class DynamoDbIndexesTest {
 		Assertions.assertTrue(t.getCause().getMessage().contains("expected single linkage"));
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testMultiOrganisationSecondaryIndexWithDynamoDbManager(final DynamoDbManager dynamoDbManager) throws ExecutionException, InterruptedException {
 		final var db0 = dynamoDbManager.getDatabase("organisation-0");
 		final var db1 = dynamoDbManager.getDatabase("organisation-1");
-		db0.start(new CompletableFuture<>());
-		db1.start(new CompletableFuture<>());
 
 		final var putAvocado = db0.put(new SimpleTable("avocado", "fruit")).get();
 
@@ -114,7 +110,7 @@ final class DynamoDbIndexesTest {
 		Assertions.assertNull(nonExistent);
 	}
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testMultiOrganisationSecondaryIndexWithAnnotations(@DatabaseOrganisation("newdude") final Database db0, final Database db1)
 		throws ExecutionException, InterruptedException {
 		final var putJohn = db0.put(new SimpleTable("john", "nhoj")).get();

@@ -12,6 +12,7 @@
 
 package com.fleetpin.graphql.database.manager;
 
+import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
 import java.util.Objects;
 
 public class DatabaseKey<T extends Table> {
@@ -22,7 +23,7 @@ public class DatabaseKey<T extends Table> {
 
 	DatabaseKey(String organisationId, Class<T> type, String id) {
 		this.organisationId = organisationId;
-		this.type = type;
+		this.type = TableCoreUtil.baseClass(type);
 		this.id = id;
 	}
 

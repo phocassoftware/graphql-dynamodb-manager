@@ -15,10 +15,13 @@ package com.fleetpin.graphql.database.manager;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
 import com.fleetpin.graphql.builder.annotations.Id;
-import com.google.common.collect.HashMultimap;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public abstract class Table {
 
@@ -34,7 +37,7 @@ public abstract class Table {
 	private String sourceOrganistaionId;
 
 	@JsonIgnore
-	private HashMultimap<String, String> links = HashMultimap.create();
+	private Map<String, Set<String>> links = new HashMap<>();
 
 	@Id
 	public String getId() {
@@ -91,7 +94,7 @@ public abstract class Table {
 		return sourceTable;
 	}
 
-	void setSource(String sourceTable, HashMultimap<String, String> links, String sourceOrganisationId) {
+	void setSource(String sourceTable, Map<String, Set<String>> links, String sourceOrganisationId) {
 		//so bad data does not cause error
 		if (createdAt == null) {
 			createdAt = Instant.MIN;
@@ -111,13 +114,12 @@ public abstract class Table {
 	}
 
 	void setLinks(String type, Collection<String> groupIds) {
-		this.links.removeAll(type);
-		this.links.putAll(type, groupIds);
+		this.links.put(type, new HashSet<>(groupIds));
 	}
 
 	@JsonIgnore
 	@GraphQLIgnore
-	HashMultimap<String, String> getLinks() {
+	Map<String, Set<String>> getLinks() {
 		return links;
 	}
 }

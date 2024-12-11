@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fleetpin.graphql.database.manager.Database;
 import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.TableName;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.Comparator;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;

@@ -1,17 +1,26 @@
 package com.fleetpin.graphql.database.manager.dynamo;
 
-import com.google.common.primitives.UnsignedBytes;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.Record;
 
 public class HistoryUtil {
+
+	static Map<String, AttributeValue> toAttributes(ObjectMapper mapper, HistoryBackupItem entity) {
+		var attributes = TableUtil.toAttributes(mapper, entity);
+		attributes.put("idRevision", AttributeValue.builder().b(SdkBytes.fromByteArray(entity.getIdRevision())).build());
+		attributes.put("idDate", AttributeValue.builder().b(SdkBytes.fromByteArray(entity.getIdDate())).build());
+		attributes.put("startsWithUpdatedAt", AttributeValue.builder().b(SdkBytes.fromByteArray(entity.getStartsWithUpdatedAt())).build());
+
+		return attributes;
+	}
 
 	public static Stream<HashMap<String, AttributeValue>> toHistoryValue(Stream<Record> records) {
 		return records
@@ -92,7 +101,7 @@ public class HistoryUtil {
 					if (from) {
 						updatedAtId.put((byte) 0);
 					} else {
-						updatedAtId.put(UnsignedBytes.MAX_VALUE);
+						updatedAtId.put((byte) 0xFF);
 					}
 					updatedAtId.put(date.get());
 				}

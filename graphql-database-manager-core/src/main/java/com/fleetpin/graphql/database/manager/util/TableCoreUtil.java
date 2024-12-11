@@ -10,17 +10,26 @@ import java.util.stream.Collectors;
 public final class TableCoreUtil {
 
 	public static String table(Class<? extends Table> type) {
-		Class<?> tmp = type;
-		TableName name = null;
-		while (name == null && tmp != null) {
-			name = tmp.getDeclaredAnnotation(TableName.class);
-			tmp = tmp.getSuperclass();
-		}
+		var tmp = baseClass(type);
+		var name = tmp.getDeclaredAnnotation(TableName.class);
 		if (name == null) {
 			return type.getSimpleName().toLowerCase() + "s";
 		} else {
 			return name.value();
 		}
+	}
+
+	public static <T extends Table> Class<T> baseClass(Class<T> type) {
+		Class<?> tmp = type;
+		TableName name = null;
+		while (name == null && tmp != null) {
+			name = tmp.getDeclaredAnnotation(TableName.class);
+			if (name != null) {
+				return (Class<T>) tmp;
+			}
+			tmp = tmp.getSuperclass();
+		}
+		return type;
 	}
 
 	public static <T> CompletableFuture<List<T>> all(List<CompletableFuture<T>> collect) {

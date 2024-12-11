@@ -18,13 +18,12 @@ import com.fleetpin.graphql.database.manager.Table;
 import com.fleetpin.graphql.database.manager.annotations.Hash;
 import com.fleetpin.graphql.database.manager.annotations.History;
 import com.fleetpin.graphql.database.manager.test.HistoryProcessor;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
 final class DynamoDbHistoryTest {
 
-	@TestDatabase(hashed = true)
+	@TestDatabase
 	void testGetRevisionsById(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
 		var table1 = new SimpleTable("revision1");
 		table1.setId("hash:testTable1");

@@ -15,12 +15,20 @@ package com.fleetpin.graphql.database.manager;
 import com.fleetpin.graphql.database.manager.access.ForbiddenWriteException;
 import com.fleetpin.graphql.database.manager.access.ModificationPermission;
 import com.fleetpin.graphql.database.manager.util.BackupItem;
+import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
 import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,6 +37,8 @@ import org.dataloader.DataLoaderOptions;
 
 @SuppressWarnings("unchecked")
 public class Database {
+
+	public static ExecutorService VIRTUAL_THREAD_POOL = Executors.newVirtualThreadPerTaskExecutor();
 
 	private String organisationId;
 	private final DatabaseDriver driver;
@@ -40,10 +50,13 @@ public class Database {
 
 	private final Function<Table, CompletableFuture<Boolean>> putAllow;
 
+	private final AtomicInteger submitted;
+
 	Database(String organisationId, DatabaseDriver driver, ModificationPermission putAllow) {
 		this.organisationId = organisationId;
 		this.driver = driver;
 		this.putAllow = putAllow;
+		this.submitted = new AtomicInteger();
 
 		items =
 			new TableDataLoader<>(
@@ -52,7 +65,8 @@ public class Database {
 						return driver.get(keys);
 					},
 					DataLoaderOptions.newOptions().setMaxBatchSize(driver.maxBatchSize())
-				)
+				),
+				this::handleFuture
 			); // will auto call global
 
 		queries =
@@ -62,7 +76,8 @@ public class Database {
 						return merge(keys.stream().map(driver::query));
 					},
 					DataLoaderOptions.newOptions().setBatchingEnabled(false)
-				)
+				),
+				this::handleFuture
 			); // will auto call global
 
 		queryHistories =
@@ -72,10 +87,11 @@ public class Database {
 						return merge(keys.stream().map(driver::queryHistory));
 					},
 					DataLoaderOptions.newOptions().setBatchingEnabled(false)
-				)
+				),
+				this::handleFuture
 			); // will auto call global
 
-		put = new DataWriter(driver::bulkPut);
+		put = new DataWriter(driver::bulkPut, this::handleFuture);
 	}
 
 	public <T extends Table> CompletableFuture<List<T>> query(Class<T> type, Function<QueryBuilder<T>, QueryBuilder<T>> func) {
@@ -119,8 +135,16 @@ public class Database {
 		return driver.takeBackup(organisationId);
 	}
 
+	public CompletableFuture<List<HistoryBackupItem>> takeHistoryBackup(String organisationId) {
+		return driver.takeHistoryBackup(organisationId);
+	}
+
 	public CompletableFuture<Void> restoreBackup(List<BackupItem> entities) {
 		return driver.restoreBackup(entities);
+	}
+
+	public CompletableFuture<Void> restoreHistoryBackup(List<HistoryBackupItem> entities) {
+		return driver.restoreHistoryBackup(entities);
 	}
 
 	public <T extends Table> CompletableFuture<List<T>> delete(String organisationId, Class<T> clazz) {
@@ -219,7 +243,7 @@ public class Database {
 				if (!allow) {
 					throw new ForbiddenWriteException("Delete links not allowed for " + TableCoreUtil.table(entity.getClass()) + " with id " + entity.getId());
 				}
-				//impact of clearing links to tricky
+				// impact of clearing links to tricky
 				items.clearAll();
 				queries.clearAll();
 				return driver.deleteLinks(organisationId, entity);
@@ -236,18 +260,18 @@ public class Database {
 	 * @param <T>    database entity type to update
 	 * @param entity revision must match database or request will fail
 	 * @return updated entity with the revision incremented by one
-	 * CompletableFuture will fail with a RevisionMismatchException
+	 *         CompletableFuture will fail with a RevisionMismatchException
 	 */
 	public <T extends Table> CompletableFuture<T> put(T entity) {
 		return put(entity, true);
 	}
 
 	/**
-	 * @param <T> database entity type to update
+	 * @param <T>    database entity type to update
 	 * @param entity revision must match database or request will fail
-	 * @param check Will only pass if the entity revision matches what is currently in the database
+	 * @param check  Will only pass if the entity revision matches what is currently in the database
 	 * @return updated entity with the revision incremented by one
-	 * CompletableFuture will fail with a RevisionMismatchException
+	 *         CompletableFuture will fail with a RevisionMismatchException
 	 */
 	public <T extends Table> CompletableFuture<T> put(T entity, boolean check) {
 		return putAllow
@@ -296,24 +320,18 @@ public class Database {
 			});
 	}
 
-	private static final Executor DELAYER = CompletableFuture.delayedExecutor(10, TimeUnit.MILLISECONDS);
-
-	@SuppressWarnings("rawtypes")
-	public void start(CompletableFuture<?> toReturn) {
-		if (toReturn.isDone()) {
-			return;
+	private void start() {
+		if (items.dispatchDepth() > 0) {
+			items.dispatch();
 		}
-
-		if (items.dispatchDepth() > 0 || queries.dispatchDepth() > 0 || queryHistories.dispatchDepth() > 0 || put.dispatchSize() > 0) {
-			CompletableFuture[] all = new CompletableFuture[] { items.dispatch(), queries.dispatch(), queryHistories.dispatch(), put.dispatch() };
-			CompletableFuture
-				.allOf(all)
-				.whenComplete((response, error) -> {
-					//go around again
-					start(toReturn);
-				});
-		} else {
-			CompletableFuture.supplyAsync(() -> null, DELAYER).acceptEither(toReturn, __ -> start(toReturn));
+		if (queries.dispatchDepth() > 0) {
+			queries.dispatch();
+		}
+		if (queryHistories.dispatchDepth() > 0) {
+			queryHistories.dispatch();
+		}
+		if (put.dispatchSize() > 0) {
+			put.dispatch();
 		}
 	}
 
@@ -395,6 +413,41 @@ public class Database {
 	}
 
 	public Set<String> getLinkIds(Table entity, Class<? extends Table> type) {
-		return Collections.unmodifiableSet(TableAccess.getTableLinks(entity).get(TableCoreUtil.table(type)));
+		var links = TableAccess.getTableLinks(entity).get(TableCoreUtil.table(type));
+		if (links == null) {
+			return Collections.emptySet();
+		}
+		return Collections.unmodifiableSet(links);
+	}
+
+	private CompletableFuture<?> handleFuture(CompletableFuture<?> future) {
+		if (future.isDone()) {
+			return future;
+		}
+		while (true) {
+			var current = submitted.get();
+			if (current == 0) {
+				if (submitted.compareAndSet(0, 1)) {
+					run();
+				} else {
+					continue;
+				}
+			} else {
+				if (submitted.compareAndSet(current, current + 1)) {
+					return future.thenApplyAsync(t -> t, VIRTUAL_THREAD_POOL);
+				}
+			}
+		}
+	}
+
+	private void run() {
+		VIRTUAL_THREAD_POOL.submit(() -> {
+			var start = submitted.get();
+			start();
+			if (submitted.compareAndSet(start, 0)) {
+				return;
+			}
+			run();
+		});
 	}
 }
