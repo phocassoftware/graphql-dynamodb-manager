@@ -15,7 +15,7 @@ import com.phocas.graphql.builder.annotations.Entity;
 import com.phocas.graphql.builder.annotations.Query;
 
 @Entity
-public class Cat {
+public class BasicCat {
 
 	public boolean isCalico() {
 		return true;
@@ -31,14 +31,14 @@ public class Cat {
 
 	@Query
 	@Capture(color = "meow")
-	public static Cat getCat() {
-		return new Cat();
+	public static BasicCat getCat() {
+		return new BasicCat();
 	}
 
 	@Query
 	@Uppercase
-	public static Cat getUpper() {
-		return new Cat();
+	public static BasicCat getUpper() {
+		return new BasicCat();
 	}
 
 	@Query
