@@ -44,21 +44,6 @@
         </license>
     </licenses>
 
-    <developers>
-        <developer>
-            <name>Ashley Taylor</name>
-            <email>ashley.taylor@phocas.co.nz</email>
-            <organization>Fleetpin</organization>
-            <organizationUrl>http://www.phocas.co.nz</organizationUrl>
-        </developer>
-        <developer>
-            <name>Alexander Johnston</name>
-            <email>alexander.johnston@phocas.co.nz</email>
-            <organization>Fleetpin</organization>
-            <organizationUrl>http://www.phocas.co.nz</organizationUrl>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>com.phocas</groupId>
