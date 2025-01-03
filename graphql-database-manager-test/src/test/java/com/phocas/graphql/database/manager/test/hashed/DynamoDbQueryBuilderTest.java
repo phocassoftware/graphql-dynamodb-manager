@@ -10,11 +10,11 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocas.graphql.database.manager.test.hashed;
 
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.Hash;
+import com.phocas.graphql.database.manager.Database;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.Hash;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;

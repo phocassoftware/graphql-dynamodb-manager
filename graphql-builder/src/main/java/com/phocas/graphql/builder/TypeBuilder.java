@@ -9,11 +9,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
+import com.phocas.graphql.builder.annotations.Entity;
+import com.phocas.graphql.builder.annotations.GraphQLDescription;
+import com.phocas.graphql.builder.annotations.GraphQLIgnore;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLNamedOutputType;

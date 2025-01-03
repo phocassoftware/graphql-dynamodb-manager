@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.builder.exceptions;
+package com.phocas.graphql.builder.exceptions;
 
 public class InvalidOneOfException extends RuntimeException {
 

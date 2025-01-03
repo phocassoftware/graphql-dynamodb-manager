@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.mapper;
+package com.phocas.graphql.builder.mapper;
 
-import com.fleetpin.graphql.builder.EntityProcessor;
-import com.fleetpin.graphql.builder.TypeMeta;
+import com.phocas.graphql.builder.EntityProcessor;
+import com.phocas.graphql.builder.TypeMeta;
 import graphql.GraphQLContext;
 import graphql.com.google.common.base.Preconditions;
 import java.lang.reflect.InvocationTargetException;

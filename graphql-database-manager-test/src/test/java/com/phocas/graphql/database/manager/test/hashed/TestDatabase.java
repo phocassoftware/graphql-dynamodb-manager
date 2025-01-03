@@ -9,16 +9,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocas.graphql.database.manager.test.hashed;
 
-import com.fleetpin.graphql.database.manager.test.ObjectMapperCreator;
+import com.phocas.graphql.database.manager.test.ObjectMapperCreator;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@com.fleetpin.graphql.database.manager.test.annotations.TestDatabase(
+@com.phocas.graphql.database.manager.test.annotations.TestDatabase(
 	objectMapper = ObjectMapperCreator.class,
-	classPath = "com.fleetpin.graphql.database.manager.test.hashed",
+	classPath = "com.phocas.graphql.database.manager.test.hashed",
 	hashed = true
 )
 public @interface TestDatabase {

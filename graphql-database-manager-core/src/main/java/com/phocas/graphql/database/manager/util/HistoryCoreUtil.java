@@ -1,7 +1,7 @@
-package com.fleetpin.graphql.database.manager.util;
+package com.phocas.graphql.database.manager.util;
 
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.History;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.History;
 
 public final class HistoryCoreUtil {
 

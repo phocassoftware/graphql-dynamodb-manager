@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.scalar;
+package com.phocas.graphql.builder.scalar;
 
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.Scalar;
+import com.phocas.graphql.builder.annotations.GraphQLDescription;
+import com.phocas.graphql.builder.annotations.Scalar;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;

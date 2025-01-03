@@ -10,12 +10,12 @@
 // * the License.
 // */
 //
-//package com.fleetpin.graphql.database.manager.memory;
+//package com.phocas.graphql.database.manager.memory;
 //
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.fasterxml.jackson.databind.node.*;
-//import com.fleetpin.graphql.database.manager.*;
-//import com.fleetpin.graphql.database.manager.dynamo.Flatterner;
+//import com.phocas.graphql.database.manager.*;
+//import com.phocas.graphql.database.manager.dynamo.Flatterner;
 //import com.google.common.collect.Multimap;
 //
 //import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -35,8 +35,8 @@
 //import java.util.function.Supplier;
 //import java.util.stream.Collectors;
 //
-//import static com.fleetpin.graphql.database.manager.util.DynamoDbUtil.table;
-//import static com.fleetpin.graphql.database.manager.util.TableCoreUtil.table;
+//import static com.phocas.graphql.database.manager.util.DynamoDbUtil.table;
+//import static com.phocas.graphql.database.manager.util.TableCoreUtil.table;
 //
 //public final class InMemoryDynamoDb extends DatabaseDriver {
 //    private static final String SECONDARY_GLOBAL = "secondaryGlobal";

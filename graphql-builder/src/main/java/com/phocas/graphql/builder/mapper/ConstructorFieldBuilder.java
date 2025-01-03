@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.mapper;
+package com.phocas.graphql.builder.mapper;
 
 import graphql.GraphQLContext;
 import java.util.ArrayList;

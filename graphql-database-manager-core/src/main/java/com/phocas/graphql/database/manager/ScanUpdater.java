@@ -9,9 +9,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.database.manager;
+package com.phocas.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.ScanResult.Item;
+import com.phocas.graphql.database.manager.ScanResult.Item;
 import java.util.function.BiConsumer;
 
 public record ScanUpdater<T extends Table>(Class<?> type, BiConsumer<ScanContext<T>, T> updater) {

@@ -9,11 +9,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.type;
+package com.phocas.graphql.builder.type;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.GraphQLDeprecated;
-import com.fleetpin.graphql.builder.annotations.Query;
+import com.phocas.graphql.builder.annotations.Entity;
+import com.phocas.graphql.builder.annotations.GraphQLDeprecated;
+import com.phocas.graphql.builder.annotations.Query;
 
 @Entity
 public class DeprecatedObject {

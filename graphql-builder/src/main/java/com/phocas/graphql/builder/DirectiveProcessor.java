@@ -1,6 +1,6 @@
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
-import com.fleetpin.graphql.builder.annotations.Directive;
+import com.phocas.graphql.builder.annotations.Directive;
 import graphql.introspection.Introspection;
 import graphql.schema.*;
 import java.lang.annotation.Annotation;

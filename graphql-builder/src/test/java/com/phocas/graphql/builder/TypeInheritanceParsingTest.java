@@ -9,11 +9,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fleetpin.graphql.builder.exceptions.InvalidOneOfException;
+import com.phocas.graphql.builder.exceptions.InvalidOneOfException;
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -487,7 +487,7 @@ public class TypeInheritanceParsingTest {
 	}
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.type")).build();
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);
 		if (variables != null) {

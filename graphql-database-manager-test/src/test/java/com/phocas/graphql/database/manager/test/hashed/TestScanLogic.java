@@ -10,14 +10,14 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocas.graphql.database.manager.test.hashed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.Hash;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.Hash;
+import com.phocas.graphql.database.manager.dynamo.DynamoDbManager;
 import java.util.concurrent.ExecutionException;
 
 final class TestScanLogic {

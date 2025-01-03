@@ -9,13 +9,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static graphql.schema.GraphQLEnumValueDefinition.newEnumValueDefinition;
 
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
-import com.fleetpin.graphql.builder.mapper.InputTypeBuilder;
+import com.phocas.graphql.builder.annotations.GraphQLDescription;
+import com.phocas.graphql.builder.annotations.GraphQLIgnore;
+import com.phocas.graphql.builder.mapper.InputTypeBuilder;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLNamedInputType;
 import graphql.schema.GraphQLNamedOutputType;

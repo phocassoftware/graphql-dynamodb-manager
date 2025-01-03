@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -226,7 +226,7 @@ public class ParameterParsingTest {
 	}
 
 	private ExecutionResult execute(String query) throws ReflectiveOperationException {
-		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.parameter")).build();
+		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.parameter")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
 			throw new RuntimeException(result.getErrors().toString()); //TODO:cleanup

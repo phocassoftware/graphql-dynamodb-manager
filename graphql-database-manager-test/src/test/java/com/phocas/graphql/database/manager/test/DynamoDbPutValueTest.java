@@ -1,7 +1,7 @@
-package com.fleetpin.graphql.database.manager.test;
+package com.phocas.graphql.database.manager.test;
 
-import com.fleetpin.graphql.database.manager.PutValue;
-import com.fleetpin.graphql.database.manager.RevisionMismatchException;
+import com.phocas.graphql.database.manager.PutValue;
+import com.phocas.graphql.database.manager.RevisionMismatchException;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Assertions;
 

@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
-import com.fleetpin.graphql.builder.annotations.DataFetcherWrapper;
-import com.fleetpin.graphql.builder.annotations.Directive;
+import com.phocas.graphql.builder.annotations.DataFetcherWrapper;
+import com.phocas.graphql.builder.annotations.Directive;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLAppliedDirective;

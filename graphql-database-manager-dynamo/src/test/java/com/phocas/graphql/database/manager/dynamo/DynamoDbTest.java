@@ -10,7 +10,7 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.dynamo;
+package com.phocas.graphql.database.manager.dynamo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

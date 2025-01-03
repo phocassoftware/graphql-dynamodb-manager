@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.database.manager.util;
+package com.phocas.graphql.database.manager.util;
 
 import java.nio.ByteBuffer;
 

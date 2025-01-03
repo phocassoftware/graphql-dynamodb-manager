@@ -10,13 +10,13 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager;
+package com.phocas.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.access.ForbiddenWriteException;
-import com.fleetpin.graphql.database.manager.access.ModificationPermission;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
-import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
+import com.phocas.graphql.database.manager.access.ForbiddenWriteException;
+import com.phocas.graphql.database.manager.access.ModificationPermission;
+import com.phocas.graphql.database.manager.util.BackupItem;
+import com.phocas.graphql.database.manager.util.HistoryBackupItem;
+import com.phocas.graphql.database.manager.util.TableCoreUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

@@ -9,9 +9,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.inputgenericsRecords;
+package com.phocas.graphql.builder.inputgenericsRecords;
 
-import com.fleetpin.graphql.builder.annotations.Query;
+import com.phocas.graphql.builder.annotations.Query;
 import jakarta.annotation.Nullable;
 import java.util.List;
 

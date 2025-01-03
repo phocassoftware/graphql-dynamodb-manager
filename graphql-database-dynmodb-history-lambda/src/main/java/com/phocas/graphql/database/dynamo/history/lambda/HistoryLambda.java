@@ -10,7 +10,7 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.dynamo.history.lambda;
+package com.phocas.graphql.database.dynamo.history.lambda;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -18,7 +18,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
 import com.amazonaws.services.lambda.runtime.events.transformers.v2.DynamodbEventTransformer;
-import com.fleetpin.graphql.database.manager.dynamo.HistoryUtil;
+import com.phocas.graphql.database.manager.dynamo.HistoryUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

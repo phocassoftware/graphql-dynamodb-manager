@@ -10,21 +10,21 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocas.graphql.database.manager.test.hashed;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.GlobalIndex;
-import com.fleetpin.graphql.database.manager.annotations.Hash;
-import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
+import com.phocas.graphql.database.manager.Database;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.GlobalIndex;
+import com.phocas.graphql.database.manager.annotations.Hash;
+import com.phocas.graphql.database.manager.annotations.SecondaryIndex;
+import com.phocas.graphql.database.manager.dynamo.DynamoDbManager;
+import com.phocas.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocas.graphql.database.manager.test.annotations.DatabaseOrganisation;
+import com.phocas.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

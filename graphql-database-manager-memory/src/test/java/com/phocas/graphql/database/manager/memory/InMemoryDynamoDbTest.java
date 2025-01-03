@@ -10,7 +10,7 @@
 // * the License.
 // */
 //
-//package com.fleetpin.graphql.database.manager.memory;
+//package com.phocas.graphql.database.manager.memory;
 //
 //import com.fasterxml.jackson.annotation.JsonAutoDetect;
 //import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -20,10 +20,10 @@
 //import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 //import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 //import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-//import com.fleetpin.graphql.builder.annotations.Id;
-//import com.fleetpin.graphql.database.manager.Table;
-//import com.fleetpin.graphql.database.manager.annotations.GlobalIndex;
-//import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
+//import com.phocas.graphql.builder.annotations.Id;
+//import com.phocas.graphql.database.manager.Table;
+//import com.phocas.graphql.database.manager.annotations.GlobalIndex;
+//import com.phocas.graphql.database.manager.annotations.SecondaryIndex;
 //import com.google.common.collect.HashMultimap;
 //import org.junit.jupiter.api.Assertions;
 //import org.junit.jupiter.api.BeforeEach;

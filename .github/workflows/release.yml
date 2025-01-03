@@ -28,7 +28,7 @@ jobs:
       - name: set name
         run: |
           git config --global user.name "release-bot";
-          git config --global user.email "release-bot@fleetpin.co.nz";
+          git config --global user.email "release-bot@phocas.co.nz";
 
       - name: add key
         run: |

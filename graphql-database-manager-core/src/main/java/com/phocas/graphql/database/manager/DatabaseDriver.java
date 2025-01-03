@@ -10,10 +10,10 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager;
+package com.phocas.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
+import com.phocas.graphql.database.manager.util.BackupItem;
+import com.phocas.graphql.database.manager.util.HistoryBackupItem;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;

@@ -9,9 +9,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
-import com.fleetpin.graphql.builder.annotations.*;
+import com.phocas.graphql.builder.annotations.*;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import java.lang.reflect.Method;

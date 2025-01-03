@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,7 +38,7 @@ public class methodArgsTest {
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
 		GraphQL schema = GraphQL
-			.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.fleetpin.graphql.builder.methodArgs")))
+			.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.phocas.graphql.builder.methodArgs")))
 			.build();
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);

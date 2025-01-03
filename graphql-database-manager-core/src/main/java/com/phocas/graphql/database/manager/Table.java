@@ -10,11 +10,11 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager;
+package com.phocas.graphql.database.manager;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
-import com.fleetpin.graphql.builder.annotations.Id;
+import com.phocas.graphql.builder.annotations.GraphQLIgnore;
+import com.phocas.graphql.builder.annotations.Id;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;

@@ -10,12 +10,12 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.dynamo;
+package com.phocas.graphql.database.manager.dynamo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
+import com.phocas.graphql.database.manager.util.BackupItem;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

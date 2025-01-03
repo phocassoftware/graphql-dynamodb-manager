@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -69,7 +69,7 @@ public class TypeGenericInputRecords {
 	}
 
 	private ExecutionResult execute(String query) {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.inputgenericsRecords")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.inputgenericsRecords")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
 			ExceptionWhileDataFetching d = (ExceptionWhileDataFetching) result.getErrors().get(0);

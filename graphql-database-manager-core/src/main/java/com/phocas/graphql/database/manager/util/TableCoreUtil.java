@@ -1,7 +1,7 @@
-package com.fleetpin.graphql.database.manager.util;
+package com.phocas.graphql.database.manager.util;
 
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.TableName;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.TableName;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

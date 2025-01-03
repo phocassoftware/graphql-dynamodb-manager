@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.context;
+package com.phocas.graphql.builder.context;
 
-import com.fleetpin.graphql.builder.annotations.Context;
-import com.fleetpin.graphql.builder.annotations.Query;
+import com.phocas.graphql.builder.annotations.Context;
+import com.phocas.graphql.builder.annotations.Query;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetchingEnvironment;
 

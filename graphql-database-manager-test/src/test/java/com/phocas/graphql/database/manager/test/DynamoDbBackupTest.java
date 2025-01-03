@@ -10,20 +10,20 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test;
+package com.phocas.graphql.database.manager.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.QueryHistoryBuilder;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.GlobalIndex;
-import com.fleetpin.graphql.database.manager.annotations.History;
-import com.fleetpin.graphql.database.manager.annotations.SecondaryIndex;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoBackupItem;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoHistoryBackupItem;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
+import com.phocas.graphql.database.manager.QueryHistoryBuilder;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.GlobalIndex;
+import com.phocas.graphql.database.manager.annotations.History;
+import com.phocas.graphql.database.manager.annotations.SecondaryIndex;
+import com.phocas.graphql.database.manager.dynamo.DynamoBackupItem;
+import com.phocas.graphql.database.manager.dynamo.DynamoDbManager;
+import com.phocas.graphql.database.manager.dynamo.DynamoHistoryBackupItem;
+import com.phocas.graphql.database.manager.util.BackupItem;
+import com.phocas.graphql.database.manager.util.HistoryBackupItem;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;

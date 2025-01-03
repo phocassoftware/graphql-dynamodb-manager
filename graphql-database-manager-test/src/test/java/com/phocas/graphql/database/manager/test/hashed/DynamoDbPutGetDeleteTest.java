@@ -10,15 +10,15 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocas.graphql.database.manager.test.hashed;
 
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.Hash;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.fleetpin.graphql.database.manager.test.annotations.GlobalEnabled;
+import com.phocas.graphql.database.manager.Database;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.Hash;
+import com.phocas.graphql.database.manager.dynamo.DynamoDbManager;
+import com.phocas.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocas.graphql.database.manager.test.annotations.DatabaseOrganisation;
+import com.phocas.graphql.database.manager.test.annotations.GlobalEnabled;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

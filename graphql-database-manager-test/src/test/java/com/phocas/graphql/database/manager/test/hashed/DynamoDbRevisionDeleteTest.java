@@ -10,13 +10,13 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocas.graphql.database.manager.test.hashed;
 
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.RevisionMismatchException;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.annotations.Hash;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocas.graphql.database.manager.Database;
+import com.phocas.graphql.database.manager.RevisionMismatchException;
+import com.phocas.graphql.database.manager.Table;
+import com.phocas.graphql.database.manager.annotations.Hash;
+import com.phocas.graphql.database.manager.test.annotations.DatabaseNames;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;

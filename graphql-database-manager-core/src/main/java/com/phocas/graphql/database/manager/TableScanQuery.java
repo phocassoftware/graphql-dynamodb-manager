@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.database.manager;
+package com.phocas.graphql.database.manager;
 
 import java.util.List;
 

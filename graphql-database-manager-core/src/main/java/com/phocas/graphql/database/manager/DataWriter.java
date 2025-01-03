@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.database.manager;
+package com.phocas.graphql.database.manager;
 
 import java.util.ArrayList;
 import java.util.List;

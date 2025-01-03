@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import graphql.schema.DataFetcher;
 import java.lang.reflect.Method;

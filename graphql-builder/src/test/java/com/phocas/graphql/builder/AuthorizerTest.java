@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -53,7 +53,7 @@ public class AuthorizerTest {
 	}
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.authorizer")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.authorizer")).build();
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);
 		if (variables != null) {

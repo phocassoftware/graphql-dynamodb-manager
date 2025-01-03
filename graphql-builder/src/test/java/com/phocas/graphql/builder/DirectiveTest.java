@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +29,7 @@ public class DirectiveTest {
 
 	@Test
 	public void testDirectiveAppliedToQuery() throws ReflectiveOperationException {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type.directive")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.type.directive")).build();
 		var cat = schema.getGraphQLSchema().getFieldDefinition(FieldCoordinates.coordinates(schema.getGraphQLSchema().getQueryType(), "getCat"));
 		var capture = cat.getAppliedDirective("Capture");
 		var argument = capture.getArgument("color");
@@ -39,7 +39,7 @@ public class DirectiveTest {
 
 	@Test
 	public void testNoArgumentDirective() throws ReflectiveOperationException {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type.directive")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.type.directive")).build();
 		var cat = schema.getGraphQLSchema().getFieldDefinition(FieldCoordinates.coordinates(schema.getGraphQLSchema().getQueryType(), "getUpper"));
 		var uppercase = cat.getAppliedDirective("Uppercase");
 		assertNotNull(uppercase);
@@ -48,7 +48,7 @@ public class DirectiveTest {
 
 	@Test
 	public void testPresentOnSchema() throws ReflectiveOperationException {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type.directive")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.type.directive")).build();
 		var capture = schema.getGraphQLSchema().getSchemaAppliedDirective("Capture");
 		var argument = capture.getArgument("color");
 		var color = argument.getValue();
@@ -72,7 +72,7 @@ public class DirectiveTest {
 
 	@Test
 	public void testDirectiveArgument() {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type.directive")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocas.graphql.builder.type.directive")).build();
 		var cat = schema.getGraphQLSchema().getFieldDefinition(FieldCoordinates.coordinates(schema.getGraphQLSchema().getQueryType(), "getNickname"));
 		var argument = cat.getArgument("nickName");
 		var directive = argument.getAppliedDirective("Input");
@@ -95,7 +95,7 @@ public class DirectiveTest {
 	}
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
-		GraphQLSchema preSchema = SchemaBuilder.builder().classpath("com.fleetpin.graphql.builder.type.directive").build().build();
+		GraphQLSchema preSchema = SchemaBuilder.builder().classpath("com.phocas.graphql.builder.type.directive").build().build();
 		GraphQL schema = GraphQL.newGraphQL(new IntrospectionWithDirectivesSupport().apply(preSchema)).build();
 
 		var input = ExecutionInput.newExecutionInput();

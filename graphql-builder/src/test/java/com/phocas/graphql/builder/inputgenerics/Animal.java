@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.inputgenerics;
+package com.phocas.graphql.builder.inputgenerics;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.SchemaOption;
+import com.phocas.graphql.builder.annotations.Entity;
+import com.phocas.graphql.builder.annotations.SchemaOption;
 
 @Entity
 public abstract class Animal {

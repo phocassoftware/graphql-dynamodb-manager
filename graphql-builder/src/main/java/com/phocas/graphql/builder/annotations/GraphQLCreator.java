@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.annotations;
+package com.phocas.graphql.builder.annotations;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

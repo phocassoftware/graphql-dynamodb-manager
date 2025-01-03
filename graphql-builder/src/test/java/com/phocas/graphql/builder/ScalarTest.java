@@ -9,12 +9,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocas.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fleetpin.graphql.builder.scalar.Fur;
-import com.fleetpin.graphql.builder.scalar.Shape;
+import com.phocas.graphql.builder.scalar.Fur;
+import com.phocas.graphql.builder.scalar.Shape;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -98,7 +98,7 @@ public class ScalarTest {
 		GraphQL schema = GraphQL
 			.newGraphQL(
 				new IntrospectionWithDirectivesSupport()
-					.apply(SchemaBuilder.builder().classpath("com.fleetpin.graphql.builder.scalar").scalar(ExtendedScalars.GraphQLLong).build().build())
+					.apply(SchemaBuilder.builder().classpath("com.phocas.graphql.builder.scalar").scalar(ExtendedScalars.GraphQLLong).build().build())
 			)
 			.build();
 		var input = ExecutionInput.newExecutionInput();
