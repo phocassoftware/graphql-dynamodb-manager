@@ -12,11 +12,8 @@
 package com.phocas.graphql.builder;
 
 import com.phocas.graphql.builder.annotations.InnerNullable;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,6 +67,13 @@ public class TypeMeta {
 		if (owningClass instanceof Class) {
 			findType(target, type, (Class) owningClass, element);
 		} else if (owningClass instanceof ParameterizedType) {
+			if (element instanceof Method) {
+				var declaringClass = ((Method) element).getDeclaringClass();
+				if (declaringClass.equals(target.type)) {
+					findType(target, type, target.type, element);
+					return;
+				}
+			}
 			var pt = (ParameterizedType) owningClass;
 			if (!matchType(target, type.getTypeName(), pt, true, element)) {
 				throw new UnsupportedOperationException("Does not handle type " + owningClass);

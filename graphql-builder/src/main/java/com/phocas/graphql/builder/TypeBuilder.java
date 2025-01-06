@@ -22,6 +22,7 @@ import graphql.schema.GraphQLObjectType.Builder;
 import graphql.schema.GraphQLTypeReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 
 public abstract class TypeBuilder {
 
@@ -167,6 +168,7 @@ public abstract class TypeBuilder {
 		protected void processFields(String typeName, Builder graphType, graphql.schema.GraphQLInterfaceType.Builder interfaceBuilder)
 			throws ReflectiveOperationException {
 			var type = meta.getType();
+			
 			for (Method method : type.getMethods()) {
 				try {
 					var name = EntityUtil.getter(method);

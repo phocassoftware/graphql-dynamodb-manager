@@ -91,6 +91,7 @@ class MethodProcessor {
 
 		field.name(coordinates.getFieldName());
 
+
 		TypeMeta meta = new TypeMeta(parentMeta, method.getReturnType(), method.getGenericReturnType(), method);
 		var type = entityProcessor.getType(meta, method.getAnnotations());
 		field.type(type);
