@@ -67,8 +67,8 @@ public class TypeMeta {
 		if (owningClass instanceof Class) {
 			findType(target, type, (Class) owningClass, element);
 		} else if (owningClass instanceof ParameterizedType) {
-			if (element instanceof Member) {
-				var declaringClass = ((Member) element).getDeclaringClass();
+			if (element instanceof Member member) {
+				var declaringClass = member.getDeclaringClass();
 				if (declaringClass.equals(target.type)) {
 					findType(target, type, target.type, element);
 					return;
