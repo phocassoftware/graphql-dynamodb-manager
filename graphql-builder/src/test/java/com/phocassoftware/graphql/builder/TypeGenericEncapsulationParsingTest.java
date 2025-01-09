@@ -11,40 +11,17 @@
  */
 package com.phocassoftware.graphql.builder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class TypeGenericParsingTest {
+import java.util.List;
+import java.util.Map;
 
-	@Test
-	public void testAnimalName() throws ReflectiveOperationException {
-		var name = getField("Animal", "INTERFACE", "name");
-		var nonNull = confirmNonNull(name);
-		confirmString(nonNull);
-	}
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-	@Test
-	public void testAnimalFur() throws ReflectiveOperationException {
-		var name = getField("Animal", "INTERFACE", "fur");
-		var nonNull = confirmNonNull(name);
-		confirmInterface(nonNull, "Fur");
-	}
-
-	@Test
-	public void testAnimalFurs() throws ReflectiveOperationException {
-		var name = getField("Animal", "INTERFACE", "furs");
-		var type = confirmNonNull(name);
-		type = confirmArray(type);
-		type = confirmNonNull(type);
-		confirmInterface(type, "Fur");
-	}
-
+public class TypeGenericEncapsulationParsingTest {
 	@Test
 	public void testCatName() throws ReflectiveOperationException {
 		var name = getField("Cat", "OBJECT", "name");
@@ -89,71 +66,6 @@ public class TypeGenericParsingTest {
 		type = confirmArray(type);
 		type = confirmNonNull(type);
 		confirmObject(type, "DogFur");
-	}
-
-	@Test
-	public void testFurName() throws ReflectiveOperationException {
-		var name = getField("Fur", "INTERFACE", "length");
-		var nonNull = confirmNonNull(name);
-		confirmNumber(nonNull);
-	}
-
-	@Test
-	public void testCatFurCalico() throws ReflectiveOperationException {
-		var name = getField("CatFur", "OBJECT", "calico");
-		var nonNull = confirmNonNull(name);
-		confirmBoolean(nonNull);
-	}
-
-	@Test
-	public void testCatFurLong() throws ReflectiveOperationException {
-		var name = getField("CatFur", "OBJECT", "long");
-		var nonNull = confirmNonNull(name);
-		confirmBoolean(nonNull);
-	}
-
-	@Test
-	public void testDogFurShaggy() throws ReflectiveOperationException {
-		var name = getField("DogFur", "OBJECT", "shaggy");
-		var nonNull = confirmNonNull(name);
-		confirmBoolean(nonNull);
-	}
-
-	@Test
-	public void testCatFamilyName() throws ReflectiveOperationException {
-		var name = getField("CatFamily", "INTERFACE", "name");
-		var nonNull = confirmNonNull(name);
-		confirmString(nonNull);
-	}
-
-	@Test
-	public void testCatFamilyFur() throws ReflectiveOperationException {
-		var name = getField("CatFamily", "INTERFACE", "fur");
-		var nonNull = confirmNonNull(name);
-		confirmInterface(nonNull, "CatFamilyFur");
-	}
-
-	@Test
-	public void testCatFamilyFurs() throws ReflectiveOperationException {
-		var name = getField("CatFamily", "INTERFACE", "furs");
-		var type = confirmNonNull(name);
-		type = confirmArray(type);
-		type = confirmNonNull(type);
-		confirmInterface(type, "CatFamilyFur");
-	}
-
-	@Test
-	public void testCatFamilyFurCalico() throws ReflectiveOperationException {
-		var name = getField("CatFamilyFur", "INTERFACE", "length");
-		var nonNull = confirmNonNull(name);
-		confirmNumber(nonNull);
-	}
-
-	@Test
-	public void testCatFamilyFurLong() throws ReflectiveOperationException {
-		var name = getField("CatFamilyFur", "INTERFACE", "long");
-		var nonNull = confirmNonNull(name);
-		confirmBoolean(nonNull);
 	}
 
 	private void confirmString(Map<String, Object> type) {
@@ -238,77 +150,31 @@ public class TypeGenericParsingTest {
 
 	@Test
 	public void testQueryCatFur() throws ReflectiveOperationException {
-		Map<String, List<Map<String, Object>>> response = execute(
-			"query {animals{" +
-			"name " +
-			"... on Cat { " +
-			" fur{ " +
-			"  calico " +
-			"  length" +
-			"  catFur: long" +
-			" }" +
-			"} " +
-			"... on Dog {" +
-			" fur {" +
-			"   shaggy" +
-			"   dogFur: long" +
-			"   length" +
-			" } " +
-			"} " +
-			"}} "
+		Map<String, Map<String, Object>> response = execute(
+			"query { " +
+				"getCat {" +
+					"   name " +
+					"   fur{ " +
+					"    calico " +
+					"    length" +
+					"    long" +
+					"   }" +
+					"  } " +
+				"} "
 		)
 			.getData();
 
-		var animals = response.get("animals");
-
-		var cat = animals.get(0);
-		var dog = animals.get(1);
-
-		var catFur = (Map<String, Object>) cat.get("fur");
-		var dogFur = (Map<String, Object>) dog.get("fur");
-
-		assertEquals("name", cat.get("name"));
-		assertEquals(4, catFur.get("length"));
-		assertEquals(true, catFur.get("calico"));
-		assertEquals(true, catFur.get("catFur"));
-
-		assertEquals(4, dogFur.get("length"));
-		assertEquals(true, dogFur.get("shaggy"));
-		assertEquals("very", dogFur.get("dogFur"));
-	}
-
-	@Test
-	public void testMutationCatFur() throws ReflectiveOperationException {
-		Map<String, Map<String, Map<String, Object>>> response = execute(
-			"mutation {makeCat{" +
-			"item { " +
-			"  ... on Cat { " +
-			"   name " +
-			"   fur{ " +
-			"    calico " +
-			"    length" +
-			"    long" +
-			"   }" +
-			"  } " +
-			"}" +
-			"}} "
-		)
-			.getData();
-
-		var makeCat = response.get("makeCat");
-
-		var cat = makeCat.get("item");
-
+		var cat = response.get("getCat");
 		var catFur = (Map<String, Object>) cat.get("fur");
 
 		assertEquals("name", cat.get("name"));
 		assertEquals(4, catFur.get("length"));
 		assertEquals(true, catFur.get("calico"));
-		assertEquals(true, catFur.get("long"));
+
 	}
 
 	private ExecutionResult execute(String query) {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.generics.inheritance")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.generics.encapsulation")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
 			throw new RuntimeException(result.getErrors().toString());

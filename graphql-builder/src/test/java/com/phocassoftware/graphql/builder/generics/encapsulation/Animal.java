@@ -9,16 +9,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.phocassoftware.graphql.builder.generics;
+package com.phocassoftware.graphql.builder.generics.encapsulation;
 
 import com.phocassoftware.graphql.builder.annotations.Entity;
 import com.phocassoftware.graphql.builder.annotations.Mutation;
 import com.phocassoftware.graphql.builder.annotations.Query;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Entity
 public abstract class Animal<T extends Fur> {
 
 	private final T fur;
@@ -39,35 +39,35 @@ public abstract class Animal<T extends Fur> {
 		return Arrays.asList(fur);
 	}
 
-	@Query
-	public static List<Animal<?>> animals() {
-		return Arrays.asList(new Cat(), new Dog());
-	}
-
-	@Mutation
-	public static MutationResponse makeCat() {
-		return new GenericMutationResponse<>(Optional.of(new Cat()));
-	}
-
-	@Entity
-	public abstract static class MutationResponse<T extends Fur> {
-
-		private Optional<Animal<T>> item;
-
-		public MutationResponse(Optional<Animal<T>> item) {
-			this.item = item;
-		}
-
-		public Optional<Animal<T>> getItem() {
-			return item;
-		}
-	}
-
-	@Entity
-	public static class GenericMutationResponse<T extends Fur> extends MutationResponse<T> {
-
-		public GenericMutationResponse(Optional<Animal<T>> item) {
-			super(item);
-		}
-	}
+//	@Query
+//	public static List<Animal<?>> animals() {
+//		return Arrays.asList(new Cat(), new Dog());
+//	}
+//
+//	@Mutation
+//	public static MutationResponse makeCat() {
+//		return new GenericMutationResponse<>(Optional.of(new Cat()));
+//	}
+//
+//	@Entity
+//	public abstract static class MutationResponse<T extends Fur> {
+//
+//		private Optional<Animal<T>> item;
+//
+//		public MutationResponse(Optional<Animal<T>> item) {
+//			this.item = item;
+//		}
+//
+//		public Optional<Animal<T>> getItem() {
+//			return item;
+//		}
+//	}
+//
+//	@Entity
+//	public static class GenericMutationResponse<T extends Fur> extends MutationResponse<T> {
+//
+//		public GenericMutationResponse(Optional<Animal<T>> item) {
+//			super(item);
+//		}
+//	}
 }

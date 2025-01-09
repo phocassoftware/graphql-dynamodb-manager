@@ -9,20 +9,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.phocassoftware.graphql.builder.generics;
+package com.phocassoftware.graphql.builder.generics.inheritance;
 
 import com.phocassoftware.graphql.builder.annotations.Entity;
-import com.phocassoftware.graphql.builder.annotations.Mutation;
 
 @Entity
-public class Cat extends CatFamily<CatFur> {
+public class DogFur extends Fur {
 
-	public Cat() {
-		super(new CatFur());
+	public boolean isShaggy() {
+		return true;
 	}
 
-	@Mutation
-	public static Cat getCat() {
-		return null;
+	public String getLong() {
+		return "very";
 	}
 }

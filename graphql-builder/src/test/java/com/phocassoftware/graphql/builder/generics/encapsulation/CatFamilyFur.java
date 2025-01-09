@@ -9,11 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.phocassoftware.graphql.builder.generics;
+package com.phocassoftware.graphql.builder.generics.encapsulation;
 
 import com.phocassoftware.graphql.builder.annotations.Entity;
 
-@Entity
 public abstract class CatFamilyFur extends Fur {
 
 	public boolean isLong() {
