@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.fleetpin</groupId>
+		<groupId>com.phocas</groupId>
 		<artifactId>graphql-database-manager</artifactId>
 		<version>3.0.4-SNAPSHOT</version>
 	</parent>
@@ -51,24 +51,9 @@
 		</license>
 	</licenses>
 
-	<developers>
-		<developer>
-			<name>Ashley Taylor</name>
-			<email>ashley.taylor@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-		<developer>
-			<name>Alexander Johnston</name>
-			<email>alexander.johnston@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-	</developers>
-
 	<dependencies>
 		<dependency>
-			<groupId>com.fleetpin</groupId>
+			<groupId>com.phocas</groupId>
 			<artifactId>graphql-database-manager-dynamo</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>

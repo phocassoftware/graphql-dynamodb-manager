@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.fleetpin</groupId>
+	<groupId>com.phocas</groupId>
 	<artifactId>graphql-database-manager</artifactId>
 	<version>3.0.4-SNAPSHOT</version>
 	<name>GraphQL Builder</name>
@@ -34,21 +34,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<developers>
-		<developer>
-			<name>Ashley Taylor</name>
-			<email>ashley.taylor@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-		<developer>
-			<name>Alexander Johnston</name>
-			<email>alexander.johnston@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-	</developers>
 
 	<dependencyManagement>
 		<dependencies>
