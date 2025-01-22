@@ -1,7 +1,7 @@
-package com.fleetpin.graphql.database.manager.test;
+package com.phocassoftware.graphql.database.manager.test;
 
-import com.fleetpin.graphql.database.dynamo.history.lambda.HistoryLambda;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocassoftware.graphql.database.dynamo.history.lambda.HistoryLambda;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
 import java.lang.reflect.Parameter;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.ShardIteratorType;

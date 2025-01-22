@@ -9,9 +9,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.type.directive;
+package com.phocassoftware.graphql.builder.type.directive;
 
-import com.fleetpin.graphql.builder.SchemaConfiguration;
+import com.phocassoftware.graphql.builder.SchemaConfiguration;
 
 @Capture(color = "top")
 public class CatSchema implements SchemaConfiguration {}

@@ -9,11 +9,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.mapper;
+package com.phocassoftware.graphql.builder.mapper;
 
-import com.fleetpin.graphql.builder.EntityProcessor;
-import com.fleetpin.graphql.builder.annotations.OneOf;
-import com.fleetpin.graphql.builder.exceptions.InvalidOneOfException;
+import com.phocassoftware.graphql.builder.EntityProcessor;
+import com.phocassoftware.graphql.builder.annotations.OneOf;
+import com.phocassoftware.graphql.builder.exceptions.InvalidOneOfException;
 import graphql.GraphQLContext;
 import java.util.HashMap;
 import java.util.Locale;

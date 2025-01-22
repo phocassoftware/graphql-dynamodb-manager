@@ -9,9 +9,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.methodArgs;
+package com.phocassoftware.graphql.builder.methodArgs;
 
-import com.fleetpin.graphql.builder.annotations.Query;
+import com.phocassoftware.graphql.builder.annotations.Query;
 
 public class Queries {
 

@@ -9,14 +9,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.type.inheritance;
+package com.phocassoftware.graphql.builder.type.inheritance;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.Mutation;
-import com.fleetpin.graphql.builder.annotations.OneOf;
-import com.fleetpin.graphql.builder.annotations.Query;
-import com.fleetpin.graphql.builder.annotations.SchemaOption;
+import com.phocassoftware.graphql.builder.annotations.Entity;
+import com.phocassoftware.graphql.builder.annotations.GraphQLDescription;
+import com.phocassoftware.graphql.builder.annotations.Mutation;
+import com.phocassoftware.graphql.builder.annotations.OneOf;
+import com.phocassoftware.graphql.builder.annotations.Query;
+import com.phocassoftware.graphql.builder.annotations.SchemaOption;
 import java.util.Arrays;
 import java.util.List;
 

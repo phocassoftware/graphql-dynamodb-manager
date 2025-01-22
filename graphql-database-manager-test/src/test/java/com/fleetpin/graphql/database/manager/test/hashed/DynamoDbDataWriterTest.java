@@ -1,10 +1,10 @@
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocassoftware.graphql.database.manager.test.hashed;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.fleetpin.graphql.database.manager.DataWriter;
-import com.fleetpin.graphql.database.manager.DatabaseDriver;
+import com.phocassoftware.graphql.database.manager.DataWriter;
+import com.phocassoftware.graphql.database.manager.DatabaseDriver;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 

@@ -9,20 +9,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
-import com.fleetpin.graphql.builder.annotations.InputIgnore;
-import com.fleetpin.graphql.builder.annotations.OneOf;
-import com.fleetpin.graphql.builder.annotations.SchemaOption;
-import com.fleetpin.graphql.builder.mapper.ConstructorFieldBuilder;
-import com.fleetpin.graphql.builder.mapper.ConstructorFieldBuilder.RecordMapper;
-import com.fleetpin.graphql.builder.mapper.InputTypeBuilder;
-import com.fleetpin.graphql.builder.mapper.ObjectFieldBuilder;
-import com.fleetpin.graphql.builder.mapper.ObjectFieldBuilder.FieldMapper;
-import com.fleetpin.graphql.builder.mapper.OneOfBuilder;
+import com.phocassoftware.graphql.builder.annotations.Entity;
+import com.phocassoftware.graphql.builder.annotations.GraphQLDescription;
+import com.phocassoftware.graphql.builder.annotations.GraphQLIgnore;
+import com.phocassoftware.graphql.builder.annotations.InputIgnore;
+import com.phocassoftware.graphql.builder.annotations.OneOf;
+import com.phocassoftware.graphql.builder.annotations.SchemaOption;
+import com.phocassoftware.graphql.builder.mapper.ConstructorFieldBuilder;
+import com.phocassoftware.graphql.builder.mapper.ConstructorFieldBuilder.RecordMapper;
+import com.phocassoftware.graphql.builder.mapper.InputTypeBuilder;
+import com.phocassoftware.graphql.builder.mapper.ObjectFieldBuilder;
+import com.phocassoftware.graphql.builder.mapper.ObjectFieldBuilder.FieldMapper;
+import com.phocassoftware.graphql.builder.mapper.OneOfBuilder;
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputObjectType.Builder;

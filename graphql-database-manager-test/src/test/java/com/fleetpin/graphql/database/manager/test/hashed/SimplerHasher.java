@@ -1,6 +1,6 @@
-package com.fleetpin.graphql.database.manager.test.hashed;
+package com.phocassoftware.graphql.database.manager.test.hashed;
 
-import com.fleetpin.graphql.database.manager.annotations.Hash.HashExtractor;
+import com.phocassoftware.graphql.database.manager.annotations.Hash.HashExtractor;
 
 public class SimplerHasher implements HashExtractor {
 

@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -308,7 +308,7 @@ public class TypeGenericParsingTest {
 	}
 
 	private ExecutionResult execute(String query) {
-		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.generics")).build();
+		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.generics")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
 			throw new RuntimeException(result.getErrors().toString());

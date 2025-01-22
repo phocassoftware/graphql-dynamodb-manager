@@ -10,11 +10,11 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test;
+package com.phocassoftware.graphql.database.manager.test;
 
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.VirtualDatabase;
+import com.phocassoftware.graphql.database.manager.Database;
+import com.phocassoftware.graphql.database.manager.Table;
+import com.phocassoftware.graphql.database.manager.VirtualDatabase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

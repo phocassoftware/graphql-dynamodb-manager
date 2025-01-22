@@ -18,7 +18,7 @@
 	<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
 
 	<parent>
-		<groupId>com.fleetpin</groupId>
+		<groupId>com.phocassoftware</groupId>
 		<artifactId>graphql-database-manager</artifactId>
 		<version>3.0.4-SNAPSHOT</version>
 	</parent>

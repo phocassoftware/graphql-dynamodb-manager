@@ -10,13 +10,13 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test;
+package com.phocassoftware.graphql.database.manager.test;
 
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
+import com.phocassoftware.graphql.database.manager.Database;
+import com.phocassoftware.graphql.database.manager.dynamo.DynamoDbManager;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;

@@ -10,14 +10,14 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.virtual;
+package com.phocassoftware.graphql.database.manager.virtual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fleetpin.graphql.builder.annotations.Context;
-import com.fleetpin.graphql.database.manager.VirtualDatabase;
+import com.phocassoftware.graphql.builder.annotations.Context;
+import com.phocassoftware.graphql.database.manager.VirtualDatabase;
 import graphql.schema.DataFetcher;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;

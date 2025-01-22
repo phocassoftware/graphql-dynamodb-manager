@@ -9,11 +9,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.restrictions;
+package com.phocassoftware.graphql.builder.restrictions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fleetpin.graphql.builder.SchemaBuilder;
+import com.phocassoftware.graphql.builder.SchemaBuilder;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -35,7 +35,7 @@ public class RestrictionTypesTest {
 
 	@BeforeAll
 	public static void init() throws ReflectiveOperationException {
-		schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.restrictions.parameter")).build();
+		schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.restrictions.parameter")).build();
 	}
 
 	private static String singleQueryGql = "query entityQuery( $allowed: Boolean! ) { single(allowed: $allowed) { __typename } }";

@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.database.manager.test.annotations;
+package com.phocassoftware.graphql.database.manager.test.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

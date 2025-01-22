@@ -10,12 +10,12 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.virtual;
+package com.phocassoftware.graphql.database.manager.virtual;
 
-import com.fleetpin.graphql.builder.DataFetcherRunner;
-import com.fleetpin.graphql.builder.annotations.Context;
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.VirtualDatabase;
+import com.phocassoftware.graphql.builder.DataFetcherRunner;
+import com.phocassoftware.graphql.builder.annotations.Context;
+import com.phocassoftware.graphql.database.manager.Database;
+import com.phocassoftware.graphql.database.manager.VirtualDatabase;
 import graphql.schema.DataFetcher;
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;

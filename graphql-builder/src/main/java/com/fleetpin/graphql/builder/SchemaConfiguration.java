@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
 /**
  * Used to add extra information to the schema. Currently only supports directives. That are inferred using the annotation

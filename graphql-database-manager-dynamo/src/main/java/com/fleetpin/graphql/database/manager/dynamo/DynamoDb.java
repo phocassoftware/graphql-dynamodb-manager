@@ -10,34 +10,34 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.dynamo;
+package com.phocassoftware.graphql.database.manager.dynamo;
 
-import static com.fleetpin.graphql.database.manager.util.TableCoreUtil.table;
+import static com.phocassoftware.graphql.database.manager.util.TableCoreUtil.table;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.DatabaseDriver;
-import com.fleetpin.graphql.database.manager.DatabaseKey;
-import com.fleetpin.graphql.database.manager.DatabaseQueryHistoryKey;
-import com.fleetpin.graphql.database.manager.DatabaseQueryKey;
-import com.fleetpin.graphql.database.manager.KeyFactory;
-import com.fleetpin.graphql.database.manager.PutValue;
-import com.fleetpin.graphql.database.manager.Query;
-import com.fleetpin.graphql.database.manager.QueryBuilder;
-import com.fleetpin.graphql.database.manager.RevisionMismatchException;
-import com.fleetpin.graphql.database.manager.ScanResult;
-import com.fleetpin.graphql.database.manager.ScanResult.Item;
-import com.fleetpin.graphql.database.manager.Table;
-import com.fleetpin.graphql.database.manager.TableDataLoader;
-import com.fleetpin.graphql.database.manager.TableScanQuery;
-import com.fleetpin.graphql.database.manager.annotations.Hash;
-import com.fleetpin.graphql.database.manager.annotations.Hash.HashExtractor;
-import com.fleetpin.graphql.database.manager.annotations.HashLocator;
-import com.fleetpin.graphql.database.manager.annotations.HashLocator.HashQueryBuilder;
-import com.fleetpin.graphql.database.manager.util.BackupItem;
-import com.fleetpin.graphql.database.manager.util.CompletableFutureUtil;
-import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
-import com.fleetpin.graphql.database.manager.util.HistoryCoreUtil;
-import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
+import com.phocassoftware.graphql.database.manager.DatabaseDriver;
+import com.phocassoftware.graphql.database.manager.DatabaseKey;
+import com.phocassoftware.graphql.database.manager.DatabaseQueryHistoryKey;
+import com.phocassoftware.graphql.database.manager.DatabaseQueryKey;
+import com.phocassoftware.graphql.database.manager.KeyFactory;
+import com.phocassoftware.graphql.database.manager.PutValue;
+import com.phocassoftware.graphql.database.manager.Query;
+import com.phocassoftware.graphql.database.manager.QueryBuilder;
+import com.phocassoftware.graphql.database.manager.RevisionMismatchException;
+import com.phocassoftware.graphql.database.manager.ScanResult;
+import com.phocassoftware.graphql.database.manager.ScanResult.Item;
+import com.phocassoftware.graphql.database.manager.Table;
+import com.phocassoftware.graphql.database.manager.TableDataLoader;
+import com.phocassoftware.graphql.database.manager.TableScanQuery;
+import com.phocassoftware.graphql.database.manager.annotations.Hash;
+import com.phocassoftware.graphql.database.manager.annotations.Hash.HashExtractor;
+import com.phocassoftware.graphql.database.manager.annotations.HashLocator;
+import com.phocassoftware.graphql.database.manager.annotations.HashLocator.HashQueryBuilder;
+import com.phocassoftware.graphql.database.manager.util.BackupItem;
+import com.phocassoftware.graphql.database.manager.util.CompletableFutureUtil;
+import com.phocassoftware.graphql.database.manager.util.HistoryBackupItem;
+import com.phocassoftware.graphql.database.manager.util.HistoryCoreUtil;
+import com.phocassoftware.graphql.database.manager.util.TableCoreUtil;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;

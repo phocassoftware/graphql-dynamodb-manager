@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.fleetpin</groupId>
+        <groupId>com.phocassoftware</groupId>
         <artifactId>graphql-database-manager</artifactId>
         <version>3.0.4-SNAPSHOT</version>
     </parent>
@@ -45,23 +45,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.fleetpin</groupId>
+            <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-builder</artifactId>
             <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.fleetpin</groupId>
+            <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-database-manager-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fleetpin</groupId>
+            <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-database-manager-dynamo</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fleetpin</groupId>
+            <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-database-dynmodb-history-lambda</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

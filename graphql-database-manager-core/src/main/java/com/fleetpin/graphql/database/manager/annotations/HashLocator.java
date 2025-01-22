@@ -10,11 +10,11 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.annotations;
+package com.phocassoftware.graphql.database.manager.annotations;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.fleetpin.graphql.database.manager.Table;
+import com.phocassoftware.graphql.database.manager.Table;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

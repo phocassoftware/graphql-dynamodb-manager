@@ -10,27 +10,27 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test;
+package com.phocassoftware.graphql.database.manager.test;
 
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.createHistoryTable;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.createTable;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.findFreePort;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.getDatabaseManager;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.getEmbeddedDatabase;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoAsyncClient;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoClient;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoServer;
-import static com.fleetpin.graphql.database.manager.test.DynamoDbInitializer.startDynamoStreamClient;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.createHistoryTable;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.createTable;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.findFreePort;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.getDatabaseManager;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.getEmbeddedDatabase;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoAsyncClient;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoClient;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoServer;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoStreamClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.Database;
-import com.fleetpin.graphql.database.manager.VirtualDatabase;
-import com.fleetpin.graphql.database.manager.dynamo.DynamoDbManager;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseNames;
-import com.fleetpin.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.fleetpin.graphql.database.manager.test.annotations.GlobalEnabled;
-import com.fleetpin.graphql.database.manager.test.annotations.TestDatabase;
-import com.fleetpin.graphql.database.manager.util.CompletableFutureUtil;
+import com.phocassoftware.graphql.database.manager.Database;
+import com.phocassoftware.graphql.database.manager.VirtualDatabase;
+import com.phocassoftware.graphql.database.manager.dynamo.DynamoDbManager;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseOrganisation;
+import com.phocassoftware.graphql.database.manager.test.annotations.GlobalEnabled;
+import com.phocassoftware.graphql.database.manager.test.annotations.TestDatabase;
+import com.phocassoftware.graphql.database.manager.util.CompletableFutureUtil;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;

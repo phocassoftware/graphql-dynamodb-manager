@@ -1,6 +1,6 @@
-package com.fleetpin.graphql.database.manager;
+package com.phocassoftware.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.util.HistoryCoreUtil;
+import com.phocassoftware.graphql.database.manager.util.HistoryCoreUtil;
 import java.time.Instant;
 import java.util.function.Consumer;
 

@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.generics;
+package com.phocassoftware.graphql.builder.generics;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.Mutation;
+import com.phocassoftware.graphql.builder.annotations.Entity;
+import com.phocassoftware.graphql.builder.annotations.Mutation;
 
 @Entity
 public class Dog extends Animal<DogFur> {

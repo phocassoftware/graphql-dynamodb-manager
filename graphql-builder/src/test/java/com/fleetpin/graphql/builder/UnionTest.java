@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -75,7 +75,7 @@ public class UnionTest {
 	}
 
 	private ExecutionResult execute(String query) throws ReflectiveOperationException {
-		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type")).build();
+		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.type")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
 			throw new RuntimeException(result.getErrors().toString()); //TODO:cleanup

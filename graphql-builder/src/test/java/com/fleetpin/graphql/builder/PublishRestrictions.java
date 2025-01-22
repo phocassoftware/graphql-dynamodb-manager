@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,7 +25,7 @@ public class PublishRestrictions {
 
 	@Test
 	public void testOptionalArray() throws ReflectiveOperationException {
-		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.publishRestrictions")).build();
+		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.publishRestrictions")).build();
 		var res = schema.execute("subscription {test {value}} ");
 		Publisher<Test> response = res.getData();
 		assertEquals(0, Flowable.fromPublisher(response).count().blockingGet());

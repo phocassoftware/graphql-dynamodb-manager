@@ -1,7 +1,7 @@
-package com.fleetpin.graphql.database.manager.dynamo;
+package com.phocassoftware.graphql.database.manager.dynamo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.util.HistoryBackupItem;
+import com.phocassoftware.graphql.database.manager.util.HistoryBackupItem;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
