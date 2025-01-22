@@ -5,7 +5,7 @@
 	<version>3.0.4-SNAPSHOT</version>
 	<name>GraphQL Builder</name>
 	<description>library to make working with dynamodb and graphql easy</description>
-	<url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
+	<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -21,9 +21,9 @@
 	</modules>
 
 	<scm>
-		<url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
-		<connection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</connection>
-		<developerConnection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</developerConnection>
+		<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
+		<connection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</connection>
+		<developerConnection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -34,21 +34,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<developers>
-		<developer>
-			<name>Ashley Taylor</name>
-			<email>ashley.taylor@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-		<developer>
-			<name>Alexander Johnston</name>
-			<email>alexander.johnston@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-	</developers>
 
 	<dependencyManagement>
 		<dependencies>
