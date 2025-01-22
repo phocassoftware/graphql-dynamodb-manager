@@ -9,9 +9,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
-import static com.fleetpin.graphql.builder.EntityUtil.isContext;
+import static com.phocassoftware.graphql.builder.EntityUtil.isContext;
 
 import graphql.GraphQLContext;
 import graphql.GraphqlErrorException;

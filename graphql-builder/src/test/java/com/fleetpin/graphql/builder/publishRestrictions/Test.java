@@ -9,14 +9,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.publishRestrictions;
+package com.phocassoftware.graphql.builder.publishRestrictions;
 
-import com.fleetpin.graphql.builder.RestrictType;
-import com.fleetpin.graphql.builder.RestrictTypeFactory;
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.Query;
-import com.fleetpin.graphql.builder.annotations.Restrict;
-import com.fleetpin.graphql.builder.annotations.Subscription;
+import com.phocassoftware.graphql.builder.RestrictType;
+import com.phocassoftware.graphql.builder.RestrictTypeFactory;
+import com.phocassoftware.graphql.builder.annotations.Entity;
+import com.phocassoftware.graphql.builder.annotations.Query;
+import com.phocassoftware.graphql.builder.annotations.Restrict;
+import com.phocassoftware.graphql.builder.annotations.Subscription;
 import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.rxjava3.core.Flowable;
 import java.util.concurrent.CompletableFuture;

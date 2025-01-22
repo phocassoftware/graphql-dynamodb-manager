@@ -9,12 +9,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
-import com.fleetpin.graphql.builder.annotations.Context;
-import com.fleetpin.graphql.builder.annotations.GraphQLIgnore;
-import com.fleetpin.graphql.builder.annotations.GraphQLName;
-import com.fleetpin.graphql.builder.annotations.InputIgnore;
+import com.phocassoftware.graphql.builder.annotations.Context;
+import com.phocassoftware.graphql.builder.annotations.GraphQLIgnore;
+import com.phocassoftware.graphql.builder.annotations.GraphQLName;
+import com.phocassoftware.graphql.builder.annotations.InputIgnore;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetchingEnvironment;
 import java.lang.annotation.Annotation;

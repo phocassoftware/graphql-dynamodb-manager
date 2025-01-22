@@ -1,8 +1,8 @@
-package com.fleetpin.graphql.builder.annotations;
+package com.phocassoftware.graphql.builder.annotations;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.fleetpin.graphql.builder.DirectiveOperation;
+import com.phocassoftware.graphql.builder.DirectiveOperation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

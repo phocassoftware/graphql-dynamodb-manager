@@ -1,13 +1,13 @@
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
-import static com.fleetpin.graphql.builder.EntityUtil.isContext;
+import static com.phocassoftware.graphql.builder.EntityUtil.isContext;
 
-import com.fleetpin.graphql.builder.annotations.Directive;
-import com.fleetpin.graphql.builder.annotations.GraphQLDeprecated;
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.Mutation;
-import com.fleetpin.graphql.builder.annotations.Query;
-import com.fleetpin.graphql.builder.annotations.Subscription;
+import com.phocassoftware.graphql.builder.annotations.Directive;
+import com.phocassoftware.graphql.builder.annotations.GraphQLDeprecated;
+import com.phocassoftware.graphql.builder.annotations.GraphQLDescription;
+import com.phocassoftware.graphql.builder.annotations.Mutation;
+import com.phocassoftware.graphql.builder.annotations.Query;
+import com.phocassoftware.graphql.builder.annotations.Subscription;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;

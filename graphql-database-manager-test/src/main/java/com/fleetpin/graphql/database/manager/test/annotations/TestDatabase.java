@@ -10,10 +10,10 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.test.annotations;
+package com.phocassoftware.graphql.database.manager.test.annotations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fleetpin.graphql.database.manager.test.TestDatabaseProvider;
+import com.phocassoftware.graphql.database.manager.test.TestDatabaseProvider;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,7 +21,7 @@ public class MetaTest {
 
 	@Test
 	public void testDeprecated() throws ReflectiveOperationException {
-		var schema = SchemaBuilder.build("com.fleetpin.graphql.builder.type");
+		var schema = SchemaBuilder.build("com.phocassoftware.graphql.builder.type");
 
 		var query = schema.getQueryType().getField("deprecatedTest");
 		assertTrue(query.isDeprecated());
@@ -35,7 +35,7 @@ public class MetaTest {
 
 	@Test
 	public void testDescription() throws ReflectiveOperationException {
-		var schema = SchemaBuilder.build("com.fleetpin.graphql.builder.type");
+		var schema = SchemaBuilder.build("com.phocassoftware.graphql.builder.type");
 
 		var query = schema.getQueryType().getField("descriptionTest");
 		assertEquals("returns something", query.getDescription());

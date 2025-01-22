@@ -9,10 +9,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.database.manager;
+package com.phocassoftware.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.ScanUpdater.ScanContext;
-import com.fleetpin.graphql.database.manager.TableScanQuery.TableScanMonitor;
+import com.phocassoftware.graphql.database.manager.ScanUpdater.ScanContext;
+import com.phocassoftware.graphql.database.manager.TableScanQuery.TableScanMonitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;

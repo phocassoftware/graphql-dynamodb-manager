@@ -1,7 +1,7 @@
-package com.fleetpin.graphql.database.manager.memory;
+package com.phocassoftware.graphql.database.manager.memory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fleetpin.graphql.database.manager.Table;
+import com.phocassoftware.graphql.database.manager.Table;
 import com.google.common.collect.HashMultimap;
 
 public class MemoryItem {

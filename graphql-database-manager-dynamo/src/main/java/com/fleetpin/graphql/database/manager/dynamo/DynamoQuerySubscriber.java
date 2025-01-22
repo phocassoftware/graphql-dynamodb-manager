@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.database.manager.dynamo;
+package com.phocassoftware.graphql.database.manager.dynamo;
 
 import java.util.ArrayList;
 import java.util.List;

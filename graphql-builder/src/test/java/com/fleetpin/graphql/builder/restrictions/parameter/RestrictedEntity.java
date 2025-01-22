@@ -9,12 +9,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.restrictions.parameter;
+package com.phocassoftware.graphql.builder.restrictions.parameter;
 
-import com.fleetpin.graphql.builder.annotations.Entity;
-import com.fleetpin.graphql.builder.annotations.Query;
-import com.fleetpin.graphql.builder.annotations.Restrict;
-import com.fleetpin.graphql.builder.restrictions.EntityRestrictions;
+import com.phocassoftware.graphql.builder.annotations.Entity;
+import com.phocassoftware.graphql.builder.annotations.Query;
+import com.phocassoftware.graphql.builder.annotations.Restrict;
+import com.phocassoftware.graphql.builder.restrictions.EntityRestrictions;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

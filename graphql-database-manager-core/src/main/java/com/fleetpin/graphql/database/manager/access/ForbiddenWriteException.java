@@ -10,7 +10,7 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.access;
+package com.phocassoftware.graphql.database.manager.access;
 
 public class ForbiddenWriteException extends RuntimeException {
 

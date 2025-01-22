@@ -9,13 +9,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder.type.directive;
+package com.phocassoftware.graphql.builder.type.directive;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.fleetpin.graphql.builder.DirectiveCaller;
-import com.fleetpin.graphql.builder.annotations.DataFetcherWrapper;
-import com.fleetpin.graphql.builder.annotations.Directive;
+import com.phocassoftware.graphql.builder.DirectiveCaller;
+import com.phocassoftware.graphql.builder.annotations.DataFetcherWrapper;
+import com.phocassoftware.graphql.builder.annotations.Directive;
 import graphql.introspection.Introspection;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;

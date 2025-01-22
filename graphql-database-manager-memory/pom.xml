@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.fleetpin</groupId>
+        <groupId>com.phocassoftware</groupId>
         <artifactId>graphql-database-manager</artifactId>
         <version>3.0.0</version>
     </parent>
@@ -31,9 +31,9 @@
     </distributionManagement>
 
     <scm>
-        <url>https://github.com/ashley-taylor/graphql-dynamodb-manager</url>
-        <connection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</connection>
-        <developerConnection>scm:git:https://github.com/ashley-taylor/graphql-dynamodb-manager.git</developerConnection>
+        <url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
+        <connection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</connection>
+        <developerConnection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</developerConnection>
     </scm>
 
     <licenses>
@@ -44,30 +44,14 @@
         </license>
     </licenses>
 
-    <developers>
-        <developer>
-            <name>Ashley Taylor</name>
-            <email>ashley.taylor@fleetpin.co.nz</email>
-            <organization>Fleetpin</organization>
-            <organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-        </developer>
-        <developer>
-            <name>Alexander Johnston</name>
-            <email>alexander.johnston@fleetpin.co.nz</email>
-            <organization>Fleetpin</organization>
-            <organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
-            <groupId>com.fleetpin</groupId>
+            <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-builder</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fleetpin</groupId>
+            <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-database-manager-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

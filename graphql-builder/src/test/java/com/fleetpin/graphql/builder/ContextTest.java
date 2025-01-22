@@ -9,14 +9,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.builder;
+package com.phocassoftware.graphql.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fleetpin.graphql.builder.annotations.Context;
-import com.fleetpin.graphql.builder.annotations.Query;
-import com.fleetpin.graphql.builder.context.GraphContext;
+import com.phocassoftware.graphql.builder.annotations.Context;
+import com.phocassoftware.graphql.builder.annotations.Query;
+import com.phocassoftware.graphql.builder.context.GraphContext;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -68,7 +68,7 @@ public class ContextTest {
 
 	private ExecutionResult execute(String query, Consumer<ExecutionInput.Builder> modify) {
 		GraphQL schema = GraphQL
-			.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.fleetpin.graphql.builder.context")))
+			.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.phocassoftware.graphql.builder.context")))
 			.build();
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);

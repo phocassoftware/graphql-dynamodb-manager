@@ -10,7 +10,7 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager.util;
+package com.phocassoftware.graphql.database.manager.util;
 
 import java.util.Map;
 import java.util.Set;

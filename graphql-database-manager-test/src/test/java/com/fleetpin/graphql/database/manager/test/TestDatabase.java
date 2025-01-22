@@ -9,15 +9,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.fleetpin.graphql.database.manager.test;
+package com.phocassoftware.graphql.database.manager.test;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@com.fleetpin.graphql.database.manager.test.annotations.TestDatabase(
+@com.phocassoftware.graphql.database.manager.test.annotations.TestDatabase(
 	objectMapper = ObjectMapperCreator.class,
-	classPath = "com.fleetpin.graphql.database.manager.test"
+	classPath = "com.phocassoftware.graphql.database.manager.test"
 )
 public @interface TestDatabase {
 }

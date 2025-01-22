@@ -10,9 +10,9 @@
  * the License.
  */
 
-package com.fleetpin.graphql.database.manager;
+package com.phocassoftware.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.util.TableCoreUtil;
+import com.phocassoftware.graphql.database.manager.util.TableCoreUtil;
 import java.util.Objects;
 
 public class DatabaseKey<T extends Table> {

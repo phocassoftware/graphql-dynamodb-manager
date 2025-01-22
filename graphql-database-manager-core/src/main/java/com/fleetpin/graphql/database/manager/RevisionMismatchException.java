@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.database.manager;
+package com.phocassoftware.graphql.database.manager;
 
 public class RevisionMismatchException extends RuntimeException {
 

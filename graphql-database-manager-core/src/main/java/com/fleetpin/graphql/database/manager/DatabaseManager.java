@@ -1,6 +1,6 @@
-package com.fleetpin.graphql.database.manager;
+package com.phocassoftware.graphql.database.manager;
 
-import com.fleetpin.graphql.database.manager.access.ModificationPermission;
+import com.phocassoftware.graphql.database.manager.access.ModificationPermission;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 

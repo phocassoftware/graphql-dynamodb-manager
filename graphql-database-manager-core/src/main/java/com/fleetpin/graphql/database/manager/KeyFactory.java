@@ -1,4 +1,4 @@
-package com.fleetpin.graphql.database.manager;
+package com.phocassoftware.graphql.database.manager;
 
 public interface KeyFactory {
 	static <T extends Table> DatabaseKey<T> createDatabaseKey(final String organisationId, final Class<T> type, final String id) {
