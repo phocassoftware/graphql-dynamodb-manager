@@ -47,8 +47,7 @@
         <dependency>
             <groupId>com.phocassoftware</groupId>
             <artifactId>graphql-builder</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
+            <version>${project.parent.version}</version>
         </dependency>
 
 		<dependency>
