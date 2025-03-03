@@ -17,19 +17,17 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLAppliedDirective;
 import graphql.schema.GraphQLDirective;
+import org.reactivestreams.Publisher;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.reactivestreams.Publisher;
 
 class DirectivesSchema {
 
@@ -177,23 +175,6 @@ class DirectivesSchema {
 					}
 				});
 		}
-	}
-
-	private static <T> CompletableFuture<List<T>> all(List<CompletableFuture<T>> toReturn) {
-		return CompletableFuture
-			.allOf(toReturn.toArray(CompletableFuture[]::new))
-			.thenApply(__ ->
-				toReturn
-					.stream()
-					.map(m -> {
-						try {
-							return m.get();
-						} catch (InterruptedException | ExecutionException e) {
-							throw new RuntimeException(e);
-						}
-					})
-					.collect(Collectors.toList())
-			);
 	}
 
 	public void addSchemaDirective(AnnotatedElement element, Class<?> location, Consumer<GraphQLAppliedDirective> builder) {

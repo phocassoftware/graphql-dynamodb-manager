@@ -2,11 +2,16 @@ package com.fleetpin.graphql.builder;
 
 import com.fleetpin.graphql.builder.annotations.Directive;
 import graphql.introspection.Introspection;
-import graphql.schema.*;
+import graphql.schema.GraphQLAppliedDirective;
+import graphql.schema.GraphQLAppliedDirectiveArgument;
+import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLDirective;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 

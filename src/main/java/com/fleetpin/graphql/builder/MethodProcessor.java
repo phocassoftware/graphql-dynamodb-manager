@@ -1,35 +1,23 @@
 package com.fleetpin.graphql.builder;
 
-import static com.fleetpin.graphql.builder.EntityUtil.isContext;
-
-import com.fleetpin.graphql.builder.annotations.Directive;
-import com.fleetpin.graphql.builder.annotations.GraphQLDeprecated;
-import com.fleetpin.graphql.builder.annotations.GraphQLDescription;
-import com.fleetpin.graphql.builder.annotations.Mutation;
-import com.fleetpin.graphql.builder.annotations.Query;
-import com.fleetpin.graphql.builder.annotations.Subscription;
+import com.fleetpin.graphql.builder.annotations.*;
 import graphql.GraphQLContext;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.FieldCoordinates;
-import graphql.schema.GraphQLAppliedDirective;
-import graphql.schema.GraphQLAppliedDirectiveArgument;
-import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLCodeRegistry;
-import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.*;
 import graphql.schema.GraphQLFieldDefinition.Builder;
-import graphql.schema.GraphQLObjectType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Function;
 
+import static com.fleetpin.graphql.builder.EntityUtil.isContext;
+
 class MethodProcessor {
 
 	private final DataFetcherRunner dataFetcherRunner;
 	private final EntityProcessor entityProcessor;
-	private final DirectivesSchema diretives;
+	private final DirectivesSchema directives;
 
 	private final GraphQLCodeRegistry.Builder codeRegistry;
 
@@ -40,7 +28,7 @@ class MethodProcessor {
 	public MethodProcessor(DataFetcherRunner dataFetcherRunner, EntityProcessor entityProcessor, DirectivesSchema diretives) {
 		this.dataFetcherRunner = dataFetcherRunner;
 		this.entityProcessor = entityProcessor;
-		this.diretives = diretives;
+		this.directives = diretives;
 		this.codeRegistry = GraphQLCodeRegistry.newCodeRegistry();
 
 		this.graphQuery = GraphQLObjectType.newObject();
@@ -109,45 +97,16 @@ class MethodProcessor {
 				argument.description(description.value());
 			}
 
-			for (Annotation annotation : parameter.getAnnotations()) {
-				// Check to see if the annotation is a directive
-				if (!annotation.annotationType().isAnnotationPresent(Directive.class)) {
-					continue;
-				}
-				var annotationType = annotation.annotationType();
-				// Get the values out of the directive annotation
-				var methods = annotationType.getDeclaredMethods();
-
-				// Get the applied directive and add it to the argument
-				var appliedDirective = getAppliedDirective(annotation, annotationType, methods);
-				argument.withAppliedDirective(appliedDirective);
-			}
+			entityProcessor.addSchemaDirective(parameter, method.getDeclaringClass(), argument::withAppliedDirective);
 
 			argument.name(EntityUtil.getName(parameter.getName(), parameter));
 			// TODO: argument.defaultValue(defaultValue)
 			field.argument(argument);
 		}
 
-		DataFetcher<?> fetcher = buildFetcher(diretives, authorizer, method, meta);
+		DataFetcher<?> fetcher = buildFetcher(directives, authorizer, method, meta);
 		codeRegistry.dataFetcher(coordinates, fetcher);
 		return field;
-	}
-
-	private GraphQLAppliedDirective getAppliedDirective(Annotation annotation, Class<? extends Annotation> annotationType, Method[] methods)
-		throws IllegalAccessException, InvocationTargetException {
-		var appliedDirective = new GraphQLAppliedDirective.Builder().name(annotationType.getSimpleName());
-		for (var definedMethod : methods) {
-			var name = definedMethod.getName();
-			var value = definedMethod.invoke(annotation);
-			if (value == null) {
-				continue;
-			}
-
-			TypeMeta innerMeta = new TypeMeta(null, definedMethod.getReturnType(), definedMethod.getGenericReturnType());
-			var argumentType = entityProcessor.getEntity(innerMeta).getInputType(innerMeta, definedMethod.getAnnotations());
-			appliedDirective.argument(GraphQLAppliedDirectiveArgument.newArgument().name(name).type(argumentType).valueProgrammatic(value).build());
-		}
-		return appliedDirective.build();
 	}
 
 	private <T extends Annotation> DataFetcher<?> buildFetcher(DirectivesSchema diretives, AuthorizerSchema authorizer, Method method, TypeMeta meta) {
