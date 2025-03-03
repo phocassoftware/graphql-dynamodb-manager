@@ -12,7 +12,9 @@
 package com.fleetpin.graphql.builder.type.directive;
 
 import com.fleetpin.graphql.builder.annotations.Entity;
+import com.fleetpin.graphql.builder.annotations.Mutation;
 import com.fleetpin.graphql.builder.annotations.Query;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Cat {
@@ -39,6 +41,11 @@ public class Cat {
 	@Uppercase
 	public static Cat getUpper() {
 		return new Cat();
+	}
+
+	@Mutation
+	public static String setName(@Size(min = 3) String name) {
+		return name;
 	}
 
 	@Query
