@@ -15,7 +15,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<name>graphql-builder</name>
 	<description>Builds a graphql schema from a model using reflection</description>
-	<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
 
 	<parent>
 		<groupId>com.phocassoftware</groupId>
@@ -34,25 +33,6 @@
 		<graphql.version>22.3</graphql.version>
 	</properties>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype</id>
-			<name>central snapshot</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype</id>
-			<name>central release</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
-
-	<scm>
-		<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
-		<connection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</connection>
-		<developerConnection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
 
 	<licenses>
 		<license>

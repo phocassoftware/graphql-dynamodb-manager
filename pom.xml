@@ -5,11 +5,12 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<name>GraphQL Builder</name>
 	<description>library to make working with dynamodb and graphql easy as well as building a graphql schema from a model using reflection</description>
-	<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
+	<url>https://github.com/phocassoftware/graphql-builder</url>
 	<packaging>pom</packaging>
 
 	<properties>
 		<jackson.version>2.17.2</jackson.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<modules>
@@ -21,11 +22,25 @@
 	</modules>
 
 	<scm>
-		<url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
-		<connection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</connection>
-		<developerConnection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</developerConnection>
+		<url>https://github.com/phocassoftware/graphql-builder</url>
+		<connection>scm:git:https://github.com/phocassoftware/graphql-builder.git</connection>
+		<developerConnection>scm:git:https://github.com/phocassoftware/graphql-builder.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype</id>
+            <name>central snapshot</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype</id>
+            <name>central release</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
+
 
 	<licenses>
 		<license>

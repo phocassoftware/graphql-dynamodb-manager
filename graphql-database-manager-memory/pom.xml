@@ -14,35 +14,8 @@
 
     <properties>
         <junit.jupiter.version>5.11.0</junit.jupiter.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype</id>
-            <name>central snapshot</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype</id>
-            <name>central release</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-    </distributionManagement>
-
-    <scm>
-        <url>https://github.com/phocassoftware/graphql-dynamodb-manager</url>
-        <connection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</connection>
-        <developerConnection>scm:git:https://github.com/phocassoftware/graphql-dynamodb-manager.git</developerConnection>
-    </scm>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
 
     <dependencies>
         <dependency>
