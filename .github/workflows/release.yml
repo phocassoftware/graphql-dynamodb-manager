@@ -26,6 +26,8 @@ jobs:
               { "id": "sonatype", "username": "${{ secrets.MAVEN_CENTRAL_TOKEN_USER }}", "password": "${{ secrets.MAVEN_CENTRAL_TOKEN_PASS }}" }
             ]
 
+      - run: git config --global user.name phocasadmin; git config --global user.email admin+maven@phocassoftware.com
+
       - name: add key
         run: |
           echo  "${{ secrets.MAVEN_PRIVATE_KEY }}" | base64 -d > private.key
