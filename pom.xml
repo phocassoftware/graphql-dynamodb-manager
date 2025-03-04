@@ -37,20 +37,6 @@
 		</developer>
 	</developers>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype</id>
-            <name>central snapshot</name>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-	</snapshotRepository>
-        <repository>
-            <id>sonatype</id>
-            <name>central release</name>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
-
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -154,16 +140,14 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.7.0</version>
-						<extensions>true</extensions>
-						<configuration>
-							<serverId>sonatype</serverId>
-							<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-							<autoReleaseAfterClose>true</autoReleaseAfterClose>
-						</configuration>
-					</plugin>
+				        	<groupId>org.sonatype.central</groupId>
+				        	<artifactId>central-publishing-maven-plugin</artifactId>
+				        	<version>0.7.0</version>
+				        	<extensions>true</extensions>
+				        	<configuration>
+				        		<publishingServerId>central</publishingServerId>
+				        	</configuration>
+				        </plugin>
 				</plugins>
 			</build>
 		</profile>
