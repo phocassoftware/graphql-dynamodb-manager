@@ -41,4 +41,4 @@ jobs:
 
       - name: release
         run: |
-          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype
+          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype -X
