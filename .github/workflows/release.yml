@@ -37,7 +37,7 @@ jobs:
 
       - name: prepare
         run: |
-          mvn release:prepare -Dusername=${{ secrets.ACTION_GITHUB_RELEASE_TOKEN }} -P sonatype -Darguments="-DpushChanges=true -DscmCommentPrefix='[ci skip]' -DremoteTagging=true" -DscmForceUpdate=true
+          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype -DscmForceUpdate=true
       - name: release
         run: |
-          mvn release:perform -Dusername=${{ secrets.ACTION_GITHUB_RELEASE_TOKEN }} -P sonatype -Darguments="-DpushChanges=true -DscmCommentPrefix='[ci skip]' -DremoteTagging=true" -DscmForceUpdate=true
+          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype -DscmForceUpdate=true
