@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>com.phocassoftware</groupId>
-        <artifactId>graphql-database-manager</artifactId>
+        <artifactId>graphql-builder-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
