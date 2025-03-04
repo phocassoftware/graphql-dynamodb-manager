@@ -15,12 +15,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<name>graphql-builder</name>
 	<description>Builds a graphql schema from a model using reflection</description>
-	<url>https://github.com/ashley-taylor/graphql-builder</url>
 
 	<parent>
-		<groupId>com.fleetpin</groupId>
-		<artifactId>graphql-database-manager</artifactId>
-		<version>3.0.4-SNAPSHOT</version>
+		<groupId>com.phocassoftware</groupId>
+		<artifactId>graphql-builder-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>graphql-builder</artifactId>
@@ -34,25 +33,6 @@
 		<graphql.version>22.3</graphql.version>
 	</properties>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype</id>
-			<name>central snapshot</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype</id>
-			<name>central release</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
-
-	<scm>
-		<url>https://github.com/ashley-taylor/graphql-builder</url>
-		<connection>scm:git:https://github.com/ashley-taylor/graphql-builder.git</connection>
-		<developerConnection>scm:git:https://github.com/ashley-taylor/graphql-builder.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
 
 	<licenses>
 		<license>
@@ -61,15 +41,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<developers>
-		<developer>
-			<name>Ashley Taylor</name>
-			<email>ashley.taylor@fleetpin.co.nz</email>
-			<organization>Fleetpin</organization>
-			<organizationUrl>http://www.fleetpin.co.nz</organizationUrl>
-		</developer>
-	</developers>
 
 	<build>
 		<plugins>

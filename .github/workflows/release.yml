@@ -23,16 +23,14 @@ jobs:
         with:
           servers: >
             [
-              { "id": "sonatype", "username": "${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}", "password": "${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}" }
+              { "id": "sonatype", "username": "${{ secrets.MAVEN_CENTRAL_TOKEN_USER }}", "password": "${{ secrets.MAVEN_CENTRAL_TOKEN_PASS }}" }
             ]
-      - name: set name
-        run: |
-          git config --global user.name "release-bot";
-          git config --global user.email "release-bot@fleetpin.co.nz";
+
+      - run: git config --global user.name ${{ secrets.ACTION_GITHUB_USERNAME }}; git config --global user.email ${{ secrets.ACTION_GITHUB_EMAIL }}
 
       - name: add key
         run: |
-          echo  "${{ secrets.GPG_KEY }}" | base64 -d > private.key
+          echo  "${{ secrets.MAVEN_PRIVATE_KEY }}" | base64 -d > private.key
           gpg --batch --import ./private.key
           rm ./private.key
           gpg --list-secret-keys --keyid-format LONG
