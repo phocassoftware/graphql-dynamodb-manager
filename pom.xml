@@ -28,6 +28,15 @@
 		<tag>HEAD</tag>
 	</scm>
 
+	<developers>
+		<developer>
+			<name>Phocas Admin</name>
+			<email>admin+maven@phocassoftware.com</email>
+			<organization>Phocas Software</organization>
+			<organizationUrl>https://www.phocassoftware.com</organizationUrl>
+		</developer>
+	</developers>
+
     <distributionManagement>
         <snapshotRepository>
             <id>sonatype</id>
