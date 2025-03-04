@@ -1,3 +1,25 @@
 {
-  "forkProcessing": "enabled"
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "labels": [
+    "dependencies",
+    "renovate"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "autoApprove": true,
+      "automerge": true,
+      "groupName": "patch versions"
+    },
+    {
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "autoApprove": true,
+      "automerge": true,
+      "groupName": "minor versions"
+    }
+  ]
 }
