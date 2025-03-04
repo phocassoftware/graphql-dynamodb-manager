@@ -37,8 +37,8 @@ jobs:
 
       - name: prepare
         run: |
-          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype
+          mvn release:prepare -Dusername=${{ secrets.ACTION_GITHUB_RELEASE_TOKEN }} -P sonatype
 
       - name: release
         run: |
-          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype -X
+          mvn release:perform -Dusername=${{ secrets.ACTION_GITHUB_RELEASE_TOKEN }} -P sonatype -X
