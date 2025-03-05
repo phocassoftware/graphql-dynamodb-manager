@@ -3,6 +3,8 @@ package com.phocassoftware.graphql.database.manager.test;
 import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.*;
 
 import java.lang.reflect.Parameter;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,72 +21,88 @@ public class ArgumentProvider {
 
 	private final String uniqueId;
 	private final ServerWrapper wrapper;
-	private final String organisationId;
 	private final Parameter parameter;
 	private final Boolean withHistory;
 	private final boolean hashed;
 	private final String classPath;
 	private final ObjectMapper objectMapper;
+	private final Consumer<String> tableDeleteConsumer;
 
 	public ArgumentProvider(
 		String uniqueId,
 		ServerWrapper wrapper,
-		String organisationId,
 		Parameter parameter,
 		Boolean withHistory,
 		boolean hashed,
 		String classPath,
-		ObjectMapper objectMapper
+		ObjectMapper objectMapper,
+		Consumer<String> tableDeleteConsumer
+
 	) {
 		this.uniqueId = uniqueId;
-		var databaseOrganisation = parameter.getAnnotation(DatabaseOrganisation.class);
-		organisationId = databaseOrganisation != null ? databaseOrganisation.value() : organisationId;
-
 		this.wrapper = wrapper;
-		this.organisationId = organisationId;
 		this.parameter = parameter;
 		this.withHistory = withHistory;
 		this.hashed = hashed;
 		this.classPath = classPath;
 		this.objectMapper = objectMapper;
-
+		this.tableDeleteConsumer = tableDeleteConsumer;
 	}
 
-	public DynamoDbManager getDynamoDbManager() {
+	public DynamoDbManager getDynamoDbManager(boolean scope) {
+
+		var client = wrapper.clientAsync();
+		final var globalEnabledAnnotation = parameter.getAnnotation(GlobalEnabled.class);
+
+		var tables = getTables(scope);
+
+		var globalEnabled = true;
+		if (globalEnabledAnnotation != null) {
+			globalEnabled = globalEnabledAnnotation.value();
+		}
+
+		return getDatabaseManager(client, tables.tables(), tables.historyTable(), globalEnabled, hashed, classPath, "parallelIndex", objectMapper);
+	}
+
+	public HistoryProcessor getHistoryProcessor() {
+		var s1 = Stream.of(getTables(true).tables());
+		var s2 = Stream.of(getTables(false).tables());
+
+		var tables = Stream.concat(s1, s2).toArray(String[]::new);
+		return new HistoryProcessor(wrapper.client(), wrapper.streamClient(), parameter, tables);
+	}
+
+	private Tables getTables(boolean scope) {
 		try {
-			var client = wrapper.clientAsync();
+			String[] tables = new String[] { "table" };
+			String historyTable = "table_history";
 			final var databaseNames = parameter.getAnnotation(DatabaseNames.class);
-			String[] tables;
-			String historyTable = null;
+			var client = wrapper.client();
+
 			if (databaseNames != null) {
 				tables = Stream.of(databaseNames.value()).map(name -> name + "_" + uniqueId).toArray(String[]::new);
 				for (final String table : tables) {
 					createTable(client, table);
+					tableDeleteConsumer.accept(table);
 					if (withHistory) {
 						historyTable = table + "_history";
 						createHistoryTable(client, historyTable);
+						tableDeleteConsumer.accept(historyTable);
 					}
 				}
-			} else {
-				tables = new String[] { "table" };
-				historyTable = "table_history";
+			} else if (scope) {
+				tables = new String[] { "table" + "_" + uniqueId };
+				historyTable = tables[0] + "_history";
+				createTable(client, tables[0]);
+				if (withHistory) {
+					createHistoryTable(client, historyTable);
+					tableDeleteConsumer.accept(historyTable);
+				}
 			}
-
-			final var globalEnabledAnnotation = parameter.getAnnotation(GlobalEnabled.class);
-
-			var globalEnabled = true;
-			if (globalEnabledAnnotation != null) {
-				globalEnabled = globalEnabledAnnotation.value();
-			}
-
-			return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath, "parallelIndex", objectMapper);
+			return new Tables(tables, historyTable);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	public HistoryProcessor getHistoryProcessor() {
-		return new HistoryProcessor(wrapper.client(), wrapper.streamClient(), parameter, organisationId);
 	}
 
 	public DynamoDbAsyncClient getClientAsync() {
@@ -96,11 +114,16 @@ public class ArgumentProvider {
 	}
 
 	public Database getDatabase() {
-		return getEmbeddedDatabase(getDynamoDbManager(), organisationId);
+		var databaseOrganisation = parameter.getAnnotation(DatabaseOrganisation.class);
+		var organisationId = databaseOrganisation != null ? databaseOrganisation.value() : UUID.randomUUID().toString();
+
+		return getEmbeddedDatabase(getDynamoDbManager(false), organisationId);
 	}
 
 	public VirtualDatabase getVirtualDatabase() {
 		return new VirtualDatabase(getDatabase());
 	}
+
+	private record Tables(String[] tables, String historyTable) {}
 
 }

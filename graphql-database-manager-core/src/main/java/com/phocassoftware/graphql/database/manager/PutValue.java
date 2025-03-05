@@ -49,12 +49,10 @@ public class PutValue<T extends Table> {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		PutValue<?> putValue = (PutValue<?>) o;
-		return (
-			check == putValue.check &&
+		return (check == putValue.check &&
 			Objects.equals(organisationId, putValue.organisationId) &&
 			Objects.equals(entity, putValue.entity) &&
-			Objects.equals(future, putValue.future)
-		);
+			Objects.equals(future, putValue.future));
 	}
 
 	@Override

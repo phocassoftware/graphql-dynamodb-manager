@@ -64,16 +64,17 @@ public class RestrictedEntity {
 	public static Optional<List<RestrictedEntity>> listOptional(Optional<List<Boolean>> allowed) {
 		if (allowed.isEmpty()) return Optional.empty();
 
-		return Optional.of(
-			allowed
-				.get()
-				.stream()
-				.map(isAllowed -> {
-					RestrictedEntity entity = new RestrictedEntity();
-					entity.setAllowed(isAllowed);
-					return entity;
-				})
-				.collect(Collectors.toList())
-		);
+		return Optional
+			.of(
+				allowed
+					.get()
+					.stream()
+					.map(isAllowed -> {
+						RestrictedEntity entity = new RestrictedEntity();
+						entity.setAllowed(isAllowed);
+						return entity;
+					})
+					.collect(Collectors.toList())
+			);
 	}
 }

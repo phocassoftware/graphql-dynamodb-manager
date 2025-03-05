@@ -23,7 +23,10 @@ import org.junit.jupiter.api.Assertions;
 final class DynamoDbLinkTest {
 
 	@TestDatabase
-	void testSimpleQuery(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames("prod") final Database dbProd)
+	void testSimpleQuery(
+		@DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var garry = db.put(new SimpleTable("garry")).get();
 		var john = db.put(new AnotherTable("john")).get();
@@ -49,7 +52,10 @@ final class DynamoDbLinkTest {
 	}
 
 	@TestDatabase
-	void testDoubleLinkage(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames("prod") final Database dbProd)
+	void testDoubleLinkage(
+		@DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var garry = db.put(new SimpleTable("garry")).get();
 		var frank = dbProd.put(new SimpleTable("frank")).get();
@@ -99,12 +105,13 @@ final class DynamoDbLinkTest {
 
 		db.link(garry, john.getClass(), john.getId()).get();
 
-		Assertions.assertThrows(
-			RuntimeException.class,
-			() -> {
-				db.delete(garry, false).get();
-			}
-		);
+		Assertions
+			.assertThrows(
+				RuntimeException.class,
+				() -> {
+					db.delete(garry, false).get();
+				}
+			);
 
 		db.delete(garry, true).get();
 
@@ -141,19 +148,6 @@ final class DynamoDbLinkTest {
 
 		db0.link(putAlexBestOrg, putPineappleAmazingOrg.getClass(), putPineappleAmazingOrg.getId()).get();
 		Assertions.assertTrue(db0.getLinks(putAlexBestOrg, AnotherTable.class).get().isEmpty());
-	}
-
-	@TestDatabase
-	void testLinkingBetweenDatabases(final Database db0, final Database db1) throws ExecutionException, InterruptedException {
-		final var putAlexBestOrg = db0.put(new SimpleTable("alex")).get();
-		Assertions.assertNotNull(db0.get(SimpleTable.class, putAlexBestOrg.getId()).get());
-
-		final var putPineappleAmazingOrg = db1.put(new AnotherTable("pineapple")).get();
-		Assertions.assertNotNull(db1.get(AnotherTable.class, putPineappleAmazingOrg.getId()).get());
-
-		db0.link(putAlexBestOrg, putPineappleAmazingOrg.getClass(), putPineappleAmazingOrg.getId()).get();
-		Assertions.assertFalse(db0.getLinks(putAlexBestOrg, AnotherTable.class).get().isEmpty());
-		Assertions.assertEquals(putPineappleAmazingOrg.getId(), db0.getLinks(putAlexBestOrg, AnotherTable.class).get().get(0).getId());
 	}
 
 	@TestDatabase

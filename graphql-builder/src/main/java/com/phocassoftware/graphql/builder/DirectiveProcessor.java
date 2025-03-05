@@ -52,16 +52,17 @@ public class DirectiveProcessor {
 			builder.argument(argument);
 
 			// Add a builder to the builders list (in order to populate applied directives)
-			builders.put(
-				name,
-				object -> {
-					try {
-						return GraphQLAppliedDirectiveArgument.newArgument().name(name).type(argumentType).valueProgrammatic(method.invoke(object)).build();
-					} catch (IllegalAccessException | InvocationTargetException e) {
-						throw new RuntimeException(e);
+			builders
+				.put(
+					name,
+					object -> {
+						try {
+							return GraphQLAppliedDirectiveArgument.newArgument().name(name).type(argumentType).valueProgrammatic(method.invoke(object)).build();
+						} catch (IllegalAccessException | InvocationTargetException e) {
+							throw new RuntimeException(e);
+						}
 					}
-				}
-			);
+				);
 		}
 		return new DirectiveProcessor(builder.build(), builders);
 	}

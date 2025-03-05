@@ -101,7 +101,7 @@ public class TableUtil {
 
 	static Map<String, AttributeValue> toAttributes(ObjectMapper mapper, BackupItem entity) {
 		Map<String, AttributeValue> entries = new HashMap<>();
-		//Handle links specially, so remove here
+		// Handle links specially, so remove here
 		var entityItem = entity.getItem();
 		LinkedHashMap<String, String[]> links = mapper.convertValue(entityItem.get("links"), new TypeReference<>() {});
 
@@ -278,8 +278,8 @@ public class TableUtil {
 	static <T> CompletableFuture<List<T>> all(List<CompletableFuture<T>> collect) {
 		return CompletableFuture
 			.allOf(collect.toArray(CompletableFuture[]::new))
-			.thenApply(__ ->
-				collect
+			.thenApply(
+				__ -> collect
 					.stream()
 					.map(m -> {
 						try {

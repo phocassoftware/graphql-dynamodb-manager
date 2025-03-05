@@ -198,32 +198,32 @@ public class TypeGenericParsingTest {
 	public Map<String, Object> getField(String typeName, String kind, String name) throws ReflectiveOperationException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"" +
-			typeName +
-			"\") {" +
-			"    name" +
-			"    kind" +
-			"    fields {" +
-			"      name" +
-			"      type {" +
-			"        name" +
-			"        kind" +
-			"        ofType {" +
-			"          name" +
-			"          kind" +
-			"          ofType {" +
-			"            name" +
-			"            kind" +
-			"            ofType {" +
-			"              name" +
-			"              kind" +
-			"            }" +
-			"          }" +
-			"        }" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"} "
+				"  __type(name: \"" +
+				typeName +
+				"\") {" +
+				"    name" +
+				"    kind" +
+				"    fields {" +
+				"      name" +
+				"      type {" +
+				"        name" +
+				"        kind" +
+				"        ofType {" +
+				"          name" +
+				"          kind" +
+				"          ofType {" +
+				"            name" +
+				"            kind" +
+				"            ofType {" +
+				"              name" +
+				"              kind" +
+				"            }" +
+				"          }" +
+				"        }" +
+				"      }" +
+				"    }" +
+				"  }" +
+				"} "
 		)
 			.getData();
 		var type = response.get("__type");
@@ -240,22 +240,22 @@ public class TypeGenericParsingTest {
 	public void testQueryCatFur() throws ReflectiveOperationException {
 		Map<String, List<Map<String, Object>>> response = execute(
 			"query {animals{" +
-			"name " +
-			"... on Cat { " +
-			" fur{ " +
-			"  calico " +
-			"  length" +
-			"  catFur: long" +
-			" }" +
-			"} " +
-			"... on Dog {" +
-			" fur {" +
-			"   shaggy" +
-			"   dogFur: long" +
-			"   length" +
-			" } " +
-			"} " +
-			"}} "
+				"name " +
+				"... on Cat { " +
+				" fur{ " +
+				"  calico " +
+				"  length" +
+				"  catFur: long" +
+				" }" +
+				"} " +
+				"... on Dog {" +
+				" fur {" +
+				"   shaggy" +
+				"   dogFur: long" +
+				"   length" +
+				" } " +
+				"} " +
+				"}} "
 		)
 			.getData();
 
@@ -281,17 +281,17 @@ public class TypeGenericParsingTest {
 	public void testMutationCatFur() throws ReflectiveOperationException {
 		Map<String, Map<String, Map<String, Object>>> response = execute(
 			"mutation {makeCat{" +
-			"item { " +
-			"  ... on Cat { " +
-			"   name " +
-			"   fur{ " +
-			"    calico " +
-			"    length" +
-			"    long" +
-			"   }" +
-			"  } " +
-			"}" +
-			"}} "
+				"item { " +
+				"  ... on Cat { " +
+				"   name " +
+				"   fur{ " +
+				"    calico " +
+				"    length" +
+				"    long" +
+				"   }" +
+				"  } " +
+				"}" +
+				"}} "
 		)
 			.getData();
 

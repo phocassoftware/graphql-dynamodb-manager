@@ -29,14 +29,15 @@ public class VirtualDatabaseTest {
 
 		for (int i = 0; i < 100; i++) {
 			var f = i;
-			var future = CompletableFuture.supplyAsync(
-				() -> {
-					var fc = new Simple();
-					fc.setId("a:b:c:" + f);
-					return database.put(fc);
-				},
-				Database.VIRTUAL_THREAD_POOL
-			);
+			var future = CompletableFuture
+				.supplyAsync(
+					() -> {
+						var fc = new Simple();
+						fc.setId("a:b:c:" + f);
+						return database.put(fc);
+					},
+					Database.VIRTUAL_THREAD_POOL
+				);
 			futures.add(future);
 		}
 
@@ -46,14 +47,15 @@ public class VirtualDatabaseTest {
 
 		for (int i = 0; i < 100; i++) {
 			var f = i;
-			var future = CompletableFuture.supplyAsync(
-				() -> {
-					var fc = database.get(Simple.class, "a:b:c:" + f);
-					Assertions.assertNotNull(fc);
-					return fc;
-				},
-				Database.VIRTUAL_THREAD_POOL
-			);
+			var future = CompletableFuture
+				.supplyAsync(
+					() -> {
+						var fc = database.get(Simple.class, "a:b:c:" + f);
+						Assertions.assertNotNull(fc);
+						return fc;
+					},
+					Database.VIRTUAL_THREAD_POOL
+				);
 			futures.add(future);
 		}
 

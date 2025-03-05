@@ -29,19 +29,20 @@ public class VirtualDataRunner implements DataFetcherRunner {
 			if (parameter.isAssignableFrom(VirtualDatabase.class) || hasContext(parameter)) {
 				var isCompletableFuture = CompletionStage.class.isAssignableFrom(method.getReturnType());
 				return env -> {
-					var result = CompletableFuture.supplyAsync(
-						() -> {
-							try {
-								return fetcher.get(env);
-							} catch (Exception e) {
-								if (e instanceof RuntimeException runtime) {
-									throw runtime;
+					var result = CompletableFuture
+						.supplyAsync(
+							() -> {
+								try {
+									return fetcher.get(env);
+								} catch (Exception e) {
+									if (e instanceof RuntimeException runtime) {
+										throw runtime;
+									}
+									throw new RuntimeException(e);
 								}
-								throw new RuntimeException(e);
-							}
-						},
-						Database.VIRTUAL_THREAD_POOL
-					);
+							},
+							Database.VIRTUAL_THREAD_POOL
+						);
 
 					if (isCompletableFuture) {
 						return result.thenCompose(r -> (CompletionStage<?>) r);

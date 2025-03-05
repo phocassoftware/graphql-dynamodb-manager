@@ -186,7 +186,7 @@ public class AuthorizerSchema {
 							throw GraphqlErrorException.newErrorException().message("unauthorized").errorClassification(ErrorType.UNAUTHORIZED).build();
 						}
 					} else {
-						//only other type that passes checks above
+						// only other type that passes checks above
 						CompletableFuture<Boolean> allowed = (CompletableFuture<Boolean>) allow;
 
 						return allowed

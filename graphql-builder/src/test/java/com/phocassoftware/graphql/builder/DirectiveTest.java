@@ -90,8 +90,8 @@ public class DirectiveTest {
 		assertEquals(8, dir.size());
 		assertEquals("ARGUMENT_DEFINITION", ((List<String>) input.get("locations")).get(0));
 		assertEquals(1, ((List<Object>) input.get("args")).size());
-		//getNickname(nickName: String! @Input(value : "TT")): String!
-		//directive @Input(value: String!) on ARGUMENT_DEFINITION
+		// getNickname(nickName: String! @Input(value : "TT")): String!
+		// directive @Input(value: String!) on ARGUMENT_DEFINITION
 	}
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {

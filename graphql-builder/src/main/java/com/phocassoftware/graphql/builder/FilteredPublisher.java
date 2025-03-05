@@ -29,64 +29,63 @@ class FilteredPublisher<T> implements Publisher<T> {
 
 	@Override
 	public void subscribe(Subscriber<? super T> subscriber) {
-		publisher.subscribe(
-			new Subscriber<T>() {
-				private CompletableFuture<?> current = CompletableFuture.completedFuture(null);
-				private Subscription s;
+		publisher
+			.subscribe(
+				new Subscriber<T>() {
+					private CompletableFuture<?> current = CompletableFuture.completedFuture(null);
+					private Subscription s;
 
-				@Override
-				public void onSubscribe(Subscription s) {
-					this.s = s;
-					subscriber.onSubscribe(s);
-				}
-
-				@Override
-				public void onNext(T t) {
-					synchronized (this) {
-						current = current.thenCompose(__ -> restrict.allow(t)).whenComplete(process(subscriber, t));
+					@Override
+					public void onSubscribe(Subscription s) {
+						this.s = s;
+						subscriber.onSubscribe(s);
 					}
-				}
 
-				private BiConsumer<Boolean, Throwable> process(Subscriber<? super T> subscriber, T t) {
-					return (allow, error) -> {
-						if (error != null) {
-							subscriber.onError(error);
-							return;
+					@Override
+					public void onNext(T t) {
+						synchronized (this) {
+							current = current.thenCompose(__ -> restrict.allow(t)).whenComplete(process(subscriber, t));
 						}
-						if (allow) {
-							subscriber.onNext(t);
-						} else {
-							s.request(1);
-						}
-					};
-				}
+					}
 
-				@Override
-				public void onError(Throwable t) {
-					synchronized (this) {
-						current =
-							current.whenComplete((__, error) -> {
+					private BiConsumer<Boolean, Throwable> process(Subscriber<? super T> subscriber, T t) {
+						return (allow, error) -> {
+							if (error != null) {
+								subscriber.onError(error);
+								return;
+							}
+							if (allow) {
+								subscriber.onNext(t);
+							} else {
+								s.request(1);
+							}
+						};
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						synchronized (this) {
+							current = current.whenComplete((__, error) -> {
 								if (error != null) {
 									subscriber.onError(error);
 								}
 								subscriber.onError(t);
 							});
+						}
 					}
-				}
 
-				@Override
-				public void onComplete() {
-					synchronized (this) {
-						current =
-							current.whenComplete((__, error) -> {
+					@Override
+					public void onComplete() {
+						synchronized (this) {
+							current = current.whenComplete((__, error) -> {
 								if (error != null) {
 									subscriber.onError(error);
 								}
 								subscriber.onComplete();
 							});
+						}
 					}
 				}
-			}
-		);
+			);
 	}
 }

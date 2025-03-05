@@ -19,5 +19,4 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target({ ElementType.CONSTRUCTOR })
-public @interface GraphQLCreator {
-}
+public @interface GraphQLCreator {}

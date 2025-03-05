@@ -12,45 +12,29 @@
 
 package com.phocassoftware.graphql.database.manager.test;
 
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.createHistoryTable;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.createTable;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.findFreePort;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.getDatabaseManager;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.getEmbeddedDatabase;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoAsyncClient;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoClient;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoServer;
-import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.startDynamoStreamClient;
+import static com.phocassoftware.graphql.database.manager.test.DynamoDbInitializer.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.AnnotatedElement;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+
 import com.phocassoftware.graphql.database.manager.Database;
 import com.phocassoftware.graphql.database.manager.VirtualDatabase;
 import com.phocassoftware.graphql.database.manager.dynamo.DynamoDbManager;
-import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
-import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseOrganisation;
-import com.phocassoftware.graphql.database.manager.test.annotations.GlobalEnabled;
+import com.phocassoftware.graphql.database.manager.test.annotations.ProviderFunction;
 import com.phocassoftware.graphql.database.manager.test.annotations.TestDatabase;
-import com.phocassoftware.graphql.database.manager.util.CompletableFutureUtil;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
+
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
 public final class TestDatabaseProvider implements ParameterResolver, BeforeEachCallback, AfterEachCallback {
 
-	private static final DbHolder HOLDER = new DbHolder();
+	private static ServerWrapper serverWrapper;
 
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
@@ -72,7 +56,26 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		if (parameterContext.getParameter().getType().isAssignableFrom(DynamoDbClient.class)) {
 			return true;
 		}
+
+		final var testMethod = extensionContext.getRequiredTestMethod();
+		var testDatabase = getTestDatabase(testMethod);
+
+		if (testDatabase != null) {
+			Stream
+				.of(testDatabase.providers())
+				.map(t -> create(t))
+				.anyMatch(provider -> parameterContext.getParameter().getType().isAssignableFrom(provider.type()));
+		}
+
 		return false;
+	}
+
+	private ProviderFunction<?> create(Class<? extends ProviderFunction<?>> provider) {
+		try {
+			return provider.getConstructor().newInstance();
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -82,72 +85,12 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		return arguments.get(parameterContext.getIndex());
 	}
 
-	private Database createDatabase(
-		final DynamoDbAsyncClient client,
-		final DynamoDbStreamsAsyncClient streamClient,
-		final AnnotatedElement parameter,
-		final String organisationId,
-		final boolean withHistory,
-		final boolean hashed,
-		final String classPath,
-		final ObjectMapper objectMapper
-	) throws ExecutionException, InterruptedException {
-		final var databaseOrganisation = parameter.getAnnotation(DatabaseOrganisation.class);
-		final var correctOrganisationId = databaseOrganisation != null ? databaseOrganisation.value() : organisationId;
-
-		final var dynamoDbManager = createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath, objectMapper);
-
-		return getEmbeddedDatabase(dynamoDbManager, correctOrganisationId);
-	}
-
-	private DynamoDbManager createDynamoDbManager(
-		final DynamoDbAsyncClient client,
-		final DynamoDbStreamsAsyncClient streamClient,
-		final AnnotatedElement parameter,
-		final boolean withHistory,
-		final boolean hashed,
-		final String classPath,
-		final ObjectMapper objectMapper
-	) throws ExecutionException, InterruptedException {
-		final var databaseNames = parameter.getAnnotation(DatabaseNames.class);
-		var tables = databaseNames != null ? databaseNames.value() : new String[] { "table" };
-
-		String historyTable = null;
-		for (final String table : tables) {
-			createTable(client, table);
-			if (withHistory) {
-				historyTable = table + "_history";
-				createHistoryTable(client, historyTable);
-			}
-		}
-
-		final var globalEnabledAnnotation = parameter.getAnnotation(GlobalEnabled.class);
-
-		var globalEnabled = true;
-		if (globalEnabledAnnotation != null) {
-			globalEnabled = globalEnabledAnnotation.value();
-		}
-
-		return getDatabaseManager(client, tables, historyTable, globalEnabled, hashed, classPath, "parallelIndex", objectMapper);
-	}
-
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		var store = extensionContext.getStore(Namespace.create(extensionContext.getUniqueId()));
-		var test = store;
+		var wrapper = getServer();
 		final var testMethod = extensionContext.getRequiredTestMethod();
 		var testDatabase = getTestDatabase(testMethod);
 
-		var wrapper = HOLDER.getServer();
-
-		test.put("table", wrapper);
-
-		final var client = wrapper.clientAsync;
-		final var streamClient = wrapper.streamClient;
-
-		System.setProperty("sqlite4java.library.path", "native-libs");
-
-		var organisationId = testDatabase.organisationId();
 		var classPath = testDatabase.classPath();
 		var hashed = testDatabase.hashed();
 		var objectMapper = testDatabase.objectMapper().getConstructor().newInstance().get();
@@ -159,33 +102,80 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			.findFirst()
 			.orElse(false);
 
+		var uniqueId = UUID.randomUUID().toString();
+
+		var toDelete = new HashSet<String>();
+
+		var store = extensionContext.getStore(Namespace.create(extensionContext.getUniqueId()));
 		final var argumentsList = Arrays
 			.stream(testMethod.getParameters())
 			.map(parameter -> {
+				var provider = new ArgumentProvider(uniqueId, wrapper, parameter, withHistory, hashed, classPath, objectMapper, toDelete::add);
 				try {
-					if (parameter.getType().isAssignableFrom(DynamoDbManager.class)) {
-						return createDynamoDbManager(client, streamClient, parameter, withHistory, hashed, classPath, objectMapper);
-					} else if (parameter.getType().isAssignableFrom(HistoryProcessor.class)) {
-						return new HistoryProcessor(wrapper.client, streamClient, parameter, organisationId);
-					} else if (parameter.getType().isAssignableFrom(DynamoDbAsyncClient.class)) {
-						return wrapper.clientAsync;
-					} else if (parameter.getType().isAssignableFrom(DynamoDbClient.class)) {
-						return wrapper.client;
+					var type = parameter.getType();
+					if (type.isAssignableFrom(DynamoDbManager.class)) {
+						return provider.getDynamoDbManager(true);
+					} else if (type.isAssignableFrom(HistoryProcessor.class)) {
+						return provider.getHistoryProcessor();
+					} else if (type.isAssignableFrom(DynamoDbAsyncClient.class)) {
+						return provider.getClientAsync();
+					} else if (type.isAssignableFrom(DynamoDbClient.class)) {
+						return provider.getClient();
+					} else if (type.isAssignableFrom(VirtualDatabase.class)) {
+						return provider.getVirtualDatabase();
+					} else if (type.isAssignableFrom(Database.class)) {
+						return provider.getDatabase();
 					} else {
-						var database = createDatabase(client, streamClient, parameter, organisationId, withHistory, hashed, classPath, objectMapper);
-						if (parameter.getType().isAssignableFrom(VirtualDatabase.class)) {
-							return new VirtualDatabase(database);
-						} else {
-							return database;
-						}
+						var builder = Stream
+							.of(testDatabase.providers())
+							.map(t -> create(t))
+							.filter(p -> type.isAssignableFrom(p.type()))
+							.findAny()
+							.orElseThrow();
+						return builder.create(provider);
+
 					}
 				} catch (final Exception e) {
-					e.printStackTrace();
-					throw new ExceptionInInitializerError("Could not build parameters");
+					throw new RuntimeException("Could not build parameters", e);
 				}
 			})
 			.collect(Collectors.toList());
 		store.put("arguments", argumentsList);
+		store.put("toDelete", toDelete);
+	}
+
+	@Override
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		var store = extensionContext.getStore(Namespace.create(extensionContext.getUniqueId()));
+		Set<String> toDelete = store.get("toDelete", Set.class);
+		if (toDelete != null) {
+			var wrapper = getServer();
+			var client = wrapper.client();
+			toDelete.forEach(table -> client.deleteTable(b -> b.tableName(table)));
+		}
+	}
+
+	private ServerWrapper getServer() throws Exception {
+		if (serverWrapper == null) {
+			synchronized (TestDatabaseProvider.class) {
+				if (serverWrapper == null) {
+					final String port = findFreePort();
+					startDynamoServer(port);
+					final var clientAsync = startDynamoAsyncClient(port);
+					final var client = startDynamoClient(port);
+
+					final var streamClient = startDynamoStreamClient(port);
+
+					createTable(client, "table");
+					createHistoryTable(client, "table_history");
+					serverWrapper = new ServerWrapper(client, clientAsync, streamClient);
+				}
+
+			}
+		}
+
+		return serverWrapper;
+
 	}
 
 	private TestDatabase getTestDatabase(AnnotatedElement annotatedElement) {
@@ -200,46 +190,6 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		var wrapper = context.getStore(Namespace.create(context.getUniqueId())).get("table", ServerWrapper.class);
-		if (wrapper != null) {
-			HOLDER.returnServer(wrapper);
-		}
-	}
-
-	static class DbHolder {
-
-		private final ConcurrentLinkedQueue<ServerWrapper> servers;
-
-		public DbHolder() {
-			this.servers = new ConcurrentLinkedQueue<>();
-		}
-
-		ServerWrapper getServer() throws Exception {
-			var wrapper = this.servers.poll();
-			if (wrapper == null) {
-				final String port = findFreePort();
-
-				startDynamoServer(port);
-				final var clientAsync = startDynamoAsyncClient(port);
-				final var client = startDynamoClient(port);
-
-				final var streamClient = startDynamoStreamClient(port);
-
-				return new ServerWrapper(client, clientAsync, streamClient);
-			} else {
-				var tables = wrapper.client.listTables();
-				CompletableFutureUtil.sequence(tables.tableNames().stream().map(table -> wrapper.clientAsync.deleteTable(r -> r.tableName(table)))).get();
-				return wrapper;
-			}
-		}
-
-		void returnServer(ServerWrapper wrapper) {
-			this.servers.add(wrapper);
-		}
 	}
 
 	record ServerWrapper(DynamoDbClient client, DynamoDbAsyncClient clientAsync, DynamoDbStreamsAsyncClient streamClient) {}

@@ -44,21 +44,21 @@ public class ScalarTest {
 	public Map<String, Object> getField(String typeName, String kind) throws ReflectiveOperationException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"" +
-			typeName +
-			"\") {" +
-			"    name" +
-			"    description" +
-			"    kind" +
-			"   appliedDirectives {\n" +
-			"        name\n" +
-			"        args {\n" +
-			"          name\n" +
-			"          value\n" +
-			"        }\n" +
-			"      }" +
-			"  }" +
-			"} "
+				"  __type(name: \"" +
+				typeName +
+				"\") {" +
+				"    name" +
+				"    description" +
+				"    kind" +
+				"   appliedDirectives {\n" +
+				"        name\n" +
+				"        args {\n" +
+				"          name\n" +
+				"          value\n" +
+				"        }\n" +
+				"      }" +
+				"  }" +
+				"} "
 		)
 			.getData();
 		var type = response.get("__type");
@@ -108,7 +108,7 @@ public class ScalarTest {
 		}
 		ExecutionResult result = schema.execute(input);
 		if (!result.getErrors().isEmpty()) {
-			throw new RuntimeException(result.getErrors().toString()); //TODO:cleanup
+			throw new RuntimeException(result.getErrors().toString()); // TODO:cleanup
 		}
 		return result;
 	}

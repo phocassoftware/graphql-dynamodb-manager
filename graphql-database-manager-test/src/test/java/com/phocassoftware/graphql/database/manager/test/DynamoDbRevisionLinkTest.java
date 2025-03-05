@@ -16,12 +16,15 @@ import com.phocassoftware.graphql.database.manager.Database;
 import com.phocassoftware.graphql.database.manager.RevisionMismatchException;
 import com.phocassoftware.graphql.database.manager.Table;
 import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseOrganisation;
+
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
 /**
  * most of the test cases are cover in the RevisionPut tests this just covers links failure behavior
+ *
  * @author ashley
  *
  */
@@ -55,7 +58,7 @@ public class DynamoDbRevisionLinkTest {
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.links(snapshot, AnotherTable.class, Arrays.asList("2")).get());
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 
-		//confirm no state change
+		// confirm no state change
 		Assertions.assertEquals(2, snapshot.getRevision());
 		Assertions.assertEquals(3, entry.getRevision());
 	}
@@ -76,7 +79,7 @@ public class DynamoDbRevisionLinkTest {
 
 		entry = db.links(entry, AnotherTable.class, Arrays.asList("1", "2")).get();
 
-		//link changed these objects
+		// link changed these objects
 		var o1 = other1;
 		var o2 = other2;
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.put(o1).get());
@@ -148,7 +151,10 @@ public class DynamoDbRevisionLinkTest {
 	}
 
 	@TestDatabase
-	public void testMultipleEnv(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	public void testMultipleEnv(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("1", "garry");
 		var other1 = new AnotherTable("1", "pants");
@@ -156,7 +162,7 @@ public class DynamoDbRevisionLinkTest {
 
 		entry = dbProd.put(entry).get();
 		Assertions.assertEquals(1, entry.getRevision());
-		entry = dbProd.put(entry).get(); //want to get this ahead of the stage db
+		entry = dbProd.put(entry).get(); // want to get this ahead of the stage db
 		other1 = dbProd.put(other1).get();
 		other2 = db.put(other2).get();
 		Assertions.assertEquals(2, entry.getRevision());
@@ -167,14 +173,14 @@ public class DynamoDbRevisionLinkTest {
 
 		db.links(entry, AnotherTable.class, Arrays.asList("1", "2")).get();
 
-		entry = db.get(SimpleTable.class, "1").get(); //revision will come from stage db
+		entry = db.get(SimpleTable.class, "1").get(); // revision will come from stage db
 
 		other1 = db.get(AnotherTable.class, "1").get();
 		other2 = db.get(AnotherTable.class, "2").get();
-		Assertions.assertEquals(1, entry.getRevision()); //first write into this db
+		Assertions.assertEquals(1, entry.getRevision()); // first write into this db
 
-		Assertions.assertEquals(1, other1.getRevision()); //first write into this db
-		Assertions.assertEquals(2, other2.getRevision()); //second write into this db
+		Assertions.assertEquals(1, other1.getRevision()); // first write into this db
+		Assertions.assertEquals(2, other2.getRevision()); // second write into this db
 	}
 
 	static class SimpleTable extends Table {

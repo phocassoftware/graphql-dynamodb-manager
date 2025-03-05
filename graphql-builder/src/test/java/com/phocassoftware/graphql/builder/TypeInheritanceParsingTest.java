@@ -196,58 +196,58 @@ public class TypeInheritanceParsingTest {
 	public Map<String, Object> getField(String typeName, String kind, String name) {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"" +
-			typeName +
-			"\") {" +
-			"    name" +
-			"    kind" +
-			"    description" +
-			"    fields {" +
-			"      name" +
-			"      description" +
-			"      args {" +
-			"        name" +
-			"        description" +
-			"      }" +
-			"      type {" +
-			"        name" +
-			"        kind" +
-			"        ofType {" +
-			"          name" +
-			"          kind" +
-			"          ofType {" +
-			"            name" +
-			"            kind" +
-			"            ofType {" +
-			"              name" +
-			"              kind" +
-			"            }" +
-			"          }" +
-			"        }" +
-			"      }" +
-			"    }" +
-			"    inputFields {" +
-			"      name" +
-			"      description" +
-			"      type {" +
-			"        name" +
-			"        kind" +
-			"        ofType {" +
-			"          name" +
-			"          kind" +
-			"          ofType {" +
-			"            name" +
-			"            kind" +
-			"            ofType {" +
-			"              name" +
-			"              kind" +
-			"            }" +
-			"          }" +
-			"        }" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"} "
+				"  __type(name: \"" +
+				typeName +
+				"\") {" +
+				"    name" +
+				"    kind" +
+				"    description" +
+				"    fields {" +
+				"      name" +
+				"      description" +
+				"      args {" +
+				"        name" +
+				"        description" +
+				"      }" +
+				"      type {" +
+				"        name" +
+				"        kind" +
+				"        ofType {" +
+				"          name" +
+				"          kind" +
+				"          ofType {" +
+				"            name" +
+				"            kind" +
+				"            ofType {" +
+				"              name" +
+				"              kind" +
+				"            }" +
+				"          }" +
+				"        }" +
+				"      }" +
+				"    }" +
+				"    inputFields {" +
+				"      name" +
+				"      description" +
+				"      type {" +
+				"        name" +
+				"        kind" +
+				"        ofType {" +
+				"          name" +
+				"          kind" +
+				"          ofType {" +
+				"            name" +
+				"            kind" +
+				"            ofType {" +
+				"              name" +
+				"              kind" +
+				"            }" +
+				"          }" +
+				"        }" +
+				"      }" +
+				"    }" +
+				"  }" +
+				"} "
 		)
 			.getData();
 		var type = response.get("__type");
@@ -323,19 +323,19 @@ public class TypeInheritanceParsingTest {
 	public void testOneOf() {
 		Map<String, List<Map<String, Object>>> response = execute(
 			"mutation {myAnimals(animals: [" +
-			"{cat: {fur: true, calico: false, name: \"socks\", age: 4}}," +
-			"{dog: {fur: \"short\", name: \"patches\", age: 5}}" +
-			"]){" +
-			"name " +
-			"... on Cat { " +
-			"  age " +
-			"  calico " +
-			"} " +
-			"... on Dog {" +
-			" age " +
-			" fur " +
-			"} " +
-			"}} "
+				"{cat: {fur: true, calico: false, name: \"socks\", age: 4}}," +
+				"{dog: {fur: \"short\", name: \"patches\", age: 5}}" +
+				"]){" +
+				"name " +
+				"... on Cat { " +
+				"  age " +
+				"  calico " +
+				"} " +
+				"... on Dog {" +
+				" age " +
+				" fur " +
+				"} " +
+				"}} "
 		)
 			.getData();
 
@@ -357,18 +357,18 @@ public class TypeInheritanceParsingTest {
 	public void testOptionalFieldNotSet() {
 		Map<String, List<Map<String, Object>>> response = execute(
 			"mutation {myAnimals(animals: [" +
-			"{cat: {calico: false, name: \"socks\", age: 4}}," +
-			"]){" +
-			"name " +
-			"... on Cat { " +
-			"  age " +
-			"  calico " +
-			" fur " +
-			"} " +
-			"... on Dog {" +
-			" age " +
-			"} " +
-			"}} "
+				"{cat: {calico: false, name: \"socks\", age: 4}}," +
+				"]){" +
+				"name " +
+				"... on Cat { " +
+				"  age " +
+				"  calico " +
+				" fur " +
+				"} " +
+				"... on Dog {" +
+				" age " +
+				"} " +
+				"}} "
 		)
 			.getData();
 
@@ -386,18 +386,18 @@ public class TypeInheritanceParsingTest {
 	public void testOptionalFieldNull() {
 		Map<String, List<Map<String, Object>>> response = execute(
 			"mutation {myAnimals(animals: [" +
-			"{cat: {fur: null, calico: false, name: \"socks\", age: 4}}," +
-			"]){" +
-			"name " +
-			"... on Cat { " +
-			"  age " +
-			"  calico " +
-			" fur " +
-			"} " +
-			"... on Dog {" +
-			" age " +
-			"} " +
-			"}} "
+				"{cat: {fur: null, calico: false, name: \"socks\", age: 4}}," +
+				"]){" +
+				"name " +
+				"... on Cat { " +
+				"  age " +
+				"  calico " +
+				" fur " +
+				"} " +
+				"... on Dog {" +
+				" age " +
+				"} " +
+				"}} "
 		)
 			.getData();
 
@@ -415,19 +415,19 @@ public class TypeInheritanceParsingTest {
 	public void testOneOfError() {
 		var result = execute(
 			"mutation {myAnimals(animals: [" +
-			"{cat: {fur: true, calico: false, name: \"socks\", age: 4}," +
-			"dog: {fur: \"short\", name: \"patches\", age: 5}}" +
-			"]){" +
-			"name " +
-			"... on Cat { " +
-			"  age " +
-			"  calico " +
-			"} " +
-			"... on Dog {" +
-			" age " +
-			" fur " +
-			"} " +
-			"}} "
+				"{cat: {fur: true, calico: false, name: \"socks\", age: 4}," +
+				"dog: {fur: \"short\", name: \"patches\", age: 5}}" +
+				"]){" +
+				"name " +
+				"... on Cat { " +
+				"  age " +
+				"  calico " +
+				"} " +
+				"... on Dog {" +
+				" age " +
+				" fur " +
+				"} " +
+				"}} "
 		);
 
 		assertFalse(result.getErrors().isEmpty());
@@ -439,18 +439,18 @@ public class TypeInheritanceParsingTest {
 	public void testOneOfErrorEmpty() {
 		var result = execute(
 			"mutation {myAnimals(animals: [" +
-			"{}" +
-			"]){" +
-			"name " +
-			"... on Cat { " +
-			"  age " +
-			"  calico " +
-			"} " +
-			"... on Dog {" +
-			" age " +
-			" fur " +
-			"} " +
-			"}} "
+				"{}" +
+				"]){" +
+				"name " +
+				"... on Cat { " +
+				"  age " +
+				"  calico " +
+				"} " +
+				"... on Dog {" +
+				" age " +
+				" fur " +
+				"} " +
+				"}} "
 		);
 
 		assertFalse(result.getErrors().isEmpty());
@@ -462,18 +462,18 @@ public class TypeInheritanceParsingTest {
 	public void testOneOfErrorField() {
 		var result = execute(
 			"mutation {myAnimals(animals: [" +
-			"{cat: {fur: null, calico: false, name: \"socks\", age: 4, error: \"fail\"}}" +
-			"]){" +
-			"name " +
-			"... on Cat { " +
-			"  age " +
-			"  calico " +
-			"} " +
-			"... on Dog {" +
-			" age " +
-			" fur " +
-			"} " +
-			"}} "
+				"{cat: {fur: null, calico: false, name: \"socks\", age: 4, error: \"fail\"}}" +
+				"]){" +
+				"name " +
+				"... on Cat { " +
+				"  age " +
+				"  calico " +
+				"} " +
+				"... on Dog {" +
+				" age " +
+				" fur " +
+				"} " +
+				"}} "
 		);
 
 		assertFalse(result.getErrors().isEmpty());

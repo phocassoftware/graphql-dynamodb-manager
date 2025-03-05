@@ -14,6 +14,8 @@ package com.phocassoftware.graphql.database.manager.test;
 
 import com.phocassoftware.graphql.database.manager.Database;
 import com.phocassoftware.graphql.database.manager.Table;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
+
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -84,7 +86,8 @@ final class DynamoDbQueryBuilderTest {
 		m[0][0] = r.nextDouble();
 		for (int i = 0; i < m.length; i++) {
 			for (int j = 0; j < m[i].length; j++) {
-				if (i == 0 && j == 0) continue; else if (j == 0) {
+				if (i == 0 && j == 0) continue;
+				else if (j == 0) {
 					m[i][j] = m[i - 1][m[i - 1].length - 1] + k;
 				} else m[i][j] = m[i][j - 1] + k;
 			}
@@ -128,7 +131,7 @@ final class DynamoDbQueryBuilderTest {
 	}
 
 	@TestDatabase
-	void testBigPlusGlobal(final Database db) throws InterruptedException, ExecutionException {
+	void testBigPlusGlobal(@DatabaseNames("global") Database db) throws InterruptedException, ExecutionException {
 		var n = 400;
 		List<String> ids = Stream.iterate(1, i -> i + 1).map(i -> getId(i)).limit(n).collect(Collectors.toList());
 

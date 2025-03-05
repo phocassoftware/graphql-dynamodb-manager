@@ -19,5 +19,4 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target({ ElementType.METHOD, ElementType.PARAMETER })
-public @interface InnerNullable {
-}
+public @interface InnerNullable {}

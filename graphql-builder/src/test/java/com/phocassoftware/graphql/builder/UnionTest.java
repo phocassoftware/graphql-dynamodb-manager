@@ -28,19 +28,19 @@ public class UnionTest {
 	public void testUnion() throws ReflectiveOperationException {
 		Map<String, List<Map<String, Object>>> response = execute(
 			"query {union{" +
-			"  __typename" +
-			"  ... on SimpleType {" +
-			"    name" +
-			"  }" +
-			"  ... on UnionType {" +
-			"    type {" +
-			"      __typename" +
-			"      ... on SimpleType {" +
-			"        name" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"}} "
+				"  __typename" +
+				"  ... on SimpleType {" +
+				"    name" +
+				"  }" +
+				"  ... on UnionType {" +
+				"    type {" +
+				"      __typename" +
+				"      ... on SimpleType {" +
+				"        name" +
+				"      }" +
+				"    }" +
+				"  }" +
+				"}} "
 		)
 			.getData();
 		var union = response.get("union");
@@ -53,9 +53,8 @@ public class UnionTest {
 	public void testUnionFailure() throws ReflectiveOperationException {
 		var error = assertThrows(
 			RuntimeException.class,
-			() ->
-				execute(
-					"query {unionFailure{" +
+			() -> execute(
+				"query {unionFailure{" +
 					"  __typename" +
 					"  ... on SimpleType {" +
 					"    name" +
@@ -69,7 +68,7 @@ public class UnionTest {
 					"    }" +
 					"  }" +
 					"}} "
-				)
+			)
 		);
 		assertEquals("Union Union_SimpleType_UnionType Does not support type Boolean", error.getMessage());
 	}
@@ -78,7 +77,7 @@ public class UnionTest {
 		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.type")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
-			throw new RuntimeException(result.getErrors().toString()); //TODO:cleanup
+			throw new RuntimeException(result.getErrors().toString()); // TODO:cleanup
 		}
 		return result;
 	}

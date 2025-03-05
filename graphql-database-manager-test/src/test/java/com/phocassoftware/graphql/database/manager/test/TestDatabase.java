@@ -15,9 +15,5 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@com.phocassoftware.graphql.database.manager.test.annotations.TestDatabase(
-	objectMapper = ObjectMapperCreator.class,
-	classPath = "com.phocassoftware.graphql.database.manager.test"
-)
-public @interface TestDatabase {
-}
+@com.phocassoftware.graphql.database.manager.test.annotations.TestDatabase(objectMapper = ObjectMapperCreator.class, classPath = "com.phocassoftware.graphql.database.manager.test")
+public @interface TestDatabase {}

@@ -64,7 +64,8 @@ final class DynamoDbQueryBuilderTest {
 		m[0][0] = r.nextDouble();
 		for (int i = 0; i < m.length; i++) {
 			for (int j = 0; j < m[i].length; j++) {
-				if (i == 0 && j == 0) continue; else if (j == 0) {
+				if (i == 0 && j == 0) continue;
+				else if (j == 0) {
 					m[i][j] = m[i - 1][m[i - 1].length - 1] + k;
 				} else m[i][j] = m[i][j - 1] + k;
 			}

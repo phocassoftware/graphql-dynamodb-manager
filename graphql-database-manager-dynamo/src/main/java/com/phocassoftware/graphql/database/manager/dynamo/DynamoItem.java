@@ -67,7 +67,7 @@ public class DynamoItem implements Comparable<DynamoItem> {
 		return false;
 	}
 
-	//TODO: AWS has made this more difficult with version 2 of the api keep an eye out might get easy again in the future
+	// TODO: AWS has made this more difficult with version 2 of the api keep an eye out might get easy again in the future
 	public <T> T convertTo(ObjectMapper mapper, Class<T> type) {
 		if (isDeleted()) {
 			return null;

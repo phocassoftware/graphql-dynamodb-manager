@@ -36,7 +36,7 @@ final class DynamoDbIndexesTest {
 	ObjectMapper mapper = new ObjectMapper();
 
 	@TestDatabase
-	void testGlobal(final Database db) throws InterruptedException, ExecutionException {
+	void testGlobal(@DatabaseNames({ "isolate" }) final Database db) throws InterruptedException, ExecutionException {
 		var list = db.queryGlobal(SimpleTable.class, "john").get();
 		Assertions.assertEquals(0, list.size());
 
@@ -53,7 +53,10 @@ final class DynamoDbIndexesTest {
 	}
 
 	@TestDatabase
-	void testGlobalInheritance(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames({ "prod" }) final Database dbProd)
+	void testGlobalInheritance(
+		@DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@DatabaseNames({ "prod" }) @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry", "john");
 		entry1 = dbProd.put(entry1).get();
@@ -78,7 +81,7 @@ final class DynamoDbIndexesTest {
 	}
 
 	@TestDatabase
-	void testGlobalUnique(final Database db) throws InterruptedException, ExecutionException {
+	void testGlobalUnique(@DatabaseNames({ "isolate" }) final Database db) throws InterruptedException, ExecutionException {
 		var entry = db.queryGlobalUnique(SimpleTable.class, "john").get();
 		Assertions.assertNull(entry);
 

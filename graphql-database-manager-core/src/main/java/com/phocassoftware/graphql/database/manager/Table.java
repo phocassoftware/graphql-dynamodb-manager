@@ -95,7 +95,7 @@ public abstract class Table {
 	}
 
 	void setSource(String sourceTable, Map<String, Set<String>> links, String sourceOrganisationId) {
-		//so bad data does not cause error
+		// so bad data does not cause error
 		if (createdAt == null) {
 			createdAt = Instant.MIN;
 		}

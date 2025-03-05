@@ -56,16 +56,16 @@ public class ParameterTypeParsingTest {
 	public void testDescription() throws ReflectiveOperationException, JsonMappingException, JsonProcessingException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"AnimalType\") {" +
-			"    name" +
-			"    kind" +
-			"    description" +
-			"    enumValues {" +
-			"      name" +
-			"      description" +
-			"    }" +
-			"  }" +
-			"} ",
+				"  __type(name: \"AnimalType\") {" +
+				"    name" +
+				"    kind" +
+				"    description" +
+				"    enumValues {" +
+				"      name" +
+				"      description" +
+				"    }" +
+				"  }" +
+				"} ",
 			null
 		)
 			.getData();

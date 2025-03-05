@@ -30,12 +30,12 @@ public class RenameTest {
 	public void testClassRename() throws JsonProcessingException, JSONException {
 		var type = Map.of("nameSet", "foo");
 		var response = execute("""
-					query passthroughClass($type: ClassTypeInput!) {
-						passthroughClass(type: $type) {
-							nameGet
-						}
+				query passthroughClass($type: ClassTypeInput!) {
+					passthroughClass(type: $type) {
+						nameGet
 					}
-				""", Map.of("type", type))
+				}
+			""", Map.of("type", type))
 			.toSpecification();
 		JSONAssert.assertEquals("""
 				{
@@ -52,12 +52,12 @@ public class RenameTest {
 	public void testRecordRename() throws JsonProcessingException, JSONException {
 		var type = Map.of("name", "foo");
 		var response = execute("""
-					query passthroughRecord($type: RecordTypeInput!) {
-						passthroughRecord(type: $type) {
-							name
-						}
+				query passthroughRecord($type: RecordTypeInput!) {
+					passthroughRecord(type: $type) {
+						name
 					}
-				""", Map.of("type", type))
+				}
+			""", Map.of("type", type))
 			.toSpecification();
 		JSONAssert.assertEquals("""
 				{
@@ -71,7 +71,9 @@ public class RenameTest {
 	}
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
-		GraphQL schema = GraphQL.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.phocassoftware.graphql.builder.rename"))).build();
+		GraphQL schema = GraphQL
+			.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.phocassoftware.graphql.builder.rename")))
+			.build();
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);
 		if (variables != null) {

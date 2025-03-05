@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 public class ParameterParsingTest {
 
-	//TODO:add failure cases
+	// TODO:add failure cases
 	@Test
 	public void testRequiredString() throws ReflectiveOperationException {
 		Map<String, List<String>> response = execute("query {requiredString(type: \"There\")} ").getData();
@@ -49,7 +49,7 @@ public class ParameterParsingTest {
 		assertEquals(null, response.get("optionalString"));
 	}
 
-	//TODO:id checks don't confirm actual an id
+	// TODO:id checks don't confirm actual an id
 	@Test
 	public void testRequiredId() throws ReflectiveOperationException {
 		Map<String, List<String>> response = execute("query {testRequiredId(type: \"There\")} ").getData();
@@ -229,7 +229,7 @@ public class ParameterParsingTest {
 		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.parameter")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
-			throw new RuntimeException(result.getErrors().toString()); //TODO:cleanup
+			throw new RuntimeException(result.getErrors().toString()); // TODO:cleanup
 		}
 		return result;
 	}

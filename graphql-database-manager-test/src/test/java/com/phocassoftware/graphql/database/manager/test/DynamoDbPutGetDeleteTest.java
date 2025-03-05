@@ -43,7 +43,8 @@ final class DynamoDbPutGetDeleteTest {
 	}
 
 	@TestDatabase
-	void testGlobalPutGetDelete(final Database db, final Database dbProd) throws InterruptedException, ExecutionException {
+	void testGlobalPutGetDelete(@DatabaseNames({ "db" }) final Database db, @DatabaseNames({ "db" }) final Database dbProd) throws InterruptedException,
+		ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		entry1 = db.putGlobal(entry1).get();
 		Assertions.assertEquals("garry", entry1.getName());
@@ -70,7 +71,10 @@ final class DynamoDbPutGetDeleteTest {
 	}
 
 	@TestDatabase
-	void testGlobalDisabledPutGetDelete(@GlobalEnabled(false) final Database db, @GlobalEnabled(false) final Database dbProd)
+	void testGlobalDisabledPutGetDelete(
+		@DatabaseNames({ "db" }) @GlobalEnabled(false) final Database db,
+		@DatabaseNames({ "db" }) @GlobalEnabled(false) final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		entry1 = db.putGlobal(entry1).get();
@@ -89,7 +93,10 @@ final class DynamoDbPutGetDeleteTest {
 	}
 
 	@TestDatabase
-	void testClimbingSimplePutGetDelete(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	void testClimbingSimplePutGetDelete(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		entry1 = dbProd.put(entry1).get();
@@ -126,7 +133,10 @@ final class DynamoDbPutGetDeleteTest {
 	}
 
 	@TestDatabase
-	void testClimbingGlobalPutGetDelete(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames("prod") final Database dbProd)
+	void testClimbingGlobalPutGetDelete(
+		@DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		SimpleTable entry1 = new SimpleTable("garry");
 		entry1 = dbProd.putGlobal(entry1).get();

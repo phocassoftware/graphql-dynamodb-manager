@@ -74,22 +74,13 @@
 				<version>3.5.2</version>
 			</plugin>
 			<plugin>
-				<groupId>com.hubspot.maven.plugins</groupId>
-				<artifactId>prettier-maven-plugin</artifactId>
-				<version>0.22</version>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<version>2.24.1</version>
 				<configuration>
-					<prettierJavaVersion>1.4.0</prettierJavaVersion>
-					<printWidth>160</printWidth>
-					<tabWidth>4</tabWidth>
-					<useTabs>true</useTabs>
-					<ignoreConfigFile>true</ignoreConfigFile>
-					<ignoreEditorConfig>true</ignoreEditorConfig>
+					<configFile>${project.parent.basedir}/formatter.xml</configFile>
+					<lineEnding>LF</lineEnding>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

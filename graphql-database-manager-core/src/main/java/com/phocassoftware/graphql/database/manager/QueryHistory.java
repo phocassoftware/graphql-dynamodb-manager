@@ -65,14 +65,12 @@ public class QueryHistory<T extends Table> {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		QueryHistory other = (QueryHistory) obj;
-		return (
-			Objects.equals(fromRevision, other.fromRevision) &&
+		return (Objects.equals(fromRevision, other.fromRevision) &&
 			Objects.equals(fromUpdatedAt, other.fromUpdatedAt) &&
 			Objects.equals(id, other.id) &&
 			Objects.equals(startsWith, other.startsWith) &&
 			Objects.equals(toRevision, other.toRevision) &&
 			Objects.equals(toUpdatedAt, other.toUpdatedAt) &&
-			Objects.equals(type, other.type)
-		);
+			Objects.equals(type, other.type));
 	}
 }

@@ -150,4 +150,8 @@ public class VirtualDatabase {
 	public <T extends Table> T takeHistoryBackup(final T entity, final Class<? extends Table> type, final String targetId) {
 		return database.unlink(entity, type, targetId).join();
 	}
+
+	public String getOrganisationId() {
+		return database.getOrganisationId();
+	}
 }

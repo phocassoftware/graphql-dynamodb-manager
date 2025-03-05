@@ -71,14 +71,12 @@ public class Query<T extends Table> {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		Query other = (Query) obj;
-		return (
-			Objects.equals(after, other.after) &&
+		return (Objects.equals(after, other.after) &&
 			Objects.equals(limit, other.limit) &&
 			Objects.equals(startsWith, other.startsWith) &&
 			Objects.equals(type, other.type) &&
 			Objects.equals(threadCount, other.threadCount) &&
-			Objects.equals(threadIndex, other.threadIndex)
-		);
+			Objects.equals(threadIndex, other.threadIndex));
 	}
 
 	static boolean isPowerOfTwo(int n) {

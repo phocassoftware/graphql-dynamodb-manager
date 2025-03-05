@@ -13,6 +13,6 @@
 package com.phocassoftware.graphql.database.manager.test;
 
 class DynamoDbPermission {
-	//TODO: to check the allowed to write logic.
+	// TODO: to check the allowed to write logic.
 
 }

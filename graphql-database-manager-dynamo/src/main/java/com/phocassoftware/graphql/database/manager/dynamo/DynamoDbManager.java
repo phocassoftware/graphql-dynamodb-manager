@@ -141,8 +141,8 @@ public final class DynamoDbManager extends DatabaseManager {
 				idGenerator = () -> UUID.randomUUID().toString();
 			}
 
-			database =
-				Objects.requireNonNullElse(
+			database = Objects
+				.requireNonNullElse(
 					database,
 					new DynamoDb(mapper, tables, historyTable, client, idGenerator, batchWriteSize, maxRetry, globalEnabled, hash, classPath, parallelIndex)
 				);

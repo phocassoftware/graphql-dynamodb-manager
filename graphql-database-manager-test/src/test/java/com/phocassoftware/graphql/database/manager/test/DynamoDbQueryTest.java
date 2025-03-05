@@ -14,8 +14,8 @@ package com.phocassoftware.graphql.database.manager.test;
 
 import com.phocassoftware.graphql.database.manager.Database;
 import com.phocassoftware.graphql.database.manager.Table;
-import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
-import com.phocassoftware.graphql.database.manager.test.annotations.GlobalEnabled;
+import com.phocassoftware.graphql.database.manager.test.annotations.*;
+
 import java.util.Comparator;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
@@ -92,7 +92,10 @@ final class DynamoDbQueryTest {
 	}
 
 	@TestDatabase
-	void testClimbingQuery(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames({ "prod" }) final Database dbProd)
+	void testClimbingQuery(
+		@DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@DatabaseNames({ "prod" }) @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var garry = dbProd.put(new SimpleTable("garry")).get();
 		var garryLocal = new SimpleTable("GARRY");
@@ -122,7 +125,10 @@ final class DynamoDbQueryTest {
 	}
 
 	@TestDatabase
-	void testClimbingGlobalQuery(@DatabaseNames({ "prod", "stage" }) final Database db, @DatabaseNames("prod") final Database dbProd)
+	void testClimbingGlobalQuery(
+		@DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var garry = dbProd.put(new SimpleTable("garry")).get();
 		var garryLocal = new SimpleTable("GARRY");
@@ -153,8 +159,8 @@ final class DynamoDbQueryTest {
 
 	@TestDatabase
 	void testClimbingGlobalDisabledQuery(
-		@GlobalEnabled(false) @DatabaseNames({ "prod", "stage" }) final Database db,
-		@GlobalEnabled(false) @DatabaseNames("prod") final Database dbProd
+		@GlobalEnabled(false) @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") final Database db,
+		@GlobalEnabled(false) @DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
 	) throws InterruptedException, ExecutionException {
 		var garry = dbProd.put(new SimpleTable("garry")).get();
 		var garryLocal = new SimpleTable("GARRY");

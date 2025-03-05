@@ -47,7 +47,7 @@ class DirectivesSchema {
 		this.directives = directives;
 	}
 
-	//TODO:mess of exceptions
+	// TODO:mess of exceptions
 	public static DirectivesSchema build(List<RestrictTypeFactory<?>> globalDirectives, Set<Class<?>> directiveTypes) throws ReflectiveOperationException {
 		Map<Class<? extends Annotation>, DirectiveCaller<?>> targets = new HashMap<>();
 
@@ -89,31 +89,30 @@ class DirectivesSchema {
 	}
 
 	private DataFetcher<?> wrap(RestrictTypeFactory<?> directive, DataFetcher<?> fetcher) {
-		//TODO: hate having this cache here would love to scope against the env object but nothing to hook into dataload caused global leak
+		// TODO: hate having this cache here would love to scope against the env object but nothing to hook into dataload caused global leak
 		Map<DataFetchingEnvironment, CompletableFuture<RestrictType>> cache = Collections.synchronizedMap(new WeakHashMap<>());
 
-		return env ->
-			cache
-				.computeIfAbsent(env, key -> directive.create(key).thenApply(t -> t))
-				.thenCompose(restrict -> {
-					try {
-						Object response = fetcher.get(env);
-						if (response instanceof CompletionStage) {
-							return ((CompletionStage) response).thenCompose(r -> applyRestrict(restrict, r));
-						}
-						return applyRestrict(restrict, response);
-					} catch (Exception e) {
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
-						}
-						throw new RuntimeException(e);
+		return env -> cache
+			.computeIfAbsent(env, key -> directive.create(key).thenApply(t -> t))
+			.thenCompose(restrict -> {
+				try {
+					Object response = fetcher.get(env);
+					if (response instanceof CompletionStage) {
+						return ((CompletionStage) response).thenCompose(r -> applyRestrict(restrict, r));
 					}
-				});
+					return applyRestrict(restrict, response);
+				} catch (Exception e) {
+					if (e instanceof RuntimeException) {
+						throw (RuntimeException) e;
+					}
+					throw new RuntimeException(e);
+				}
+			});
 	}
 
 	public boolean target(Method method, TypeMeta meta) {
 		for (var global : this.global) {
-			//TODO: extract class
+			// TODO: extract class
 			if (global.extractType().isAssignableFrom(meta.getType())) {
 				return true;
 			}
@@ -181,8 +180,8 @@ class DirectivesSchema {
 	private static <T> CompletableFuture<List<T>> all(List<CompletableFuture<T>> toReturn) {
 		return CompletableFuture
 			.allOf(toReturn.toArray(CompletableFuture[]::new))
-			.thenApply(__ ->
-				toReturn
+			.thenApply(
+				__ -> toReturn
 					.stream()
 					.map(m -> {
 						try {

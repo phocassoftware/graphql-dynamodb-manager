@@ -58,38 +58,35 @@ public class Database {
 		this.putAllow = putAllow;
 		this.submitted = new AtomicInteger();
 
-		items =
-			new TableDataLoader<>(
-				new DataLoader<DatabaseKey<Table>, Table>(
-					keys -> {
-						return driver.get(keys);
-					},
-					DataLoaderOptions.newOptions().setMaxBatchSize(driver.maxBatchSize())
-				),
-				this::handleFuture
-			); // will auto call global
+		items = new TableDataLoader<>(
+			new DataLoader<DatabaseKey<Table>, Table>(
+				keys -> {
+					return driver.get(keys);
+				},
+				DataLoaderOptions.newOptions().setMaxBatchSize(driver.maxBatchSize())
+			),
+			this::handleFuture
+		); // will auto call global
 
-		queries =
-			new TableDataLoader<>(
-				new DataLoader<DatabaseQueryKey<Table>, List<Table>>(
-					keys -> {
-						return merge(keys.stream().map(driver::query));
-					},
-					DataLoaderOptions.newOptions().setBatchingEnabled(false)
-				),
-				this::handleFuture
-			); // will auto call global
+		queries = new TableDataLoader<>(
+			new DataLoader<DatabaseQueryKey<Table>, List<Table>>(
+				keys -> {
+					return merge(keys.stream().map(driver::query));
+				},
+				DataLoaderOptions.newOptions().setBatchingEnabled(false)
+			),
+			this::handleFuture
+		); // will auto call global
 
-		queryHistories =
-			new TableDataLoader<>(
-				new DataLoader<DatabaseQueryHistoryKey<Table>, List<Table>>(
-					keys -> {
-						return merge(keys.stream().map(driver::queryHistory));
-					},
-					DataLoaderOptions.newOptions().setBatchingEnabled(false)
-				),
-				this::handleFuture
-			); // will auto call global
+		queryHistories = new TableDataLoader<>(
+			new DataLoader<DatabaseQueryHistoryKey<Table>, List<Table>>(
+				keys -> {
+					return merge(keys.stream().map(driver::queryHistory));
+				},
+				DataLoaderOptions.newOptions().setBatchingEnabled(false)
+			),
+			this::handleFuture
+		); // will auto call global
 
 		put = new DataWriter(driver::bulkPut, this::handleFuture);
 	}
@@ -410,6 +407,10 @@ public class Database {
 
 	public String newId() {
 		return driver.newId();
+	}
+
+	public String getOrganisationId() {
+		return organisationId;
 	}
 
 	public Set<String> getLinkIds(Table entity, Class<? extends Table> type) {
