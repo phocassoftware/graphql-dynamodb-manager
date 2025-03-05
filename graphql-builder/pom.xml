@@ -25,10 +25,10 @@
 	<artifactId>graphql-builder</artifactId>
 
 	<properties>
-		<junit.jupiter.version>5.11.2</junit.jupiter.version>
+		<junit.jupiter.version>5.12.0</junit.jupiter.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jackson.version>2.18.3</jackson.version>
-		<pitest.version>1.17.0</pitest.version>
+		<pitest.version>1.18.2</pitest.version>
 		<pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
 		<graphql.version>22.3</graphql.version>
 	</properties>
@@ -73,7 +73,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.11.2</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
