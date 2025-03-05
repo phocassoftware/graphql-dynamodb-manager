@@ -25,7 +25,7 @@ public class TypeGenericInputRecords {
 	public void textQuery() throws ReflectiveOperationException {
 		Map<String, String> response = execute("""
 			query {doChange(input: {
-				name: { 
+				name: {
 					wrap: ["felix"]
 				},
 				age: {

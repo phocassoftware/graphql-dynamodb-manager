@@ -17,6 +17,8 @@ import com.phocassoftware.graphql.database.manager.QueryHistoryBuilder;
 import com.phocassoftware.graphql.database.manager.Table;
 import com.phocassoftware.graphql.database.manager.annotations.History;
 import com.phocassoftware.graphql.database.manager.annotations.TableName;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
+
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
@@ -42,7 +44,8 @@ final class DynamoDbHistoryTest {
 	}
 
 	@TestDatabase
-	void testHistoryProcessor(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
+	void testHistoryProcessor(@DatabaseNames({ "isolate" }) final Database db, final HistoryProcessor historyProcessor) throws InterruptedException,
+		ExecutionException {
 		var table1 = new SimpleTable("revision1");
 		table1.setId("testTable1");
 		db.put(table1).get();
@@ -319,7 +322,6 @@ final class DynamoDbHistoryTest {
 		var history = db
 			.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").fromUpdatedAt(revision2Time).toUpdatedAt(revision4Time).build())
 			.get();
-		System.out.println(history);
 		Assertions.assertEquals(3, history.size());
 		Assertions.assertEquals("revision2", history.get(0).getName());
 		Assertions.assertEquals(2L, history.get(0).getRevision());
@@ -362,7 +364,6 @@ final class DynamoDbHistoryTest {
 
 		historyProcessor.process();
 		var history = db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").fromUpdatedAt(revision2Time).build()).get();
-		System.out.println(history);
 		Assertions.assertEquals(4, history.size());
 		Assertions.assertEquals("revision2", history.get(0).getName());
 		Assertions.assertEquals(2L, history.get(0).getRevision());
@@ -407,7 +408,6 @@ final class DynamoDbHistoryTest {
 
 		historyProcessor.process();
 		var history = db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").toUpdatedAt(revision4Time).build()).get();
-		System.out.println(history);
 		Assertions.assertEquals(4, history.size());
 		Assertions.assertEquals("revision1", history.get(0).getName());
 		Assertions.assertEquals(1L, history.get(0).getRevision());
@@ -437,110 +437,117 @@ final class DynamoDbHistoryTest {
 
 	@TestDatabase
 	void testNoHistoryTable2(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
-		Assertions.assertThrows(
-			IllegalArgumentException.class,
-			() -> {
-				var table1 = new NoHistorySameNameTable("revision1");
-				table1.setId("testTable1");
-				db.put(table1).get();
-				table1 = new NoHistorySameNameTable("revision2");
-				table1.setId("testTable1");
-				table1.setRevision(1);
-				db.put(table1).get();
+		Assertions
+			.assertThrows(
+				IllegalArgumentException.class,
+				() -> {
+					var table1 = new NoHistorySameNameTable("revision1");
+					table1.setId("testTable1");
+					db.put(table1).get();
+					table1 = new NoHistorySameNameTable("revision2");
+					table1.setId("testTable1");
+					table1.setRevision(1);
+					db.put(table1).get();
 
-				historyProcessor.process();
-				db.queryHistory(QueryHistoryBuilder.create(NoHistorySameNameTable.class).id("testTable1").build()).get();
-			},
-			"Can only do history when history annotation is present."
-		);
+					historyProcessor.process();
+					db.queryHistory(QueryHistoryBuilder.create(NoHistorySameNameTable.class).id("testTable1").build()).get();
+				},
+				"Can only do history when history annotation is present."
+			);
 	}
 
 	@TestDatabase
 	void testIdAndStartWith(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
-		Assertions.assertThrows(
-			IllegalArgumentException.class,
-			() -> {
-				var table1 = new SimpleTable("revision1");
-				table1.setId("testTable1");
-				db.put(table1).get();
+		Assertions
+			.assertThrows(
+				IllegalArgumentException.class,
+				() -> {
+					var table1 = new SimpleTable("revision1");
+					table1.setId("testTable1");
+					db.put(table1).get();
 
-				historyProcessor.process();
-				db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).id("testTable1").startsWith("test").build()).get();
-			},
-			"ID and StartsWith cannot both be set."
-		);
+					historyProcessor.process();
+					db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).id("testTable1").startsWith("test").build()).get();
+				},
+				"ID and StartsWith cannot both be set."
+			);
 	}
 
 	@TestDatabase
 	void testIdAndStartWith2(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
-		Assertions.assertThrows(
-			IllegalArgumentException.class,
-			() -> {
-				var table1 = new SimpleTable("revision1");
-				table1.setId("testTable1");
-				db.put(table1).get();
+		Assertions
+			.assertThrows(
+				IllegalArgumentException.class,
+				() -> {
+					var table1 = new SimpleTable("revision1");
+					table1.setId("testTable1");
+					db.put(table1).get();
 
-				historyProcessor.process();
-				db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).build()).get();
-			},
-			"ID or StartsWith must be set."
-		);
+					historyProcessor.process();
+					db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).build()).get();
+				},
+				"ID or StartsWith must be set."
+			);
 	}
 
 	@TestDatabase
 	void testRevisionAndCreatedAt(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
-		Assertions.assertThrows(
-			IllegalArgumentException.class,
-			() -> {
-				var table1 = new SimpleTable("revision1");
-				table1.setId("testTable1");
-				var revision1Time = db.put(table1).get().getUpdatedAt();
-				Thread.sleep(1000);
+		Assertions
+			.assertThrows(
+				IllegalArgumentException.class,
+				() -> {
+					var table1 = new SimpleTable("revision1");
+					table1.setId("testTable1");
+					var revision1Time = db.put(table1).get().getUpdatedAt();
+					Thread.sleep(1000);
 
-				table1 = new SimpleTable("revision2");
-				table1.setId("testTable1");
-				table1.setRevision(1);
-				var revision2Time = db.put(table1).get().getUpdatedAt();
-				Thread.sleep(1000);
+					table1 = new SimpleTable("revision2");
+					table1.setId("testTable1");
+					table1.setRevision(1);
+					var revision2Time = db.put(table1).get().getUpdatedAt();
+					Thread.sleep(1000);
 
-				table1 = new SimpleTable("revision3");
-				table1.setId("testTable1");
-				table1.setRevision(2);
-				var revision3Time = db.put(table1).get().getUpdatedAt();
+					table1 = new SimpleTable("revision3");
+					table1.setId("testTable1");
+					table1.setRevision(2);
+					var revision3Time = db.put(table1).get().getUpdatedAt();
 
-				historyProcessor.process();
-				db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").fromUpdatedAt(revision2Time).fromRevision(1L).build()).get();
-			},
-			"Revision and CreatedAt cannot both be set."
-		);
+					historyProcessor.process();
+					db
+						.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").fromUpdatedAt(revision2Time).fromRevision(1L).build())
+						.get();
+				},
+				"Revision and CreatedAt cannot both be set."
+			);
 	}
 
 	@TestDatabase
 	void testStartWith(final Database db, final HistoryProcessor historyProcessor) throws InterruptedException, ExecutionException {
-		Assertions.assertThrows(
-			IllegalArgumentException.class,
-			() -> {
-				var table1 = new SimpleTable("revision1");
-				table1.setId("testTable1");
-				var revision1Time = db.put(table1).get().getUpdatedAt();
-				Thread.sleep(1000);
+		Assertions
+			.assertThrows(
+				IllegalArgumentException.class,
+				() -> {
+					var table1 = new SimpleTable("revision1");
+					table1.setId("testTable1");
+					var revision1Time = db.put(table1).get().getUpdatedAt();
+					Thread.sleep(1000);
 
-				table1 = new SimpleTable("revision2");
-				table1.setId("testTable1");
-				table1.setRevision(1);
-				var revision2Time = db.put(table1).get().getUpdatedAt();
-				Thread.sleep(1000);
+					table1 = new SimpleTable("revision2");
+					table1.setId("testTable1");
+					table1.setRevision(1);
+					var revision2Time = db.put(table1).get().getUpdatedAt();
+					Thread.sleep(1000);
 
-				table1 = new SimpleTable("revision3");
-				table1.setId("testTable1");
-				table1.setRevision(2);
-				var revision3Time = db.put(table1).get().getUpdatedAt();
+					table1 = new SimpleTable("revision3");
+					table1.setId("testTable1");
+					table1.setRevision(2);
+					var revision3Time = db.put(table1).get().getUpdatedAt();
 
-				historyProcessor.process();
-				db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").fromRevision(1L).build()).get();
-			},
-			"StartsWith can only be used with updatedAt."
-		);
+					historyProcessor.process();
+					db.queryHistory(QueryHistoryBuilder.create(SimpleTable.class).startsWith("test").fromRevision(1L).build()).get();
+				},
+				"StartsWith can only be used with updatedAt."
+			);
 	}
 
 	@History

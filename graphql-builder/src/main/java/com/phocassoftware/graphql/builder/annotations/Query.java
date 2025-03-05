@@ -19,5 +19,4 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Query {
-}
+public @interface Query {}

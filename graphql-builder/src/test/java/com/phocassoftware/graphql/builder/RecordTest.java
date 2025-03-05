@@ -48,22 +48,21 @@ public class RecordTest {
 	public void testDescription() throws ReflectiveOperationException, JsonMappingException, JsonProcessingException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"InputTypeInput\") {" +
-			"    name" +
-			"    kind" +
-			"    description" +
-			"    inputFields {" +
-			"      name" +
-			"      description" +
-			"    }" +
-			"  }" +
-			"} ",
+				"  __type(name: \"InputTypeInput\") {" +
+				"    name" +
+				"    kind" +
+				"    description" +
+				"    inputFields {" +
+				"      name" +
+				"      description" +
+				"    }" +
+				"  }" +
+				"} ",
 			null
 		)
 			.getData();
 
 		var type = response.get("__type");
-		System.out.println(type);
 		assertEquals("record Type", type.get("description"));
 
 		Map<String, String> age = new HashMap<>();
@@ -162,7 +161,9 @@ public class RecordTest {
 	}
 
 	private ExecutionResult execute(String query, Map<String, Object> variables) {
-		GraphQL schema = GraphQL.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.phocassoftware.graphql.builder.record"))).build();
+		GraphQL schema = GraphQL
+			.newGraphQL(new IntrospectionWithDirectivesSupport().apply(SchemaBuilder.build("com.phocassoftware.graphql.builder.record")))
+			.build();
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);
 		if (variables != null) {

@@ -36,35 +36,36 @@ final class TestScanLogic {
 		org2.put(new Dog("hash_dog", "small"));
 		org2.put(new Dog("hash_lassy", "loud"));
 
-		var scan = dynamoDbManager.startTableScan(b ->
-			b
-				.updater(
-					Cat.class,
-					(context, cat) -> {
-						if (cat.getName().equals("boots")) {
-							context.delete();
-						} else if (cat.getName().equals("mittens")) {
-							cat.setPur("gone");
-							context.replace(cat);
-						} else {
-							context.getVirtualDatabase().put(cat);
+		var scan = dynamoDbManager
+			.startTableScan(
+				b -> b
+					.updater(
+						Cat.class,
+						(context, cat) -> {
+							if (cat.getName().equals("boots")) {
+								context.delete();
+							} else if (cat.getName().equals("mittens")) {
+								cat.setPur("gone");
+								context.replace(cat);
+							} else {
+								context.getVirtualDatabase().put(cat);
+							}
 						}
-					}
-				)
-				.updater(
-					Dog.class,
-					(context, dog) -> {
-						if (dog.getName().equals("hash_otis")) {
-							context.delete();
-						} else if (dog.getName().equals("hash_dog")) {
-							dog.setBark("gone");
-							context.replace(dog);
-						} else {
-							context.getVirtualDatabase().put(dog);
+					)
+					.updater(
+						Dog.class,
+						(context, dog) -> {
+							if (dog.getName().equals("hash_otis")) {
+								context.delete();
+							} else if (dog.getName().equals("hash_dog")) {
+								dog.setBark("gone");
+								context.replace(dog);
+							} else {
+								context.getVirtualDatabase().put(dog);
+							}
 						}
-					}
-				)
-		);
+					)
+			);
 
 		scan.start().join();
 

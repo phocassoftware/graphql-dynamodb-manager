@@ -34,22 +34,21 @@ public class OneOfBuilder implements InputTypeBuilder {
 			builders.put(typeOf.name(), entityProcessor.getResolver(typeOf.type()));
 		}
 
-		map =
-			(obj, context, locale) -> {
-				Map<String, Object> map = (Map) obj;
+		map = (obj, context, locale) -> {
+			Map<String, Object> map = (Map) obj;
 
-				if (map.size() > 1) {
-					var fields = String.join(", ", map.keySet());
-					throw new InvalidOneOfException("OneOf must only have a single field set. Fields: " + fields);
-				}
+			if (map.size() > 1) {
+				var fields = String.join(", ", map.keySet());
+				throw new InvalidOneOfException("OneOf must only have a single field set. Fields: " + fields);
+			}
 
-				for (var entry : map.entrySet()) {
-					var builder = builders.get(entry.getKey());
-					return builder.convert(entry.getValue(), context, locale);
-				}
+			for (var entry : map.entrySet()) {
+				var builder = builders.get(entry.getKey());
+				return builder.convert(entry.getValue(), context, locale);
+			}
 
-				throw new InvalidOneOfException("OneOf must have a field set");
-			};
+			throw new InvalidOneOfException("OneOf must have a field set");
+		};
 	}
 
 	@Override

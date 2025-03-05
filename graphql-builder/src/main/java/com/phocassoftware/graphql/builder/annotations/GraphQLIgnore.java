@@ -19,5 +19,4 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target({ ElementType.METHOD, ElementType.FIELD })
-public @interface GraphQLIgnore {
-}
+public @interface GraphQLIgnore {}

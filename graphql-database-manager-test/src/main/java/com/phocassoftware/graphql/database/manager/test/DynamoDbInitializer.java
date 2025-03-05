@@ -39,14 +39,14 @@ import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClie
 final class DynamoDbInitializer {
 
 	@SuppressWarnings("unchecked")
-	static void createTable(final DynamoDbAsyncClient client, final String name) throws ExecutionException, InterruptedException {
-		if (client.listTables().get().tableNames().contains(name)) {
+	static void createTable(final DynamoDbClient client, final String name) throws ExecutionException, InterruptedException {
+		if (client.listTables().tableNames().contains(name)) {
 			return;
 		}
 
 		client
-			.createTable(t ->
-				t
+			.createTable(
+				t -> t
 					.tableName(name)
 					.keySchema(
 						KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
@@ -72,8 +72,8 @@ final class DynamoDbInitializer {
 							)
 							.build()
 					)
-					.localSecondaryIndexes(builder ->
-						builder
+					.localSecondaryIndexes(
+						builder -> builder
 							.indexName("secondaryOrganisation")
 							.projection(b -> b.projectionType(ProjectionType.ALL))
 							.keySchema(
@@ -89,40 +89,37 @@ final class DynamoDbInitializer {
 						AttributeDefinition.builder().attributeName("parallelHash").attributeType(ScalarAttributeType.S).build()
 					)
 					.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L).build())
-			)
-			.get();
+			);
 	}
 
-	static void createHistoryTable(final DynamoDbAsyncClient client, final String name) throws ExecutionException, InterruptedException {
-		if (client.listTables().get().tableNames().contains(name)) {
+	static void createHistoryTable(final DynamoDbClient client, final String name) throws ExecutionException, InterruptedException {
+		if (client.listTables().tableNames().contains(name)) {
 			return;
 		}
 
 		client
-			.createTable(t ->
-				t
+			.createTable(
+				t -> t
 					.tableName(name)
 					.keySchema(
 						KeySchemaElement.builder().attributeName("organisationIdType").keyType(KeyType.HASH).build(),
 						KeySchemaElement.builder().attributeName("idRevision").keyType(KeyType.RANGE).build()
 					)
 					.localSecondaryIndexes(
-						builder ->
-							builder
-								.indexName("startsWithUpdatedAt")
-								.projection(b -> b.projectionType(ProjectionType.ALL))
-								.keySchema(
-									KeySchemaElement.builder().attributeName("organisationIdType").keyType(KeyType.HASH).build(),
-									KeySchemaElement.builder().attributeName("startsWithUpdatedAt").keyType(KeyType.RANGE).build()
-								),
-						builder ->
-							builder
-								.indexName("idDate")
-								.projection(b -> b.projectionType(ProjectionType.ALL))
-								.keySchema(
-									KeySchemaElement.builder().attributeName("organisationIdType").keyType(KeyType.HASH).build(),
-									KeySchemaElement.builder().attributeName("idDate").keyType(KeyType.RANGE).build()
-								)
+						builder -> builder
+							.indexName("startsWithUpdatedAt")
+							.projection(b -> b.projectionType(ProjectionType.ALL))
+							.keySchema(
+								KeySchemaElement.builder().attributeName("organisationIdType").keyType(KeyType.HASH).build(),
+								KeySchemaElement.builder().attributeName("startsWithUpdatedAt").keyType(KeyType.RANGE).build()
+							),
+						builder -> builder
+							.indexName("idDate")
+							.projection(b -> b.projectionType(ProjectionType.ALL))
+							.keySchema(
+								KeySchemaElement.builder().attributeName("organisationIdType").keyType(KeyType.HASH).build(),
+								KeySchemaElement.builder().attributeName("idDate").keyType(KeyType.RANGE).build()
+							)
 					)
 					.attributeDefinitions(
 						AttributeDefinition.builder().attributeName("organisationIdType").attributeType(ScalarAttributeType.S).build(),
@@ -131,8 +128,7 @@ final class DynamoDbInitializer {
 						AttributeDefinition.builder().attributeName("startsWithUpdatedAt").attributeType(ScalarAttributeType.B).build()
 					)
 					.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L).build())
-			)
-			.get();
+			);
 	}
 
 	static synchronized DynamoDBProxyServer startDynamoServer(final String port) throws Exception {

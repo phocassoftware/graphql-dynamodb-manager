@@ -25,23 +25,22 @@ public class ConstructorFieldBuilder implements InputTypeBuilder {
 			var argTypes = mappers.stream().map(t -> t.type).toArray(Class[]::new);
 			var constructor = type.getDeclaredConstructor(argTypes);
 			constructor.setAccessible(true);
-			map =
-				(obj, context, locale) -> {
-					try {
-						Map map = (Map) obj;
+			map = (obj, context, locale) -> {
+				try {
+					Map map = (Map) obj;
 
-						var args = new Object[argTypes.length];
+					var args = new Object[argTypes.length];
 
-						for (int i = 0; i < args.length; i++) {
-							var mapper = mappers.get(i);
-							args[i] = mapper.resolver.convert(map.get(mapper.name), context, locale);
-						}
-
-						return constructor.newInstance(args);
-					} catch (ReflectiveOperationException e) {
-						throw new RuntimeException(e);
+					for (int i = 0; i < args.length; i++) {
+						var mapper = mappers.get(i);
+						args[i] = mapper.resolver.convert(map.get(mapper.name), context, locale);
 					}
-				};
+
+					return constructor.newInstance(args);
+				} catch (ReflectiveOperationException e) {
+					throw new RuntimeException(e);
+				}
+			};
 		} catch (ReflectiveOperationException e) {
 			throw new RuntimeException(e);
 		}

@@ -43,13 +43,14 @@ public class TableScanner {
 			if (updater.type().isAssignableFrom(item.entity().getClass())) {
 				@SuppressWarnings("unchecked")
 				ScanUpdater<T> update = (ScanUpdater<T>) updater;
-				return CompletableFuture.runAsync(
-					() -> {
-						var virtualDatabase = databaseManager.getVirtualDatabase(item.organisationId());
-						update.updater().accept(new ScanContext<T>(virtualDatabase, item), item.entity());
-					},
-					Database.VIRTUAL_THREAD_POOL
-				);
+				return CompletableFuture
+					.runAsync(
+						() -> {
+							var virtualDatabase = databaseManager.getVirtualDatabase(item.organisationId());
+							update.updater().accept(new ScanContext<T>(virtualDatabase, item), item.entity());
+						},
+						Database.VIRTUAL_THREAD_POOL
+					);
 			}
 		}
 		return CompletableFuture.completedFuture(null);

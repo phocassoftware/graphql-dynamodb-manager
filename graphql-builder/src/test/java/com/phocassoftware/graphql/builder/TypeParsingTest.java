@@ -162,29 +162,29 @@ public class TypeParsingTest {
 	public Map<String, Object> getField(String name) throws ReflectiveOperationException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"SimpleType\") {" +
-			"    name" +
-			"    fields {" +
-			"      name" +
-			"      type {" +
-			"        name" +
-			"        kind" +
-			"        ofType {" +
-			"          name" +
-			"          kind" +
-			"          ofType {" +
-			"            name" +
-			"            kind" +
-			"            ofType {" +
-			"              name" +
-			"              kind" +
-			"            }" +
-			"          }" +
-			"        }" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"} "
+				"  __type(name: \"SimpleType\") {" +
+				"    name" +
+				"    fields {" +
+				"      name" +
+				"      type {" +
+				"        name" +
+				"        kind" +
+				"        ofType {" +
+				"          name" +
+				"          kind" +
+				"          ofType {" +
+				"            name" +
+				"            kind" +
+				"            ofType {" +
+				"              name" +
+				"              kind" +
+				"            }" +
+				"          }" +
+				"        }" +
+				"      }" +
+				"    }" +
+				"  }" +
+				"} "
 		)
 			.getData();
 		var type = response.get("__type");
@@ -200,21 +200,21 @@ public class TypeParsingTest {
 	public void testQuery() throws ReflectiveOperationException {
 		Map<String, Map<String, Object>> response = execute(
 			"query {simpleType{" +
-			"name " +
-			"deleted " +
-			"alive " +
-			"parts " +
-			"gappyParts " +
-			"optionalParts " +
-			"optionalGappyParts " +
-			"nameFuture " +
-			"deletedFuture " +
-			"aliveFuture " +
-			"partsFuture " +
-			"gappyPartsFuture " +
-			"optionalPartsFuture " +
-			"optionalGappyPartsFuture " +
-			"}} "
+				"name " +
+				"deleted " +
+				"alive " +
+				"parts " +
+				"gappyParts " +
+				"optionalParts " +
+				"optionalGappyParts " +
+				"nameFuture " +
+				"deletedFuture " +
+				"aliveFuture " +
+				"partsFuture " +
+				"gappyPartsFuture " +
+				"optionalPartsFuture " +
+				"optionalGappyPartsFuture " +
+				"}} "
 		)
 			.getData();
 
@@ -240,7 +240,7 @@ public class TypeParsingTest {
 		var schema = GraphQL.newGraphQL(SchemaBuilder.build("com.phocassoftware.graphql.builder.type")).build();
 		ExecutionResult result = schema.execute(query);
 		if (!result.getErrors().isEmpty()) {
-			throw new RuntimeException(result.getErrors().toString()); //TODO:cleanup
+			throw new RuntimeException(result.getErrors().toString()); // TODO:cleanup
 		}
 		return result;
 	}

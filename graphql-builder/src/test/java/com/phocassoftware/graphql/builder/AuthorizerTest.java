@@ -45,7 +45,7 @@ public class AuthorizerTest {
 		var error = result.getErrors().get(0);
 
 		assertEquals("Exception while fetching data (/getCat) : unauthorized", error.getMessage());
-		//assertEquals("", error.getErrorType());
+		// assertEquals("", error.getErrorType());
 	}
 
 	private ExecutionResult execute(String query) {

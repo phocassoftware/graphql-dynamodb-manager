@@ -67,7 +67,7 @@ public final class FlattenerMulti extends Flattener {
 		}
 
 		var item = new HashMap<>(replace.getItem());
-		//only links in parent
+		// only links in parent
 		if (item.get("item") == null) {
 			item.put("item", existing.getItem().get("item"));
 		}

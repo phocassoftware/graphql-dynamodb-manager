@@ -143,9 +143,8 @@ class EntityUtil {
 				return true;
 			}
 		}
-		return (
-			class1.isAssignableFrom(GraphQLContext.class) || class1.isAssignableFrom(DataFetchingEnvironment.class) || class1.isAnnotationPresent(Context.class)
-		);
+		return (class1.isAssignableFrom(GraphQLContext.class) || class1.isAssignableFrom(DataFetchingEnvironment.class) || class1
+			.isAnnotationPresent(Context.class));
 	}
 
 	static <T extends Annotation> T getAnnotation(Class<?> type, Class<T> annotation) {

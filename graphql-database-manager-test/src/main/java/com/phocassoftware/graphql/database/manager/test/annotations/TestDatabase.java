@@ -12,26 +12,25 @@
 
 package com.phocassoftware.graphql.database.manager.test.annotations;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.phocassoftware.graphql.database.manager.test.TestDatabaseProvider;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 import java.util.function.Supplier;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.phocassoftware.graphql.database.manager.test.TestDatabaseProvider;
 
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Test
 @ExtendWith(TestDatabaseProvider.class)
 public @interface TestDatabase {
-	String organisationId() default "organisation";
-
 	boolean hashed() default false;
 
 	String classPath() default "";
 
 	Class<? extends Supplier<ObjectMapper>> objectMapper();
+
+	Class<? extends ProviderFunction<?>>[] providers() default {};
 }

@@ -22,5 +22,4 @@ import java.lang.annotation.Target;
 @Directive(Introspection.DirectiveLocation.FIELD_DEFINITION)
 @Retention(RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface Uppercase {
-}
+public @interface Uppercase {}

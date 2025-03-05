@@ -17,6 +17,8 @@ import com.phocassoftware.graphql.database.manager.RevisionMismatchException;
 import com.phocassoftware.graphql.database.manager.Table;
 import com.phocassoftware.graphql.database.manager.annotations.Hash;
 import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseOrganisation;
+
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
@@ -36,11 +38,11 @@ public class DynamoDbRevisionPutTest {
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.put(e).get());
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 
-		//put failed don't change revision
+		// put failed don't change revision
 		Assertions.assertEquals(0, e.getRevision());
 
 		db.put(e, false).get();
-		//will still bump version to one
+		// will still bump version to one
 		Assertions.assertEquals(1, entries.size());
 		Assertions.assertEquals("garry", entries.get(0).name);
 		Assertions.assertEquals(1, entries.get(0).getRevision());
@@ -50,7 +52,7 @@ public class DynamoDbRevisionPutTest {
 	public void testRevisionMustStartAt0(final Database db) throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 		entry.setRevision(1);
-		//does not exist yet so fails
+		// does not exist yet so fails
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.put(entry).get());
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 	}
@@ -70,7 +72,7 @@ public class DynamoDbRevisionPutTest {
 		entry = db.put(entry).get();
 		Assertions.assertEquals(3, entry.getRevision());
 
-		//check any out of order revisions are reflected
+		// check any out of order revisions are reflected
 		{
 			entry.setRevision(5);
 			var e = entry;
@@ -94,7 +96,10 @@ public class DynamoDbRevisionPutTest {
 	}
 
 	@TestDatabase
-	public void testMultipleEnv(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	public void testMultipleEnv(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -103,12 +108,12 @@ public class DynamoDbRevisionPutTest {
 		Assertions.assertEquals(1, entry.getRevision());
 
 		entry = db.get(SimpleTable.class, "12345").get();
-		//ignores revision when its going from one db to another if not already there
+		// ignores revision when its going from one db to another if not already there
 		entry = db.put(entry, false).get();
 
 		Assertions.assertEquals(2, entry.getRevision());
 
-		//can no remake once set in db though
+		// can no remake once set in db though
 		var e = new SimpleTable("12345", "garry");
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.put(e).get());
 
@@ -116,7 +121,10 @@ public class DynamoDbRevisionPutTest {
 	}
 
 	@TestDatabase
-	public void testMultipleEnvConfirmRevisionIgnored(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	public void testMultipleEnvConfirmRevisionIgnored(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -124,12 +132,12 @@ public class DynamoDbRevisionPutTest {
 
 		Assertions.assertEquals(1, entry.getRevision());
 		entry = db.get(SimpleTable.class, "12345").get();
-		//ignores revision when its going from one db to another if not already there
+		// ignores revision when its going from one db to another if not already there
 		entry.setRevision(100);
 		entry = db.put(entry, false).get();
 		Assertions.assertEquals(101, entry.getRevision());
 
-		//can no remake once set in db though
+		// can no remake once set in db though
 		var e = new SimpleTable("12345", "garry");
 		e.setRevision(40);
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.put(e).get());
@@ -137,7 +145,10 @@ public class DynamoDbRevisionPutTest {
 	}
 
 	@TestDatabase
-	public void testMultipleEnvCreatedInDbBeforePut(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	public void testMultipleEnvCreatedInDbBeforePut(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -153,7 +164,7 @@ public class DynamoDbRevisionPutTest {
 
 		var newEntry = new SimpleTable("12345", "garry");
 
-		//this part would happen on different maching or something
+		// this part would happen on different maching or something
 		newEntry = db.put(newEntry).get();
 		Assertions.assertEquals(1, newEntry.getRevision());
 		newEntry = db.get(SimpleTable.class, "12345").get();

@@ -28,26 +28,25 @@ public class ObjectFieldBuilder implements InputTypeBuilder {
 	public ObjectFieldBuilder(Class<?> type, ArrayList<FieldMapper> mappers) {
 		try {
 			var constructor = type.getConstructor();
-			map =
-				(obj, context, locale) -> {
-					try {
-						var toReturn = constructor.newInstance();
+			map = (obj, context, locale) -> {
+				try {
+					var toReturn = constructor.newInstance();
 
-						Map map = (Map) obj;
+					Map map = (Map) obj;
 
-						for (var mapper : mappers) {
-							var name = mapper.getName();
-							if (map.containsKey(name)) {
-								mapper.map(toReturn, map.get(name), context, locale);
-							}
+					for (var mapper : mappers) {
+						var name = mapper.getName();
+						if (map.containsKey(name)) {
+							mapper.map(toReturn, map.get(name), context, locale);
 						}
-
-						return toReturn;
-					} catch (Throwable e) {
-						throwIfUnchecked(e);
-						throw new RuntimeException(e);
 					}
-				};
+
+					return toReturn;
+				} catch (Throwable e) {
+					throwIfUnchecked(e);
+					throw new RuntimeException(e);
+				}
+			};
 		} catch (ReflectiveOperationException e) {
 			throw new RuntimeException(e);
 		}

@@ -35,8 +35,8 @@ public final class TableCoreUtil {
 	public static <T> CompletableFuture<List<T>> all(List<CompletableFuture<T>> collect) {
 		return CompletableFuture
 			.allOf(collect.toArray(CompletableFuture[]::new))
-			.thenApply(__ ->
-				collect
+			.thenApply(
+				__ -> collect
 					.stream()
 					.map(m -> {
 						try {

@@ -1,9 +1,11 @@
 package com.phocassoftware.graphql.database.manager.test;
 
-import com.phocassoftware.graphql.database.dynamo.history.lambda.HistoryLambda;
-import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
 import java.lang.reflect.Parameter;
+
+import com.phocassoftware.graphql.database.dynamo.history.lambda.HistoryLambda;
+
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.dynamodb.model.ShardIteratorType;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
@@ -13,9 +15,8 @@ public class HistoryProcessor {
 	private DynamoDbClient client;
 	private DynamoDbStreamsAsyncClient streamClient;
 
-	public HistoryProcessor(DynamoDbClient client, DynamoDbStreamsAsyncClient streamClient, Parameter parameter, String organisationId) {
-		final var databaseNames = parameter.getAnnotation(DatabaseNames.class);
-		this.tables = databaseNames != null ? databaseNames.value() : new String[] { "table" };
+	public HistoryProcessor(DynamoDbClient client, DynamoDbStreamsAsyncClient streamClient, Parameter parameter, String[] tables) {
+		this.tables = tables;
 		this.client = client;
 		this.streamClient = streamClient;
 	}
@@ -42,8 +43,8 @@ public class HistoryProcessor {
 	}
 
 	public void process() {
-		try {
-			for (final String table : tables) {
+		for (final String table : tables) {
+			try {
 				var streamArn = client.describeTable(builder -> builder.tableName(table).build()).table().latestStreamArn();
 
 				var shards = streamClient.describeStream(builder -> builder.streamArn(streamArn).build()).get().streamDescription().shards();
@@ -56,9 +57,12 @@ public class HistoryProcessor {
 					var processor = new Processor(client, table + "_history");
 					processor.process(response.records());
 				}
+
+			} catch (ResourceNotFoundException e) {
+				// ignore
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
 		}
 	}
 }

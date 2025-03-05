@@ -126,7 +126,7 @@ public class SchemaBuilder {
 			try {
 				Reflections reflections = new Reflections(classpaths, Scanners.SubTypes, Scanners.MethodsAnnotated, Scanners.TypesAnnotated);
 				Set<Class<? extends Authorizer>> authorizers = reflections.getSubTypesOf(Authorizer.class);
-				//want to make everything split by package
+				// want to make everything split by package
 				AuthorizerSchema authorizer = AuthorizerSchema.build(dataFetcherRunner, new HashSet<>(classpaths), authorizers);
 
 				Set<Class<? extends SchemaConfiguration>> schemaConfiguration = reflections.getSubTypesOf(SchemaConfiguration.class);

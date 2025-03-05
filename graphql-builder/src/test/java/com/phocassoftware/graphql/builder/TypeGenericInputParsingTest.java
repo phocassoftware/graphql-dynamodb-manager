@@ -103,32 +103,32 @@ public class TypeGenericInputParsingTest {
 	public Map<String, Object> getField(String typeName, String kind, String name) throws ReflectiveOperationException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"" +
-			typeName +
-			"\") {" +
-			"    name" +
-			"    kind" +
-			"    fields {" +
-			"      name" +
-			"      type {" +
-			"        name" +
-			"        kind" +
-			"        ofType {" +
-			"          name" +
-			"          kind" +
-			"          ofType {" +
-			"            name" +
-			"            kind" +
-			"            ofType {" +
-			"              name" +
-			"              kind" +
-			"            }" +
-			"          }" +
-			"        }" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"} "
+				"  __type(name: \"" +
+				typeName +
+				"\") {" +
+				"    name" +
+				"    kind" +
+				"    fields {" +
+				"      name" +
+				"      type {" +
+				"        name" +
+				"        kind" +
+				"        ofType {" +
+				"          name" +
+				"          kind" +
+				"          ofType {" +
+				"            name" +
+				"            kind" +
+				"            ofType {" +
+				"              name" +
+				"              kind" +
+				"            }" +
+				"          }" +
+				"        }" +
+				"      }" +
+				"    }" +
+				"  }" +
+				"} "
 		)
 			.getData();
 		var type = response.get("__type");
@@ -143,32 +143,32 @@ public class TypeGenericInputParsingTest {
 	public Map<String, Object> getInputField(String typeName, String kind, String name) throws ReflectiveOperationException {
 		Map<String, Map<String, Object>> response = execute(
 			"{" +
-			"  __type(name: \"" +
-			typeName +
-			"\") {" +
-			"    name" +
-			"    kind" +
-			"    inputFields {" +
-			"      name" +
-			"      type {" +
-			"        name" +
-			"        kind" +
-			"        ofType {" +
-			"          name" +
-			"          kind" +
-			"          ofType {" +
-			"            name" +
-			"            kind" +
-			"            ofType {" +
-			"              name" +
-			"              kind" +
-			"            }" +
-			"          }" +
-			"        }" +
-			"      }" +
-			"    }" +
-			"  }" +
-			"} "
+				"  __type(name: \"" +
+				typeName +
+				"\") {" +
+				"    name" +
+				"    kind" +
+				"    inputFields {" +
+				"      name" +
+				"      type {" +
+				"        name" +
+				"        kind" +
+				"        ofType {" +
+				"          name" +
+				"          kind" +
+				"          ofType {" +
+				"            name" +
+				"            kind" +
+				"            ofType {" +
+				"              name" +
+				"              kind" +
+				"            }" +
+				"          }" +
+				"        }" +
+				"      }" +
+				"    }" +
+				"  }" +
+				"} "
 		)
 			.getData();
 		var type = response.get("__type");

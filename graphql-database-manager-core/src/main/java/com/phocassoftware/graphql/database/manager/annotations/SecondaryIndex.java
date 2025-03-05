@@ -20,5 +20,4 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(ElementType.METHOD)
-public @interface SecondaryIndex {
-}
+public @interface SecondaryIndex {}

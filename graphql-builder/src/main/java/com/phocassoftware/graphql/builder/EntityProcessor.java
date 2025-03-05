@@ -103,28 +103,29 @@ public class EntityProcessor {
 
 	EntityHolder getEntity(TypeMeta meta) {
 		String name = EntityUtil.getName(meta);
-		return entities.computeIfAbsent(
-			name,
-			__ -> {
-				Class<?> type = meta.getType();
-				Type genericType = meta.getGenericType();
-				if (genericType == null) {
-					genericType = type;
-				}
-				try {
-					if (type.isAnnotationPresent(Scalar.class)) {
-						return new ScalarEntity(directives, meta);
+		return entities
+			.computeIfAbsent(
+				name,
+				__ -> {
+					Class<?> type = meta.getType();
+					Type genericType = meta.getGenericType();
+					if (genericType == null) {
+						genericType = type;
 					}
-					if (type.isEnum()) {
-						return new EnumEntity(directives, meta);
-					} else {
-						return new ObjectEntity(this, meta);
+					try {
+						if (type.isAnnotationPresent(Scalar.class)) {
+							return new ScalarEntity(directives, meta);
+						}
+						if (type.isEnum()) {
+							return new EnumEntity(directives, meta);
+						} else {
+							return new ObjectEntity(this, meta);
+						}
+					} catch (ReflectiveOperationException | RuntimeException e) {
+						throw new RuntimeException("Failed to build schema for class " + type, e);
 					}
-				} catch (ReflectiveOperationException | RuntimeException e) {
-					throw new RuntimeException("Failed to build schema for class " + type, e);
 				}
-			}
-		);
+			);
 	}
 
 	public GraphQLOutputType getType(TypeMeta meta, Annotation[] annotations) {

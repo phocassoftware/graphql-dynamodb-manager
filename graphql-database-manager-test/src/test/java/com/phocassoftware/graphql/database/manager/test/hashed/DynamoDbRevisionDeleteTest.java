@@ -17,12 +17,14 @@ import com.phocassoftware.graphql.database.manager.RevisionMismatchException;
 import com.phocassoftware.graphql.database.manager.Table;
 import com.phocassoftware.graphql.database.manager.annotations.Hash;
 import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseNames;
+import com.phocassoftware.graphql.database.manager.test.annotations.DatabaseOrganisation;
 
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 
 /**
  * most of the test cases are cover in the RevisionPut tests this just covers delete failure behavior
+ *
  * @author ashley
  *
  */
@@ -46,17 +48,20 @@ public class DynamoDbRevisionDeleteTest {
 		var cause = Assertions.assertThrows(ExecutionException.class, () -> db.delete(snapshot, true).get());
 		Assertions.assertEquals(RevisionMismatchException.class, cause.getCause().getClass());
 
-		//confirm no state change
+		// confirm no state change
 		Assertions.assertEquals(2, db.get(SimpleTable.class, "12345").get().getRevision());
 
 		db.delete(entry, true).get();
 
-		//confirm deleted
+		// confirm deleted
 		Assertions.assertNull(db.get(SimpleTable.class, "12345").get());
 	}
 
 	@TestDatabase
-	public void testMultipleEnv(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	public void testMultipleEnv(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -73,15 +78,18 @@ public class DynamoDbRevisionDeleteTest {
 
 		db.delete(snapshot, false).get(); // this passes because we don't have it in this database yet so revision check can not be done
 
-		//confirm deleted
+		// confirm deleted
 		Assertions.assertNull(db.get(SimpleTable.class, "12345").get());
 
-		//still in prod
+		// still in prod
 		Assertions.assertEquals(2, dbProd.get(SimpleTable.class, "12345").get().getRevision());
 	}
 
 	@TestDatabase
-	public void testMultipleEnvCheckLinks(final @DatabaseNames({ "prod", "stage" }) Database db, @DatabaseNames("prod") final Database dbProd)
+	public void testMultipleEnvCheckLinks(
+		final @DatabaseNames({ "prod", "stage" }) @DatabaseOrganisation("fixed") Database db,
+		@DatabaseNames("prod") @DatabaseOrganisation("fixed") final Database dbProd
+	)
 		throws InterruptedException, ExecutionException {
 		var entry = new SimpleTable("12345", "garry");
 
@@ -98,10 +106,10 @@ public class DynamoDbRevisionDeleteTest {
 
 		db.delete(snapshot, true).get(); // this passes because we don't have it in this database yet so revision check can not be done
 
-		//confirm deleted
+		// confirm deleted
 		Assertions.assertNull(db.get(SimpleTable.class, "12345").get());
 
-		//still in prod
+		// still in prod
 		Assertions.assertEquals(2, dbProd.get(SimpleTable.class, "12345").get().getRevision());
 	}
 

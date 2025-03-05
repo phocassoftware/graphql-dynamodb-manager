@@ -22,5 +22,4 @@ import java.lang.annotation.Target;
 @Directive(DirectiveLocation.OBJECT)
 @Retention(RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface Capture {
-}
+public @interface Capture {}
