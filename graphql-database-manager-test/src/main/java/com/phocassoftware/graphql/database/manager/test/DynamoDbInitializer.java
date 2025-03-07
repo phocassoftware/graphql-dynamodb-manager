@@ -43,53 +43,56 @@ final class DynamoDbInitializer {
 		if (client.listTables().tableNames().contains(name)) {
 			return;
 		}
+		// looks like bug within local dynamodb client around creating multiple tables at the same time
+		synchronized (DynamoDbInitializer.class) {
+			client
+				.createTable(
+					t -> t
+						.tableName(name)
+						.keySchema(
+							KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
+							KeySchemaElement.builder().attributeName("id").keyType(KeyType.RANGE).build()
+						)
+						.streamSpecification(streamSpecification -> streamSpecification.streamEnabled(true).streamViewType(StreamViewType.NEW_IMAGE))
+						.globalSecondaryIndexes(
+							GlobalSecondaryIndex
+								.builder()
+								.indexName("secondaryGlobal")
+								.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
+								.projection(b -> b.projectionType(ProjectionType.ALL))
+								.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build())
+								.build(),
+							GlobalSecondaryIndex
+								.builder()
+								.indexName("parallelIndex")
+								.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
+								.projection(b -> b.projectionType(ProjectionType.ALL))
+								.keySchema(
+									KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
+									KeySchemaElement.builder().attributeName("parallelHash").keyType(KeyType.RANGE).build()
+								)
+								.build()
+						)
+						.localSecondaryIndexes(
+							builder -> builder
+								.indexName("secondaryOrganisation")
+								.projection(b -> b.projectionType(ProjectionType.ALL))
+								.keySchema(
+									KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
+									KeySchemaElement.builder().attributeName("secondaryOrganisation").keyType(KeyType.RANGE).build()
+								)
+						)
+						.attributeDefinitions(
+							AttributeDefinition.builder().attributeName("organisationId").attributeType(ScalarAttributeType.S).build(),
+							AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build(),
+							AttributeDefinition.builder().attributeName("secondaryGlobal").attributeType(ScalarAttributeType.S).build(),
+							AttributeDefinition.builder().attributeName("secondaryOrganisation").attributeType(ScalarAttributeType.S).build(),
+							AttributeDefinition.builder().attributeName("parallelHash").attributeType(ScalarAttributeType.S).build()
+						)
+						.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L).build())
+				);
 
-		client
-			.createTable(
-				t -> t
-					.tableName(name)
-					.keySchema(
-						KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
-						KeySchemaElement.builder().attributeName("id").keyType(KeyType.RANGE).build()
-					)
-					.streamSpecification(streamSpecification -> streamSpecification.streamEnabled(true).streamViewType(StreamViewType.NEW_IMAGE))
-					.globalSecondaryIndexes(
-						GlobalSecondaryIndex
-							.builder()
-							.indexName("secondaryGlobal")
-							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
-							.projection(b -> b.projectionType(ProjectionType.ALL))
-							.keySchema(KeySchemaElement.builder().attributeName("secondaryGlobal").keyType(KeyType.HASH).build())
-							.build(),
-						GlobalSecondaryIndex
-							.builder()
-							.indexName("parallelIndex")
-							.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L))
-							.projection(b -> b.projectionType(ProjectionType.ALL))
-							.keySchema(
-								KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
-								KeySchemaElement.builder().attributeName("parallelHash").keyType(KeyType.RANGE).build()
-							)
-							.build()
-					)
-					.localSecondaryIndexes(
-						builder -> builder
-							.indexName("secondaryOrganisation")
-							.projection(b -> b.projectionType(ProjectionType.ALL))
-							.keySchema(
-								KeySchemaElement.builder().attributeName("organisationId").keyType(KeyType.HASH).build(),
-								KeySchemaElement.builder().attributeName("secondaryOrganisation").keyType(KeyType.RANGE).build()
-							)
-					)
-					.attributeDefinitions(
-						AttributeDefinition.builder().attributeName("organisationId").attributeType(ScalarAttributeType.S).build(),
-						AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build(),
-						AttributeDefinition.builder().attributeName("secondaryGlobal").attributeType(ScalarAttributeType.S).build(),
-						AttributeDefinition.builder().attributeName("secondaryOrganisation").attributeType(ScalarAttributeType.S).build(),
-						AttributeDefinition.builder().attributeName("parallelHash").attributeType(ScalarAttributeType.S).build()
-					)
-					.provisionedThroughput(p -> p.readCapacityUnits(10L).writeCapacityUnits(10L).build())
-			);
+		}
 	}
 
 	static void createHistoryTable(final DynamoDbClient client, final String name) throws ExecutionException, InterruptedException {
