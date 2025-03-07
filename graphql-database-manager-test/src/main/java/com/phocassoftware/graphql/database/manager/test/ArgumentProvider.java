@@ -101,14 +101,12 @@ public class ArgumentProvider {
 						tableDeleteConsumer.accept(historyTable);
 					}
 				}
-			} else if (scope) {
+			} else if (scope || withHistory) {
 				tables = new String[] { "table" + "_" + uniqueId };
 				historyTable = tables[0] + "_history";
 				createTable(client, tables[0]);
-				if (withHistory) {
-					createHistoryTable(client, historyTable);
-					tableDeleteConsumer.accept(historyTable);
-				}
+				createHistoryTable(client, historyTable);
+				tableDeleteConsumer.accept(historyTable);
 			}
 			return new Tables(tables, historyTable);
 		} catch (Exception e) {
