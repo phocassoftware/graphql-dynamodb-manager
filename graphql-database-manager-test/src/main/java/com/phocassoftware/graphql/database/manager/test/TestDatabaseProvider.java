@@ -61,7 +61,7 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 		var testDatabase = getTestDatabase(testMethod);
 
 		if (testDatabase != null) {
-			Stream
+			return Stream
 				.of(testDatabase.providers())
 				.map(t -> create(t))
 				.anyMatch(provider -> parameterContext.getParameter().getType().isAssignableFrom(provider.type()));
@@ -131,7 +131,10 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 							.map(t -> create(t))
 							.filter(p -> type.isAssignableFrom(p.type()))
 							.findAny()
-							.orElseThrow();
+							.orElse(null);
+						if (builder == null) {
+							return null;
+						}
 						return builder.create(provider);
 
 					}
@@ -167,7 +170,6 @@ public final class TestDatabaseProvider implements ParameterResolver, BeforeEach
 					final var streamClient = startDynamoStreamClient(port);
 
 					createTable(client, "table");
-					createHistoryTable(client, "table_history");
 					serverWrapper = new ServerWrapper(client, clientAsync, streamClient);
 				}
 
