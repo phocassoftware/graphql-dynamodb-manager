@@ -27,14 +27,28 @@ public class DirectiveProcessor {
 
 	public static DirectiveProcessor build(EntityProcessor entityProcessor, Class<? extends Annotation> directive) {
 		var builder = GraphQLDirective.newDirective().name(directive.getSimpleName());
-		var validLocations = directive.getAnnotation(Directive.class).value();
+
+		Introspection.DirectiveLocation[] validLocations;
+		if (
+			!directive.isAnnotationPresent(Directive.class) &&
+				directive
+					.getName()
+					.startsWith("jakarta.validation.constraints") // Jakarta constraint annotations don't have the Directive annotation, so we need to manually add in the locations
+		) {
+			validLocations = new Introspection.DirectiveLocation[] {
+				Introspection.DirectiveLocation.ARGUMENT_DEFINITION,
+				Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION };
+		} else {
+			validLocations = directive.getAnnotation(Directive.class).value();
+
+			// Check for repeatable tag in annotation and add it
+			builder.repeatable(directive.getAnnotation(Directive.class).repeatable());
+		}
+
 		// loop through and add valid locations
 		for (Introspection.DirectiveLocation location : validLocations) {
 			builder.validLocation(location);
 		}
-
-		// Check for repeatable tag in annotation and add it
-		builder.repeatable(directive.getAnnotation(Directive.class).repeatable());
 
 		// Go through each argument and add name/type to directive
 		var methods = directive.getDeclaredMethods();
