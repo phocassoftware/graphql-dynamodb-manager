@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JakartaValidationDirectiveTest {
+class JakartaValidationDirectiveTest {
 	@Test
-	public void testJakartaArgumentAnnotationChangedToConstraint() {
+	void testJakartaArgumentAnnotationChangedToConstraint() {
 		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type.directive")).build();
 		var name = schema.getGraphQLSchema().getFieldDefinition(FieldCoordinates.coordinates(schema.getGraphQLSchema().getMutationType(), "setName"));
 		var constraint = name.getArgument("name").getAppliedDirective("Size");
@@ -27,29 +27,28 @@ public class JakartaValidationDirectiveTest {
 	}
 
 	@Test
-	public void testDirectiveArgumentDefinition() {
-		Map<String, Object> response = execute("query IntrospectionQuery { __schema { directives { name locations args { name } } } }", null).getData();
+	void testDirectiveArgumentDefinition() {
+		Map<String, Object> response = execute("query IntrospectionQuery { __schema { directives { name locations args { name } } } }").getData();
 		List<LinkedHashMap<String, Object>> dir = (List<LinkedHashMap<String, Object>>) ((Map<String, Object>) response.get("__schema")).get("directives");
 		LinkedHashMap<String, Object> constraint = dir.stream().filter(map -> map.get("name").equals("Size")).collect(Collectors.toList()).get(0);
 
 		assertEquals(9, dir.size());
 		assertEquals("ARGUMENT_DEFINITION", ((List<String>) constraint.get("locations")).get(0));
-		assertEquals(1, ((List<Object>) constraint.get("args")).size());
-		assertEquals("{name=validatedBy}", ((List<Object>) constraint.get("args")).getFirst().toString());
-		//setName(name: String! @Size(min : 3)): Int!
-		//directive @Constraint(name: String!) on ARGUMENT_DEFINITION
+		assertEquals("INPUT_FIELD_DEFINITION", ((List<String>) constraint.get("locations")).get(1));
+		assertEquals(5, ((List<Object>) constraint.get("args")).size());
+		assertEquals("{name=payload}", ((List<Object>) constraint.get("args")).getFirst().toString());
+		assertEquals("{name=min}", ((List<Object>) constraint.get("args")).get(1).toString());
+		assertEquals("{name=max}", ((List<Object>) constraint.get("args")).get(2).toString());
+		assertEquals("{name=message}", ((List<Object>) constraint.get("args")).get(3).toString());
+		assertEquals("{name=groups}", ((List<Object>) constraint.get("args")).get(4).toString());
 	}
 
-	private ExecutionResult execute(String query, Map<String, Object> variables) {
+	private ExecutionResult execute(String query) {
 		GraphQLSchema preSchema = SchemaBuilder.builder().classpath("com.fleetpin.graphql.builder.type.directive").build().build();
 		GraphQL schema = GraphQL.newGraphQL(new IntrospectionWithDirectivesSupport().apply(preSchema)).build();
 
 		var input = ExecutionInput.newExecutionInput();
 		input.query(query);
-		if (variables != null) {
-			input.variables(variables);
-		}
-		ExecutionResult result = schema.execute(input);
-		return result;
+		return schema.execute(input);
 	}
 }

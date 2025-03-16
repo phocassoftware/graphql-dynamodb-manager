@@ -47,7 +47,7 @@ class DirectivesSchema {
 	}
 
 	//TODO:mess of exceptions
-	public static DirectivesSchema build(List<RestrictTypeFactory<?>> globalDirectives, Set<Class<?>> directiveTypes) throws ReflectiveOperationException {
+	public static DirectivesSchema build(List<RestrictTypeFactory<?>> globalDirectives, Set<Class<?>> directiveTypes, Set<Class<? extends Annotation>> jakartaDirectiveTypes) throws ReflectiveOperationException {
 		Map<Class<? extends Annotation>, DirectiveCaller<?>> targets = new HashMap<>();
 
 		Collection<Class<? extends Annotation>> allDirectives = new ArrayList<>();
@@ -61,7 +61,7 @@ class DirectivesSchema {
 				}
 				continue;
 			}
-			if (!directiveType.isAnnotationPresent(Directive.class) && !directiveType.getName().startsWith("jakarta.validation.constraints")) {
+			if (!directiveType.isAnnotationPresent(Directive.class)) {
 				continue;
 			}
 			if (!directiveType.isAnnotation()) {
@@ -69,6 +69,8 @@ class DirectivesSchema {
 			}
 			allDirectives.add((Class<? extends Annotation>) directiveType);
 		}
+
+		allDirectives.addAll(jakartaDirectiveTypes);
 
 		return new DirectivesSchema(globalDirectives, targets, allDirectives);
 	}

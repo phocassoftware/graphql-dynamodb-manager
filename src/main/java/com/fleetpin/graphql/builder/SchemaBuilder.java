@@ -18,6 +18,7 @@ import jakarta.validation.constraints.Size;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -162,15 +163,15 @@ public class SchemaBuilder {
 			Set<Class<?>> directivesTypes = reflections.getTypesAnnotatedWith(Directive.class);
 			directivesTypes.addAll(reflections.getTypesAnnotatedWith(DataFetcherWrapper.class));
 
-			addAllJakartaAnnotations(directivesTypes);
-
 			List<RestrictTypeFactory<?>> globalRestricts = getGlobalRestricts(reflections);
 
-			return DirectivesSchema.build(globalRestricts, directivesTypes);
+			return DirectivesSchema.build(globalRestricts, directivesTypes, getJakartaAnnotations());
 		}
 
-		private static void addAllJakartaAnnotations(Set<Class<?>> directivesTypes) {
-			directivesTypes.add(Size.class); // use reflection?
+		private static Set<Class<? extends Annotation>> getJakartaAnnotations() {
+			Set<Class<? extends Annotation>> list = new HashSet<>();
+			list.add(Size.class);
+			return list;
 		}
 
 		private static List<RestrictTypeFactory<?>> getGlobalRestricts(Reflections reflections)
