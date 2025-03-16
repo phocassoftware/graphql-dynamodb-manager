@@ -2,13 +2,17 @@ package com.fleetpin.graphql.builder;
 
 import com.fleetpin.graphql.builder.annotations.*;
 import graphql.GraphQLContext;
+import graphql.GraphQLError;
+import graphql.execution.DataFetcherResult;
 import graphql.schema.*;
 import graphql.schema.GraphQLFieldDefinition.Builder;
+import graphql.validation.rules.ValidationRules;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.function.Function;
 
 import static com.fleetpin.graphql.builder.EntityUtil.isContext;
@@ -61,8 +65,7 @@ class MethodProcessor {
 		object.field(process(authorizer, coordinates, null, method));
 	}
 
-	Builder process(AuthorizerSchema authorizer, FieldCoordinates coordinates, TypeMeta parentMeta, Method method)
-		throws InvocationTargetException, IllegalAccessException {
+	Builder process(AuthorizerSchema authorizer, FieldCoordinates coordinates, TypeMeta parentMeta, Method method) {
 		GraphQLFieldDefinition.Builder field = GraphQLFieldDefinition.newFieldDefinition();
 
 		entityProcessor.addSchemaDirective(method, method.getDeclaringClass(), field::withAppliedDirective);
@@ -133,8 +136,17 @@ class MethodProcessor {
 			resolvers[i] = buildResolver(name, argMeta, parameter.getAnnotations());
 		}
 
+		ValidationRules validationRules = ValidationRules
+			.newValidationRules()
+			.build();
+
 		DataFetcher<?> fetcher = env -> {
 			try {
+				List<GraphQLError> errors = validationRules.runValidationRules(env);
+				if (!errors.isEmpty()) {
+					return DataFetcherResult.newResult().errors(errors).data(null).build();
+				}
+
 				Object[] args = new Object[resolvers.length];
 				for (int i = 0; i < resolvers.length; i++) {
 					args[i] = resolvers[i].apply(env);

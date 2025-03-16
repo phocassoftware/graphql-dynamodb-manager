@@ -61,7 +61,7 @@ class DirectivesSchema {
 				}
 				continue;
 			}
-			if (!directiveType.isAnnotationPresent(Directive.class)) {
+			if (!directiveType.isAnnotationPresent(Directive.class) && !directiveType.getName().startsWith("jakarta.validation.constraints")) {
 				continue;
 			}
 			if (!directiveType.isAnnotation()) {
