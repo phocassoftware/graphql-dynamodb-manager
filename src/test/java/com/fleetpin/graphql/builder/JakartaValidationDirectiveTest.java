@@ -20,7 +20,7 @@ public class JakartaValidationDirectiveTest {
 	public void testJakartaArgumentAnnotationChangedToConstraint() {
 		GraphQL schema = GraphQL.newGraphQL(SchemaBuilder.build("com.fleetpin.graphql.builder.type.directive")).build();
 		var name = schema.getGraphQLSchema().getFieldDefinition(FieldCoordinates.coordinates(schema.getGraphQLSchema().getMutationType(), "setName"));
-		var constraint = name.getArgument("name").getAppliedDirective("Size");
+		var constraint = name.getArgument("name").getAppliedDirective("Constraint");
 		var argument = constraint.getArgument("min");
 		var min = argument.getValue();
 		assertEquals(3, min);
@@ -30,7 +30,7 @@ public class JakartaValidationDirectiveTest {
 	public void testDirectiveArgumentDefinition() {
 		Map<String, Object> response = execute("query IntrospectionQuery { __schema { directives { name locations args { name } } } }", null).getData();
 		List<LinkedHashMap<String, Object>> dir = (List<LinkedHashMap<String, Object>>) ((Map<String, Object>) response.get("__schema")).get("directives");
-		LinkedHashMap<String, Object> constraint = dir.stream().filter(map -> map.get("name").equals("Size")).collect(Collectors.toList()).get(0);
+		LinkedHashMap<String, Object> constraint = dir.stream().filter(map -> map.get("name").equals("Constraint")).collect(Collectors.toList()).get(0);
 
 		assertEquals(9, dir.size());
 		assertEquals("ARGUMENT_DEFINITION", ((List<String>) constraint.get("locations")).get(0));

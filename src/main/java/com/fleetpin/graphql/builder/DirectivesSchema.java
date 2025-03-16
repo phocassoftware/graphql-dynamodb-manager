@@ -61,7 +61,7 @@ class DirectivesSchema {
 				}
 				continue;
 			}
-			if (!directiveType.isAnnotationPresent(Directive.class) && !directiveType.getName().startsWith("jakarta.validation.constraints")) {
+			if (!directiveType.isAnnotationPresent(Directive.class)) {
 				continue;
 			}
 			if (!directiveType.isAnnotation()) {
@@ -69,8 +69,6 @@ class DirectivesSchema {
 			}
 			allDirectives.add((Class<? extends Annotation>) directiveType);
 		}
-		//	allDirectives.addAll(extra);
-		// we could pass the constraint annotations around as an extra list, separate to the other directive.
 
 		return new DirectivesSchema(globalDirectives, targets, allDirectives);
 	}

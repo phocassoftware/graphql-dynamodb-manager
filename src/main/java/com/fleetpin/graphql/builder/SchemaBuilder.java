@@ -14,7 +14,6 @@ package com.fleetpin.graphql.builder;
 import com.fleetpin.graphql.builder.annotations.*;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
-import jakarta.validation.constraints.Size;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -162,15 +161,9 @@ public class SchemaBuilder {
 			Set<Class<?>> directivesTypes = reflections.getTypesAnnotatedWith(Directive.class);
 			directivesTypes.addAll(reflections.getTypesAnnotatedWith(DataFetcherWrapper.class));
 
-			addAllJakartaAnnotations(directivesTypes);
-
 			List<RestrictTypeFactory<?>> globalRestricts = getGlobalRestricts(reflections);
 
 			return DirectivesSchema.build(globalRestricts, directivesTypes);
-		}
-
-		private static void addAllJakartaAnnotations(Set<Class<?>> directivesTypes) {
-			directivesTypes.add(Size.class); // use reflection?
 		}
 
 		private static List<RestrictTypeFactory<?>> getGlobalRestricts(Reflections reflections)
@@ -205,7 +198,7 @@ public class SchemaBuilder {
 					globalRestricts.add(factory);
 				}
 			}
-
+			
 			return globalRestricts;
 		}
 	}
