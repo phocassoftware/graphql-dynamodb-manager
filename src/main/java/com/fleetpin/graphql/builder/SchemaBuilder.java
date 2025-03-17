@@ -14,17 +14,17 @@ package com.fleetpin.graphql.builder;
 import com.fleetpin.graphql.builder.annotations.*;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
-import jakarta.validation.constraints.Size;
+import graphql.scalars.ExtendedScalars;
+import jakarta.validation.Constraint;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.reflections.scanners.Scanners.SubTypes;
 
 public class SchemaBuilder {
 
@@ -106,8 +106,8 @@ public class SchemaBuilder {
 	public static class Builder {
 
 		private DataFetcherRunner dataFetcherRunner = (method, fetcher) -> fetcher;
-		private List<String> classpaths = new ArrayList<>();
-		private List<GraphQLScalarType> scalars = new ArrayList<>();
+		private final List<String> classpaths = new ArrayList<>();
+		private final List<GraphQLScalarType> scalars = new ArrayList<>();
 
 		private Builder() {}
 
@@ -128,7 +128,9 @@ public class SchemaBuilder {
 
 		public GraphQLSchema.Builder build() {
 			try {
-				Reflections reflections = new Reflections(classpaths, Scanners.SubTypes, Scanners.MethodsAnnotated, Scanners.TypesAnnotated);
+				this.scalar(ExtendedScalars.GraphQLLong);
+
+				Reflections reflections = new Reflections(classpaths, SubTypes, Scanners.MethodsAnnotated, Scanners.TypesAnnotated);
 				Set<Class<? extends Authorizer>> authorizers = reflections.getSubTypesOf(Authorizer.class);
 				//want to make everything split by package
 				AuthorizerSchema authorizer = AuthorizerSchema.build(dataFetcherRunner, new HashSet<>(classpaths), authorizers);
@@ -168,10 +170,11 @@ public class SchemaBuilder {
 			return DirectivesSchema.build(globalRestricts, directivesTypes, getJakartaAnnotations());
 		}
 
-		private static Set<Class<? extends Annotation>> getJakartaAnnotations() {
-			Set<Class<? extends Annotation>> list = new HashSet<>();
-			list.add(Size.class);
-			return list;
+		private static Set<Class<?>> getJakartaAnnotations() {
+			Reflections reflections = new Reflections("jakarta.validation.constraints", SubTypes.filterResultsBy(c -> true));
+			return reflections.getSubTypesOf(Object.class).stream()
+				.filter(a -> a.isAnnotationPresent(Constraint.class))
+				.collect(Collectors.toSet());
 		}
 
 		private static List<RestrictTypeFactory<?>> getGlobalRestricts(Reflections reflections)

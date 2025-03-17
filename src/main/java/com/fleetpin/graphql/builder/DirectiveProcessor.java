@@ -25,16 +25,11 @@ public class DirectiveProcessor {
 		this.builders = builders;
 	}
 
-	public static DirectiveProcessor build(EntityProcessor entityProcessor, Class<? extends Annotation> directive) {
+	public static DirectiveProcessor build(EntityProcessor entityProcessor, Class<? extends Annotation> directive, boolean isJakarta) {
 		var builder = GraphQLDirective.newDirective().name(directive.getSimpleName());
 
 		Introspection.DirectiveLocation[] validLocations;
-		if (
-			!directive.isAnnotationPresent(Directive.class) &&
-				directive
-					.getName()
-					.startsWith("jakarta.validation.constraints") // Jakarta constraint annotations don't have the Directive annotation, so we need to manually add in the locations
-		) {
+		if (isJakarta) {
 			validLocations = new Introspection.DirectiveLocation[] {
 				Introspection.DirectiveLocation.ARGUMENT_DEFINITION,
 				Introspection.DirectiveLocation.INPUT_FIELD_DEFINITION };

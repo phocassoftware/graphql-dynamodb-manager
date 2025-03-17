@@ -34,20 +34,27 @@ class DirectivesSchema {
 	private final Collection<RestrictTypeFactory<?>> global;
 	private final Map<Class<? extends Annotation>, DirectiveCaller<?>> targets;
 	private final Collection<Class<? extends Annotation>> directives;
+	private final Collection<Class<? extends Annotation>> jakartaDirectives;
 	private Map<Class<? extends Annotation>, DirectiveProcessor> directiveProcessors;
 
 	private DirectivesSchema(
 		Collection<RestrictTypeFactory<?>> global,
 		Map<Class<? extends Annotation>, DirectiveCaller<?>> targets,
-		Collection<Class<? extends Annotation>> directives
+		Collection<Class<? extends Annotation>> directives,
+		Collection<Class<? extends Annotation>> jakartaDirectives
 	) {
 		this.global = global;
 		this.targets = targets;
 		this.directives = directives;
+		this.jakartaDirectives = jakartaDirectives;
 	}
 
 	//TODO:mess of exceptions
-	public static DirectivesSchema build(List<RestrictTypeFactory<?>> globalDirectives, Set<Class<?>> directiveTypes, Set<Class<? extends Annotation>> jakartaDirectiveTypes) throws ReflectiveOperationException {
+	public static DirectivesSchema build(
+		List<RestrictTypeFactory<?>> globalDirectives,
+		Set<Class<?>> directiveTypes,
+		Set<Class<?>> jakartaDirectiveTypes
+	) throws ReflectiveOperationException {
 		Map<Class<? extends Annotation>, DirectiveCaller<?>> targets = new HashMap<>();
 
 		Collection<Class<? extends Annotation>> allDirectives = new ArrayList<>();
@@ -70,9 +77,15 @@ class DirectivesSchema {
 			allDirectives.add((Class<? extends Annotation>) directiveType);
 		}
 
-		allDirectives.addAll(jakartaDirectiveTypes);
+		Collection<Class<? extends Annotation>> jakartaDirectives = new ArrayList<>();
+		for (Class<?> jakartaDirectiveType : jakartaDirectiveTypes) {
+			if (!jakartaDirectiveType.isAnnotation()) {
+				continue;
+			}
+			jakartaDirectives.add((Class<? extends Annotation>) jakartaDirectiveType);
+		}
 
-		return new DirectivesSchema(globalDirectives, targets, allDirectives);
+		return new DirectivesSchema(globalDirectives, targets, allDirectives, jakartaDirectives);
 	}
 
 	private DirectiveCaller<?> get(Annotation annotation) {
@@ -80,9 +93,7 @@ class DirectivesSchema {
 	}
 
 	private <T extends Annotation> DataFetcher<?> wrap(DirectiveCaller<T> directive, T annotation, DataFetcher<?> fetcher) {
-		return env -> {
-			return directive.process(annotation, env, fetcher);
-		};
+		return env -> directive.process(annotation, env, fetcher);
 	}
 
 	public Stream<GraphQLDirective> getSchemaDirective() {
@@ -104,8 +115,8 @@ class DirectivesSchema {
 						}
 						return applyRestrict(restrict, response);
 					} catch (Exception e) {
-						if (e instanceof RuntimeException) {
-							throw (RuntimeException) e;
+						if (e instanceof RuntimeException runtimeException) {
+							throw runtimeException;
 						}
 						throw new RuntimeException(e);
 					}
@@ -113,9 +124,9 @@ class DirectivesSchema {
 	}
 
 	public boolean target(Method method, TypeMeta meta) {
-		for (var global : this.global) {
+		for (var globalRestricts : this.global) {
 			//TODO: extract class
-			if (global.extractType().isAssignableFrom(meta.getType())) {
+			if (globalRestricts.extractType().isAssignableFrom(meta.getType())) {
 				return true;
 			}
 		}
@@ -134,7 +145,7 @@ class DirectivesSchema {
 			}
 		}
 		for (Annotation annotation : method.getAnnotations()) {
-			DirectiveCaller directive = (DirectiveCaller) get(annotation);
+			DirectiveCaller directive = get(annotation);
 			if (directive != null) {
 				fetcher = wrap(directive, annotation, fetcher);
 			}
@@ -142,7 +153,7 @@ class DirectivesSchema {
 		return fetcher;
 	}
 
-	private <T> CompletableFuture<Object> applyRestrict(RestrictType restrict, Object response) {
+	private CompletableFuture<Object> applyRestrict(RestrictType restrict, Object response) {
 		if (response instanceof List) {
 			return restrict.filter((List) response);
 		} else if (response instanceof Publisher) {
@@ -193,9 +204,10 @@ class DirectivesSchema {
 	}
 
 	public void processDirectives(EntityProcessor ep) { // Replacement of processSDL
-		Map<Class<? extends Annotation>, DirectiveProcessor> directiveProcessors = new HashMap<>();
+		Map<Class<? extends Annotation>, DirectiveProcessor> directiveProcessorsList = new HashMap<>();
 
-		this.directives.forEach(dir -> directiveProcessors.put(dir, DirectiveProcessor.build(ep, dir)));
-		this.directiveProcessors = directiveProcessors;
+		this.directives.forEach(dir -> directiveProcessorsList.put(dir, DirectiveProcessor.build(ep, dir, false)));
+		this.jakartaDirectives.forEach(dir -> directiveProcessorsList.put(dir, DirectiveProcessor.build(ep, dir, true)));
+		this.directiveProcessors = directiveProcessorsList;
 	}
 }
