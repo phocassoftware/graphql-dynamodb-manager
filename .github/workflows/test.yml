@@ -18,5 +18,13 @@ jobs:
         with:
           java-version: 21
           distribution: zulu
+      - name: Formatter Check
+        run: mvn formatter:validate
+      - name: License Check
+        run: mvn license:check
       - name: Build with Maven
         run: mvn -B test --file pom.xml
+      - uses: ashley-taylor/junit-report-annotations-action@master
+        if: always()
+        with:
+          access-token: ${{ secrets.GITHUB_TOKEN }}

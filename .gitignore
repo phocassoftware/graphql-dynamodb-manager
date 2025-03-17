@@ -1,6 +1,8 @@
-/target/
-/.classpath
-/.project
+.classpath
+.project
 .settings
-.idea/*
-
+target
+native-libs
+.idea
+*.iml
+bin

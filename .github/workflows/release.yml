@@ -1,19 +1,7 @@
 name: Release
 permissions:
-    contents: write
-    packages: write
-on:
-  workflow_dispatch:
-    inputs:
-      releaseType:
-        type: choice
-        description: "Release type"
-        required: true
-        default: minor
-        options:
-          - patch
-          - minor
-          - major
+  contents: write
+on: workflow_dispatch
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -35,56 +23,21 @@ jobs:
         with:
           servers: >
             [
-              { "id": "sonatype", "username": "${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}", "password": "${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}" }
+              { "id": "central", "username": "${{ secrets.MAVEN_CENTRAL_TOKEN_USER }}", "password": "${{ secrets.MAVEN_CENTRAL_TOKEN_PASS }}" }
             ]
-      - name: set name
-        run: |
-          git config --global user.name "release-bot";
-          git config --global user.email "release-bot@fleetpin.co.nz";
+
+      - run: git config --global user.name phocasadmin; git config --global user.email admin+maven@phocassoftware.com
 
       - name: add key
         run: |
-          echo  "${{ secrets.GPG_KEY }}" | base64 -d > private.key
+          echo  "${{ secrets.MAVEN_PRIVATE_KEY }}" | base64 -d > private.key
           gpg --batch --import ./private.key
           rm ./private.key
           gpg --list-secret-keys --keyid-format LONG
 
-      - name: Get current development version
-        id: get_version
-        run: |
-          VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//' )
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Generate versions
-        id: generate_versions
-        uses: WyriHaximus/github-action-next-semvers@v1.2.1
-        with:
-          version: ${{ steps.get_version.outputs.version }}
-
-      - name: Pick release version
-        id: pick_release_version
-        run: |
-          VERSION=$(
-            case ${{ github.event.inputs.releaseType }} in
-              ("minor") echo "${{ steps.generate_versions.outputs.minor }}" ;;
-              ("major") echo "${{ steps.generate_versions.outputs.major }}" ;;
-              ("patch") echo "${{ steps.generate_versions.outputs.patch }}" ;;
-            esac
-          )
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-
       - name: prepare
         run: |
-          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} \
-          -DreleaseVersion=${{ steps.pick_release_version.outputs.version }} \
-          -DdevelopmentVersion=${{ steps.pick_release_version.outputs.version }}-SNAPSHOT \
-          -P sonatype
-
+          mvn release:prepare -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype -DscmForceUpdate=true
       - name: release
         run: |
-          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} \
-          -DreleaseVersion=${{ steps.pick_release_version.outputs.version }} \
-          -DdevelopmentVersion=${{ steps.pick_release_version.outputs.version }}-SNAPSHOT \
-          -Darguments="-DskipTests" \
-          -P sonatype
+          mvn release:perform -Dusername=${{ secrets.GITHUB_TOKEN }} -P sonatype -DscmForceUpdate=true
