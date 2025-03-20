@@ -12,7 +12,6 @@
 
 package com.phocassoftware.graphql.database.manager.test.hashed;
 
-
 import com.phocassoftware.graphql.database.manager.Database;
 import com.phocassoftware.graphql.database.manager.Table;
 import com.phocassoftware.graphql.database.manager.annotations.Hash;
@@ -115,7 +114,6 @@ final class DynamoDbLinkTest {
 		var list2 = db.getLinks(garry, AnotherTable.class).get();
 		Assertions.assertEquals(0, list2.size());
 	}
-
 
 	@TestDatabase
 	void unlink(final Database db) throws InterruptedException, ExecutionException {
