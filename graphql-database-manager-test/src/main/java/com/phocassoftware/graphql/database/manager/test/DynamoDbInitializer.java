@@ -39,9 +39,8 @@ final class DynamoDbInitializer {
 		try {
 			client.describeTable(builder -> builder.tableName(name));
 			return;
-		} catch (ResourceNotFoundException ignored) {
-		}
-		
+		} catch (ResourceNotFoundException ignored) {}
+
 		// looks like bug within local dynamodb client around creating multiple tables at the same time
 		synchronized (DynamoDbInitializer.class) {
 			client
@@ -98,8 +97,7 @@ final class DynamoDbInitializer {
 		try {
 			client.describeTable(builder -> builder.tableName(name));
 			return;
-		} catch (ResourceNotFoundException ignored) {
-		}
+		} catch (ResourceNotFoundException ignored) {}
 
 		// looks like bug within local dynamodb client around creating multiple tables at the same time
 		synchronized (DynamoDbInitializer.class) {
