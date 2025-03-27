@@ -29,22 +29,19 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
-import software.amazon.awssdk.services.dynamodb.model.GlobalSecondaryIndex;
-import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
-import software.amazon.awssdk.services.dynamodb.model.KeyType;
-import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
-import software.amazon.awssdk.services.dynamodb.model.StreamViewType;
+import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.streams.DynamoDbStreamsAsyncClient;
 
 final class DynamoDbInitializer {
 
 	@SuppressWarnings("unchecked")
 	static void createTable(final DynamoDbClient client, final String name) throws ExecutionException, InterruptedException {
-		if (client.listTables().tableNames().contains(name)) {
+		try {
+			client.describeTable(builder -> builder.tableName(name));
 			return;
+		} catch (ResourceNotFoundException ignored) {
 		}
+		
 		// looks like bug within local dynamodb client around creating multiple tables at the same time
 		synchronized (DynamoDbInitializer.class) {
 			client
@@ -98,8 +95,10 @@ final class DynamoDbInitializer {
 	}
 
 	static void createHistoryTable(final DynamoDbClient client, final String name) throws ExecutionException, InterruptedException {
-		if (client.listTables().tableNames().contains(name)) {
+		try {
+			client.describeTable(builder -> builder.tableName(name));
 			return;
+		} catch (ResourceNotFoundException ignored) {
 		}
 
 		// looks like bug within local dynamodb client around creating multiple tables at the same time
